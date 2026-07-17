@@ -1,0 +1,3 @@
+# Add project dependencies here, pinned to exact versions.
+# Example:
+# requests==2.32.3
