@@ -17,13 +17,6 @@ env/
 .ruff_cache/
 .idea/
 .vscode/
-
-# Local assistant state (source of truth for shipped skills is skills/)
-.claude/
-.kiro/skills/
-.kiro/agents/
-!.kiro/steering/
-
 # OS
 .DS_Store
 
