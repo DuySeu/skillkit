@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phân tích mã — VNAlpha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="assets/tw-config.js"></script>
+<link rel="stylesheet" href="assets/theme.css">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('vnalpha.theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+  })();
+</script>
+</head>
+
+<body class="bg-bg text-fg antialiased">
+
+<div class="flex min-h-screen">
+
+  <div data-sidebar-scrim hidden class="fixed inset-0 z-30 bg-black/60 lg:hidden"></div>
+
+  <!-- ═════════════════════════════════════════════════════ SIDEBAR ═════ -->
+  <aside data-sidebar
+         class="fixed lg:sticky top-0 inset-y-0 start-0 z-40 w-[248px] shrink-0 h-screen flex flex-col
+                bg-surface border-e hairline -translate-x-full lg:translate-x-0
+                transition-transform duration-200 ease-out">
+
+    <div class="h-16 flex items-center px-4 border-b hairline shrink-0">
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="VNAlpha">
+        <span class="grid place-items-center w-8 h-8 rounded-lg bg-primary text-primary-fg">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/>
+            <path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/>
+            <path d="M3 3v16a2 2 0 0 0 2 2h16"/>
+          </svg>
+        </span>
+        <span class="font-extrabold tracking-tight">VN<span class="text-primary">Alpha</span></span>
+      </a>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto p-3 space-y-1" aria-label="Điều hướng chính">
+      <a href="dashboard.html" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/>
+          <rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+        </svg>
+        <span data-i18n="app.nav.overview">Tổng quan</span>
+      </a>
+      <a href="dashboard.html#board" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>
+        </svg>
+        <span data-i18n="app.nav.board">Bảng giá</span>
+      </a>
+      <a href="stock.html" class="nav-link" aria-current="page">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/>
+          <path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/>
+          <path d="M3 3v16a2 2 0 0 0 2 2h16"/>
+        </svg>
+        <span data-i18n="app.nav.stock">Phân tích mã</span>
+      </a>
+
+      <p class="eyebrow px-3 pt-4 pb-1.5" data-i18n="app.nav.tools">Công cụ</p>
+      <a href="#" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        <span data-i18n="app.nav.screener">Bộ lọc cổ phiếu</span>
+      </a>
+      <a href="chat.html" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m12 3-1.9 5.8a2 2 0 0 1-1.287 1.288L3 12l5.8 1.9a2 2 0 0 1 1.288 1.287L12 21l1.9-5.8a2 2 0 0 1 1.287-1.288L21 12l-5.8-1.9a2 2 0 0 1-1.288-1.287Z"/>
+        </svg>
+        <span data-i18n="app.nav.chat">Trợ lý AI</span>
+        <span class="badge badge-accent ms-auto !text-[9px] !px-1.5">AI</span>
+      </a>
+      <a href="dashboard.html#news" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+          <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
+        </svg>
+        <span data-i18n="app.nav.news">Tin tức</span>
+      </a>
+
+      <p class="eyebrow px-3 pt-4 pb-1.5" data-i18n="app.nav.personal">Cá nhân</p>
+      <a href="portfolio.html" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+        <span data-i18n="app.nav.portfolio">Danh mục</span>
+      </a>
+      <a href="portfolio.html#watchlist" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
+        </svg>
+        <span data-i18n="app.nav.watchlist">Danh sách theo dõi</span>
+      </a>
+      <a href="portfolio.html#alerts" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+        <span data-i18n="app.nav.alerts">Cảnh báo</span>
+      </a>
+      <a href="settings.html" class="nav-link">
+        <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span data-i18n="app.nav.settings">Cài đặt</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════════ CONTENT ═════ -->
+  <div class="flex-1 min-w-0 flex flex-col">
+
+    <header class="sticky top-0 z-20 glass border-b hairline">
+      <div class="h-16 flex items-center gap-3 px-4 sm:px-6">
+        <button type="button" data-sidebar-toggle class="lg:hidden btn btn-ghost btn-icon" aria-label="Mở menu">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+        </button>
+
+        <div class="relative flex-1 max-w-md">
+          <svg class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <label class="sr-only" for="topsearch" data-i18n="app.search.label">Tìm kiếm</label>
+          <input id="topsearch" type="search" class="input !h-10 ps-9" list="sym-list"
+                 data-i18n-ph="app.search.ph" placeholder="Tìm mã, tên công ty hoặc ngành…">
+          <datalist id="sym-list"></datalist>
+        </div>
+
+        <span class="hidden md:inline-flex badge badge-up gap-1.5">
+          <span class="pulse-dot w-1.5 h-1.5 rounded-full bg-up" aria-hidden="true"></span>
+          <span data-i18n="app.session.atc">Phiên ATC</span>
+          <span class="num opacity-70">14:38</span>
+        </span>
+
+        <div class="ms-auto flex items-center gap-1.5">
+          <button type="button" data-lang-toggle class="btn btn-ghost btn-sm gap-1.5 px-2.5"
+                  data-i18n-label="lang.switch" aria-label="Đổi ngôn ngữ">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
+              <path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
+            </svg>
+            <span class="num text-xs font-bold" data-lang-label>VI</span>
+          </button>
+          <button type="button" data-theme-toggle class="btn btn-ghost btn-icon"
+                  data-i18n-label="theme.switch" aria-label="Đổi giao diện sáng/tối">
+            <svg class="w-[18px] h-[18px] hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/>
+              <path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+            <svg class="w-[18px] h-[18px] block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+          </button>
+          <span class="grid place-items-center w-8 h-8 rounded-full bg-accent/20 text-accent num text-[11px] font-bold" aria-hidden="true">DN</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 sm:p-6 space-y-4">
+
+      <!-- ══════════════════════════════════════ TICKER HEADER ═════ -->
+      <section class="card p-4 sm:p-5">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+              <h1 class="num text-2xl font-extrabold tracking-tight" id="sk-sym">HPG</h1>
+              <span class="badge badge-neutral" id="sk-exch">HOSE</span>
+              <span class="badge badge-primary" id="sk-sector">Thép</span>
+            </div>
+            <p class="text-sm text-muted truncate" id="sk-name">CTCP Tập đoàn Hoà Phát</p>
+
+            <div class="flex flex-wrap items-end gap-x-4 gap-y-2 mt-4">
+              <p class="num text-4xl font-extrabold tracking-tight" id="sk-price">28,20</p>
+              <p class="num text-base font-bold pb-1" id="sk-chg">+0,70 (+2,55%)</p>
+              <p class="text-[11px] text-muted pb-1.5" data-i18n="b.unit">Đơn vị: giá nghìn đồng</p>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start sm:items-end gap-3">
+            <!-- ceiling / reference / floor — the three anchors of a VN quote -->
+            <dl class="flex items-center gap-2 text-center">
+              <div class="rounded-lg border border-ceil/30 bg-ceil/10 px-3 py-1.5">
+                <dt class="text-[10px] font-semibold px-ceil" data-i18n="b.ceil">Trần</dt>
+                <dd class="num text-sm font-bold px-ceil" id="sk-ceil">29,40</dd>
+              </div>
+              <div class="rounded-lg border border-ref/30 bg-ref/10 px-3 py-1.5">
+                <dt class="text-[10px] font-semibold px-ref" data-i18n="b.ref">TC</dt>
+                <dd class="num text-sm font-bold px-ref" id="sk-ref">27,50</dd>
+              </div>
+              <div class="rounded-lg border border-floor/30 bg-floor/10 px-3 py-1.5">
+                <dt class="text-[10px] font-semibold px-floor" data-i18n="b.floor">Sàn</dt>
+                <dd class="num text-sm font-bold px-floor" id="sk-floor">25,60</dd>
+              </div>
+            </dl>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" class="btn btn-outline btn-sm" data-watch aria-pressed="false">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
+                </svg>
+                <span data-watch-label data-i18n="st.follow">Theo dõi</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                </svg>
+                <span data-i18n="st.alert">Cảnh báo</span>
+              </button>
+              <button type="button" class="btn btn-primary btn-sm">
+                <span data-i18n="st.order">Đặt lệnh</span>
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════════════ CHART + RIGHT RAIL ═════ -->
+      <div class="grid xl:grid-cols-[minmax(0,1fr)_308px] gap-4">
+
+        <section class="card p-4 sm:p-5 min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div class="seg" role="tablist" aria-label="Khung thời gian">
+              <button type="button" role="tab" class="seg-item" aria-selected="false">1D</button>
+              <button type="button" role="tab" class="seg-item" aria-selected="false">1W</button>
+              <button type="button" role="tab" class="seg-item" aria-selected="false">1M</button>
+              <button type="button" role="tab" class="seg-item" aria-selected="true">6M</button>
+              <button type="button" role="tab" class="seg-item" aria-selected="false">1Y</button>
+              <button type="button" role="tab" class="seg-item" aria-selected="false">5Y</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-muted" data-i18n="st.ind">Chỉ báo</span>
+              <button type="button" class="chip !py-1 !text-[11px] !text-accent !border-accent/40">MA20</button>
+              <button type="button" class="chip !py-1 !text-[11px]">RSI</button>
+              <button type="button" class="chip !py-1 !text-[11px]">MACD</button>
+            </div>
+          </div>
+
+          <p id="ohlc-tip" class="num text-[11px] h-4 mb-1" aria-live="polite"></p>
+          <canvas id="candles" class="w-full h-[300px] sm:h-[400px] cursor-crosshair" role="img"
+                  aria-label="Biểu đồ nến 6 tháng kèm khối lượng và đường trung bình 20 phiên"></canvas>
+        </section>
+
+        <div class="space-y-4 min-w-0">
+
+          <!-- order book -->
+          <section class="card p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-semibold text-sm" data-i18n="st.book">Sổ lệnh</h2>
+              <span class="text-[10px] text-muted num">3 mức giá</span>
+            </div>
+            <div class="grid grid-cols-2 gap-x-3">
+              <p class="eyebrow !text-[10px] px-up mb-1.5" data-i18n="st.book.buy">Dư mua</p>
+              <p class="eyebrow !text-[10px] px-down mb-1.5 text-end" data-i18n="st.book.sell">Dư bán</p>
+              <ul id="book-bids" class="space-y-1"></ul>
+              <ul id="book-asks" class="space-y-1"></ul>
+            </div>
+          </section>
+
+          <!-- key stats -->
+          <section class="card p-4">
+            <h2 class="font-semibold text-sm mb-3" data-i18n="st.stats">Chỉ số chính</h2>
+            <dl class="text-xs" id="sk-stats"></dl>
+
+            <!-- 52-week position -->
+            <div class="mt-4 pt-3 border-t hairline">
+              <dt class="text-[11px] text-muted mb-2" data-i18n="st.stat.52w">Vùng giá 52 tuần</dt>
+              <div class="relative h-1.5 rounded-full bg-surface2 border hairline">
+                <span class="absolute inset-y-0 start-0 rounded-full bg-gradient-to-r from-down/60 to-up/60" style="width:100%" aria-hidden="true"></span>
+                <span id="pos52" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-fg ring-2 ring-surface" aria-hidden="true"></span>
+              </div>
+              <div class="flex justify-between mt-1.5">
+                <span class="num text-[11px] px-down" id="w52lo">21,30</span>
+                <span class="num text-[11px] px-up" id="w52hi">31,80</span>
+              </div>
+            </div>
+
+            <!-- foreign room -->
+            <div class="mt-4 pt-3 border-t hairline">
+              <div class="flex items-center justify-between mb-2">
+                <dt class="text-[11px] text-muted" data-i18n="st.stat.room">Room ngoại còn lại</dt>
+                <dd class="num text-xs font-bold" id="room-val">22,4%</dd>
+              </div>
+              <div class="h-1.5 rounded-full bg-surface2 border hairline overflow-hidden">
+                <span id="room-bar" class="block h-full bg-primary" style="width:0%"></span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════ TABS ═════ -->
+      <div class="flex items-center gap-1 border-b hairline overflow-x-auto no-scrollbar" role="tablist" aria-label="Nội dung phân tích">
+        <button type="button" role="tab" class="tab shrink-0" data-tab="sk:ov"   aria-selected="true"  data-i18n="st.tab.overview">Tổng quan</button>
+        <button type="button" role="tab" class="tab shrink-0" data-tab="sk:fin"  aria-selected="false" data-i18n="st.tab.fin">Tài chính</button>
+        <button type="button" role="tab" class="tab shrink-0" data-tab="sk:val"  aria-selected="false" data-i18n="st.tab.val">Định giá</button>
+        <button type="button" role="tab" class="tab shrink-0" data-tab="sk:fg"   aria-selected="false" data-i18n="st.tab.foreign">Khối ngoại</button>
+        <button type="button" role="tab" class="tab shrink-0" data-tab="sk:news" aria-selected="false" data-i18n="st.tab.news">Tin tức</button>
+        <button type="button" role="tab" class="tab shrink-0" data-tab="sk:prof" aria-selected="false" data-i18n="st.tab.profile">Hồ sơ</button>
+      </div>
+
+      <!-- ── overview ─────────────────────────────────────────────── -->
+      <div data-tabpanel="sk:ov" role="tabpanel" class="grid lg:grid-cols-3 gap-4">
+
+        <section class="lg:col-span-2 card p-4 sm:p-5">
+          <h2 class="font-semibold text-sm mb-3" data-i18n="st.peers">So sánh cùng ngành</h2>
+          <div class="tbl-wrap">
+            <table class="tbl min-w-[620px]">
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="b.ticker">Mã CK</th>
+                  <th scope="col" data-i18n="b.price">Giá</th>
+                  <th scope="col" data-i18n="x.pct">% thay đổi</th>
+                  <th scope="col" data-i18n="st.stat.cap">Vốn hoá</th>
+                  <th scope="col" data-i18n="st.stat.pe">P/E</th>
+                  <th scope="col" data-i18n="st.stat.pb">P/B</th>
+                  <th scope="col" data-i18n="st.stat.room">Room ngoại</th>
+                </tr>
+              </thead>
+              <tbody id="peers"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card p-4 sm:p-5 border-accent/30 bg-accent/[0.04]">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="grid place-items-center w-7 h-7 rounded-lg bg-accent/15 text-accent shrink-0" aria-hidden="true">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 3-1.9 5.8a2 2 0 0 1-1.287 1.288L3 12l5.8 1.9a2 2 0 0 1 1.288 1.287L12 21l1.9-5.8a2 2 0 0 1 1.287-1.288L21 12l-5.8-1.9a2 2 0 0 1-1.288-1.287Z"/>
+              </svg>
+            </span>
+            <h2 class="font-semibold text-sm" data-i18n="st.ai.title">Phân tích nhanh bằng AI</h2>
+          </div>
+
+          <p class="text-sm leading-relaxed text-muted mb-4" data-i18n="st.ai.body">…</p>
+
+          <div class="rounded-lg border border-down/25 bg-down/[0.06] p-3 mb-4">
+            <p class="text-[11px] font-bold px-down mb-1" data-i18n="st.ai.risk">Rủi ro cần theo dõi</p>
+            <p class="text-xs text-muted leading-relaxed" data-i18n="st.ai.riskbody">…</p>
+          </div>
+
+          <a href="chat.html" class="btn btn-outline btn-sm w-full" data-i18n="ai.cta">Thử trợ lý AI</a>
+        </section>
+      </div>
+
+      <!-- ── financials ───────────────────────────────────────────── -->
+      <div data-tabpanel="sk:fin" role="tabpanel" hidden class="grid lg:grid-cols-3 gap-4">
+        <section class="lg:col-span-2 card p-4 sm:p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <h2 class="font-semibold text-sm" data-i18n="st.fin.title">Doanh thu và lợi nhuận sau thuế theo quý</h2>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-primary" aria-hidden="true"></span><span data-i18n="st.fin.rev">Doanh thu thuần</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-accent" aria-hidden="true"></span><span data-i18n="st.fin.profit">Lợi nhuận sau thuế</span></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-muted mb-3" data-i18n="st.fin.unit">Đơn vị: tỷ đồng</p>
+          <canvas id="fin-chart" class="w-full h-[280px]" role="img"
+                  aria-label="Biểu đồ cột doanh thu và lợi nhuận sau thuế theo quý"></canvas>
+        </section>
+
+        <section class="card p-4 sm:p-5">
+          <h2 class="font-semibold text-sm mb-3" data-i18n="st.tab.fin">Tài chính</h2>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr><th scope="col">Chỉ tiêu</th><th scope="col">Q1/26</th><th scope="col">Q2/26</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Doanh thu thuần</td><td class="num">34.180</td><td class="num">36.420</td></tr>
+                <tr><td>Lợi nhuận gộp</td><td class="num">4.648</td><td class="num">5.026</td></tr>
+                <tr><td>Biên LN gộp</td><td class="num">13,6%</td><td class="num px-up">13,8%</td></tr>
+                <tr><td>LN sau thuế</td><td class="num">2.914</td><td class="num">3.187</td></tr>
+                <tr><td>Tổng tài sản</td><td class="num">198.400</td><td class="num">203.750</td></tr>
+                <tr><td>Vốn chủ sở hữu</td><td class="num">112.600</td><td class="num">115.480</td></tr>
+                <tr><td>Nợ vay / VCSH</td><td class="num">0,52</td><td class="num px-up">0,49</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- ── valuation ────────────────────────────────────────────── -->
+      <div data-tabpanel="sk:val" role="tabpanel" hidden class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <section class="card p-4"><p class="text-[11px] text-muted mb-1" data-i18n="st.stat.pe">P/E</p><p class="num text-2xl font-bold" id="v-pe">12,6</p><p class="text-[11px] text-muted mt-1">Trung bình ngành: 11,4</p></section>
+        <section class="card p-4"><p class="text-[11px] text-muted mb-1" data-i18n="st.stat.pb">P/B</p><p class="num text-2xl font-bold" id="v-pb">1,4</p><p class="text-[11px] text-muted mt-1">Trung bình ngành: 1,1</p></section>
+        <section class="card p-4"><p class="text-[11px] text-muted mb-1" data-i18n="st.stat.eps">EPS 4 quý</p><p class="num text-2xl font-bold">2.238</p><p class="text-[11px] text-muted mt-1">+18,4% so với cùng kỳ</p></section>
+        <section class="card p-4"><p class="text-[11px] text-muted mb-1" data-i18n="st.stat.roe">ROE</p><p class="num text-2xl font-bold px-up">11,2%</p><p class="text-[11px] text-muted mt-1">Trung bình ngành: 7,6%</p></section>
+
+        <section class="card p-4 sm:p-5 md:col-span-2 lg:col-span-4">
+          <h2 class="font-semibold text-sm mb-3">P/E theo quý (8 quý gần nhất)</h2>
+          <canvas id="pe-chart" class="w-full h-[220px]" role="img" aria-label="Biểu đồ P/E theo quý"></canvas>
+        </section>
+      </div>
+
+      <!-- ── foreign ──────────────────────────────────────────────── -->
+      <div data-tabpanel="sk:fg" role="tabpanel" hidden class="grid lg:grid-cols-3 gap-4">
+        <section class="lg:col-span-2 card p-4 sm:p-5">
+          <h2 class="font-semibold text-sm mb-3" data-i18n="dash.foreign">Giao dịch khối ngoại</h2>
+          <div class="tbl-wrap">
+            <table class="tbl min-w-[520px]">
+              <thead>
+                <tr>
+                  <th scope="col">Phiên</th>
+                  <th scope="col" data-i18n="b.fbuy">NN mua</th>
+                  <th scope="col" data-i18n="b.fsell">NN bán</th>
+                  <th scope="col" data-i18n="x.net">Ròng</th>
+                  <th scope="col" data-i18n="b.price">Giá</th>
+                </tr>
+              </thead>
+              <tbody id="fg-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card p-4 sm:p-5">
+          <h2 class="font-semibold text-sm mb-4" data-i18n="st.stat.room">Room ngoại còn lại</h2>
+          <div id="room-donut" class="mb-4" data-alt="Tỷ lệ sở hữu nước ngoài"></div>
+          <dl class="space-y-2 text-xs" id="room-legend"></dl>
+        </section>
+      </div>
+
+      <!-- ── news ─────────────────────────────────────────────────── -->
+      <div data-tabpanel="sk:news" role="tabpanel" hidden>
+        <section class="card p-4 sm:p-5">
+          <h2 class="font-semibold text-sm mb-3" data-i18n="st.news.title">Tin liên quan</h2>
+          <ul id="sk-news" class="divide-y divide-line/60"></ul>
+        </section>
+      </div>
+
+      <!-- ── profile ──────────────────────────────────────────────── -->
+      <div data-tabpanel="sk:prof" role="tabpanel" hidden class="grid lg:grid-cols-3 gap-4">
+        <section class="lg:col-span-2 card p-4 sm:p-5">
+          <h2 class="font-semibold text-sm mb-3" data-i18n="st.prof.title">Hồ sơ doanh nghiệp</h2>
+          <p class="text-sm text-muted leading-relaxed" data-i18n="st.prof.body">…</p>
+        </section>
+        <section class="card p-4 sm:p-5">
+          <dl class="text-xs space-y-3">
+            <div class="flex justify-between gap-3"><dt class="text-muted" data-i18n="st.prof.sector">Ngành</dt><dd class="font-semibold" id="p-sector">Thép</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-muted" data-i18n="st.prof.exchange">Sàn niêm yết</dt><dd class="font-semibold" id="p-exch">HOSE</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-muted" data-i18n="st.prof.listed">Ngày niêm yết</dt><dd class="num font-semibold">15/11/2007</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-muted" data-i18n="st.stat.shares">KL lưu hành</dt><dd class="num font-semibold" id="p-shares">—</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-muted" data-i18n="st.prof.emp">Số nhân viên</dt><dd class="num font-semibold">31.240</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-muted" data-i18n="st.prof.web">Website</dt><dd><a href="#" class="font-semibold text-primary hover:underline">hoaphat.com.vn</a></dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <p class="text-[11px] text-muted leading-relaxed pt-2" data-i18n="foot.warn">…</p>
+    </main>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener('appready', function () {
+  const V = window.VN;
+  const { STOCKS, BY_SYM, SECTORS, NEWS, fmt, fmtSigned, money, vol,
+          pxClass, chgClass, candles, candleChart, barsChart, autoDraw,
+          donut, cvar, onRender } = V;
+
+  /* ---------- which ticker? ---------- */
+  const sym = (new URLSearchParams(location.search).get('sym') || 'HPG').toUpperCase();
+  const S = BY_SYM[sym] || BY_SYM.HPG;
+  document.title = S.sym + ' — VNAlpha';
+
+  document.getElementById('sym-list').innerHTML =
+    STOCKS.map(function (s) { return '<option value="' + s.sym + '">'; }).join('');
+
+  /* ---------- header ---------- */
+  onRender(function () {
+    const lang = window.getLang();
+    const c = pxClass(S.last, S.ref, S.ceil, S.floor);
+
+    document.getElementById('sk-sym').textContent = S.sym;
+    document.getElementById('sk-sym').className = 'num text-2xl font-extrabold tracking-tight ' + c;
+    document.getElementById('sk-exch').textContent = S.exch;
+    document.getElementById('sk-sector').textContent = SECTORS[S.sector][lang];
+    document.getElementById('sk-name').textContent = S.name[lang];
+
+    const price = document.getElementById('sk-price');
+    price.textContent = fmt(S.last, 2);
+    price.className = 'num text-4xl font-extrabold tracking-tight ' + c;
+
+    const chg = document.getElementById('sk-chg');
+    chg.textContent = fmtSigned(S.chg, 2) + ' (' + fmtSigned(S.pct, 2) + '%)';
+    chg.className = 'num text-base font-bold pb-1 ' + c;
+
+    document.getElementById('sk-ceil').textContent = fmt(S.ceil, 2);
+    document.getElementById('sk-ref').textContent = fmt(S.ref, 2);
+    document.getElementById('sk-floor').textContent = fmt(S.floor, 2);
+  });
+
+  /* ---------- candlestick ---------- */
+  const ohlc = candles(S.sym, 126, S.last);
+  candleChart(document.getElementById('candles'), ohlc, { tooltip: '#ohlc-tip' });
+
+  /* ---------- order book ---------- */
+  onRender(function () {
+    const maxV = Math.max.apply(null,
+      S.bids.map(function (b) { return b[1]; }).concat(S.asks.map(function (a) { return a[1]; })));
+
+    function row(p, v, side) {
+      const cls = pxClass(p, S.ref, S.ceil, S.floor);
+      const pctW = (v / maxV) * 100;
+      const bar = side === 'bid'
+        ? '<span class="absolute inset-y-0 end-0 bg-up/12" style="width:' + pctW + '%"></span>'
+        : '<span class="absolute inset-y-0 start-0 bg-down/12" style="width:' + pctW + '%"></span>';
+      return '<li class="relative flex items-center justify-between px-1.5 py-1 rounded overflow-hidden">' +
+        bar +
+        '<span class="num relative text-xs font-semibold ' + cls + '">' + fmt(p, 2) + '</span>' +
+        '<span class="num relative text-[11px] text-muted">' + fmt(v / 10, 1) + '</span></li>';
+    }
+
+    document.getElementById('book-bids').innerHTML =
+      S.bids.map(function (b) { return row(b[0], b[1], 'bid'); }).join('');
+    document.getElementById('book-asks').innerHTML =
+      S.asks.map(function (a) { return row(a[0], a[1], 'ask'); }).join('');
+  });
+
+  /* ---------- key statistics ---------- */
+  onRender(function () {
+    const shares = Math.round(S.cap / (S.last * 1000));
+    const rows = [
+      ['st.stat.vol',    vol(S.volume) + ' ' + window.t('x.shares')],
+      ['st.stat.val',    money(S.value)],
+      ['st.stat.cap',    money(S.cap)],
+      ['st.stat.pe',     fmt(S.pe, 1)],
+      ['st.stat.pb',     fmt(S.pb, 2)],
+      ['st.stat.beta',   fmt(S.beta, 2)],
+      ['st.stat.div',    fmt(S.divYield, 2) + '%'],
+      ['st.stat.shares', vol(shares)],
+      ['b.avg',          fmt(S.avg, 2)],
+      ['b.high',         fmt(S.high, 2)],
+      ['b.low',          fmt(S.low, 2)],
+    ];
+    document.getElementById('sk-stats').innerHTML = rows.map(function (r) {
+      return '<div class="flex items-center justify-between gap-3 py-1.5 border-b border-line/40 last:border-0">' +
+        '<dt class="text-muted">' + window.t(r[0]) + '</dt>' +
+        '<dd class="num font-semibold">' + r[1] + '</dd></div>';
+    }).join('');
+
+    /* 52-week band */
+    const lo = S.last * 0.755, hi = S.last * 1.128;
+    document.getElementById('w52lo').textContent = fmt(lo, 2);
+    document.getElementById('w52hi').textContent = fmt(hi, 2);
+    document.getElementById('pos52').style.left = ((S.last - lo) / (hi - lo) * 100) + '%';
+
+    /* foreign room */
+    document.getElementById('room-val').textContent = fmt(S.room, 1) + '%';
+    document.getElementById('room-bar').style.width = S.room + '%';
+  });
+
+  /* ---------- peers ---------- */
+  onRender(function () {
+    const lang = window.getLang();
+    document.getElementById('peers').innerHTML = STOCKS
+      .filter(function (s) { return s.sector === S.sector; })
+      .sort(function (a, b) { return b.cap - a.cap; })
+      .map(function (s) {
+        const c = pxClass(s.last, s.ref, s.ceil, s.floor);
+        const me = s.sym === S.sym;
+        return '<tr class="' + (me ? 'bg-primary/[0.07]' : '') + '">' +
+          '<td><a href="stock.html?sym=' + s.sym + '" class="font-bold hover:underline ' + (me ? 'text-primary' : '') + '">' + s.sym + '</a>' +
+          '<span class="block text-[11px] text-muted font-normal truncate max-w-[180px]">' + s.name[lang] + '</span></td>' +
+          '<td class="num ' + c + '">' + fmt(s.last, 2) + '</td>' +
+          '<td class="num ' + c + '">' + fmtSigned(s.pct, 2) + '%</td>' +
+          '<td class="num">' + money(s.cap) + '</td>' +
+          '<td class="num">' + fmt(s.pe, 1) + '</td>' +
+          '<td class="num">' + fmt(s.pb, 2) + '</td>' +
+          '<td class="num">' + fmt(s.room, 1) + '%</td></tr>';
+      }).join('');
+  });
+
+  /* ---------- financial bars ---------- */
+  const QL = ['Q3/24', 'Q4/24', 'Q1/25', 'Q2/25', 'Q3/25', 'Q4/25', 'Q1/26', 'Q2/26'];
+  barsChart(document.getElementById('fin-chart'), QL,
+    [27400, 29100, 28600, 31200, 30800, 33400, 34180, 36420],
+    [1980, 2240, 2110, 2560, 2480, 2790, 2914, 3187]);
+
+  document.getElementById('v-pe').textContent = fmt(S.pe, 1);
+  document.getElementById('v-pb').textContent = fmt(S.pb, 2);
+
+  /* ---------- P/E line ---------- */
+  const peSeries = [14.8, 13.9, 15.2, 14.1, 13.4, 13.1, 12.9, S.pe];
+  autoDraw(document.getElementById('pe-chart'), function (ctx, w, h) {
+    const padL = 6, padR = 44, padT = 12, padB = 24;
+    const iw = w - padL - padR, ih = h - padT - padB;
+    const lo = Math.min.apply(null, peSeries) * 0.94;
+    const hi = Math.max.apply(null, peSeries) * 1.06;
+    const X = function (i) { return padL + (i / (peSeries.length - 1)) * iw; };
+    const Y = function (v) { return padT + (1 - (v - lo) / (hi - lo)) * ih; };
+
+    ctx.font = '500 10px "JetBrains Mono", monospace';
+    ctx.textBaseline = 'middle';
+    for (let k = 0; k <= 4; k++) {
+      const v = lo + (hi - lo) * (k / 4);
+      const y = Math.round(Y(v)) + 0.5;
+      ctx.strokeStyle = cvar('--c-line', 0.5);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + iw, y); ctx.stroke();
+      ctx.fillStyle = cvar('--c-muted');
+      ctx.textAlign = 'left';
+      ctx.fillText(fmt(v, 1), padL + iw + 8, y);
+    }
+
+    ctx.beginPath();
+    peSeries.forEach(function (v, i) { i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)); });
+    ctx.strokeStyle = cvar('--c-primary');
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    peSeries.forEach(function (v, i) {
+      ctx.beginPath(); ctx.arc(X(i), Y(v), 3, 0, Math.PI * 2);
+      ctx.fillStyle = cvar('--c-primary'); ctx.fill();
+      ctx.fillStyle = cvar('--c-muted');
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(QL[i], X(i), padT + ih + 8);
+      ctx.textBaseline = 'middle';
+    });
+  });
+
+  /* ---------- foreign trading table ---------- */
+  onRender(function () {
+    const rnd = V.mulberry32(V.hash(S.sym + ':fg'));
+    const days = ['28/07', '25/07', '24/07', '23/07', '22/07', '19/07', '18/07'];
+    document.getElementById('fg-rows').innerHTML = days.map(function (d, i) {
+      const buy = Math.round(S.volume * (0.05 + rnd() * 0.14));
+      const sell = Math.round(S.volume * (0.04 + rnd() * 0.13));
+      const net = buy - sell;
+      const px = S.last * (1 - i * 0.004 * (rnd() - 0.3));
+      return '<tr><td class="num">' + d + '</td>' +
+        '<td class="num">' + vol(buy) + '</td>' +
+        '<td class="num">' + vol(sell) + '</td>' +
+        '<td class="num font-semibold ' + chgClass(net) + '">' + (net > 0 ? '+' : '') + vol(net) + '</td>' +
+        '<td class="num">' + fmt(px, 2) + '</td></tr>';
+    }).join('');
+
+    /* ownership donut: foreign held vs. remaining room vs. domestic */
+    const held = 49 - S.room;
+    donut(document.getElementById('room-donut'), [
+      { label: window.t('st.stat.room'), value: S.room, color: cvar('--c-primary') },
+      { label: 'Nước ngoài đang nắm giữ', value: held, color: cvar('--c-accent') },
+      { label: 'Trong nước', value: 51, color: cvar('--c-line') },
+    ]);
+
+    document.getElementById('room-legend').innerHTML = [
+      [window.t('st.stat.room'), S.room, cvar('--c-primary')],
+      ['Nước ngoài đang nắm giữ', held, cvar('--c-accent')],
+      ['Nhà đầu tư trong nước', 51, cvar('--c-line')],
+    ].map(function (r) {
+      return '<div class="flex items-center gap-2">' +
+        '<span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:' + r[2] + '" aria-hidden="true"></span>' +
+        '<dt class="text-muted flex-1">' + r[0] + '</dt>' +
+        '<dd class="num font-semibold">' + fmt(r[1], 1) + '%</dd></div>';
+    }).join('');
+  });
+
+  /* ---------- related news ---------- */
+  onRender(function () {
+    const lang = window.getLang();
+    document.getElementById('sk-news').innerHTML = NEWS.map(function (n) {
+      return '<li><a href="#" class="flex gap-3 py-2.5 px-1 -mx-1 rounded hover:bg-surface2 transition-colors duration-200">' +
+        '<span class="num text-[11px] text-muted w-10 shrink-0 pt-0.5">' + n.time + '</span>' +
+        '<span class="min-w-0 flex-1"><span class="block text-[13px] leading-snug">' + n[lang] + '</span>' +
+        '<span class="block text-[11px] text-muted mt-1">' + n.src + '</span></span></a></li>';
+    }).join('');
+  });
+
+  /* ---------- profile fields ---------- */
+  onRender(function () {
+    document.getElementById('p-sector').textContent = SECTORS[S.sector][window.getLang()];
+    document.getElementById('p-exch').textContent = S.exch;
+    document.getElementById('p-shares').textContent = vol(Math.round(S.cap / (S.last * 1000)));
+  });
+
+  /* ---------- watch toggle ---------- */
+  const watchBtn = document.querySelector('[data-watch]');
+  watchBtn.addEventListener('click', function () {
+    const on = watchBtn.getAttribute('aria-pressed') === 'true';
+    watchBtn.setAttribute('aria-pressed', String(!on));
+    watchBtn.classList.toggle('!text-accent', !on);
+    watchBtn.classList.toggle('!border-accent/50', !on);
+    const label = watchBtn.querySelector('[data-watch-label]');
+    label.setAttribute('data-i18n', on ? 'st.follow' : 'st.following');
+    label.textContent = window.t(on ? 'st.follow' : 'st.following');
+  });
+
+  /* ---------- ticker search ---------- */
+  document.getElementById('topsearch').addEventListener('change', function (e) {
+    const v = e.target.value.trim().toUpperCase();
+    if (BY_SYM[v]) location.search = '?sym=' + v;
+  });
+});
+</script>
+</body>
+</html>

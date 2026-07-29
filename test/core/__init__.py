@@ -1,1 +1,0 @@
-"""Package placeholder — replace with a real module docstring."""
