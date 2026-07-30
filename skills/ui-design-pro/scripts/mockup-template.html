@@ -110,12 +110,17 @@
   .pickrow { margin-top: 14px; display: flex; align-items: center; gap: 12px; }
   .ctl.pickbtn[aria-pressed="true"] { background: var(--ui-accent); color: #0b0c0f; border-color: var(--ui-accent); }
 
-  /* ---- the mock app: every value below reads from the option's tokens ---- */
+  /* ---- the mock app: every value below reads from the option's tokens ----
+     Colour tokens decide what it is coloured like; the --surface-* kit decides
+     what it is *drawn* like — border weight, shadow geometry, translucency,
+     sheen. Without the second half every option renders as the same flat card
+     in a different hue. */
   .app {
     --d: 1;                                  /* density multiplier */
     --r: var(--radius, 8px);
     display: grid; grid-template-columns: 188px 1fr; min-height: 470px;
-    background: var(--background); color: var(--foreground);
+    background-color: var(--background); background-image: var(--surface-wash, none);
+    color: var(--foreground);
     font-family: var(--font-body); font-size: calc(13.5px * var(--d));
   }
   .app.compact { --d: 0.9; }
@@ -124,7 +129,8 @@
 
   .app aside {
     background: var(--sidebar, var(--card)); color: var(--sidebar-foreground, var(--card-foreground));
-    border-right: 1px solid var(--border); padding: calc(14px * var(--d));
+    border-right: var(--surface-border-width, 1px) solid var(--border);
+    padding: calc(14px * var(--d));
     display: flex; flex-direction: column; gap: calc(4px * var(--d));
   }
   .brand {
@@ -151,7 +157,10 @@
   .main { display: flex; flex-direction: column; min-width: 0; }
   .topbar {
     display: flex; align-items: center; gap: 12px; padding: calc(11px * var(--d)) calc(18px * var(--d));
-    border-bottom: 1px solid var(--border); background: var(--card); color: var(--card-foreground);
+    border-bottom: var(--surface-border-width, 1px) solid var(--border);
+    background-color: var(--card); color: var(--card-foreground);
+    backdrop-filter: blur(var(--surface-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--surface-blur, 0px));
   }
   .search {
     flex: 1; max-width: 300px; background: var(--background); border: 1px solid var(--input);
@@ -180,7 +189,9 @@
 
   .btn {
     border-radius: calc(var(--r) * 0.85); padding: calc(7px * var(--d)) calc(13px * var(--d));
-    font-size: calc(12.5px * var(--d)); font-weight: 500; border: 1px solid transparent;
+    font-size: calc(12.5px * var(--d)); font-weight: 500;
+    border: var(--surface-border-width, 1px) solid transparent;
+    box-shadow: var(--surface-shadow-raised, none);
     font-family: inherit; white-space: nowrap;
   }
   .btn.primary { background: var(--primary); color: var(--primary-foreground); }
@@ -193,8 +204,13 @@
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(12px * var(--d)); }
   @media (max-width: 620px) { .grid3 { grid-template-columns: 1fr; } }
   .card {
-    background: var(--card); color: var(--card-foreground); border: 1px solid var(--border);
+    background-color: var(--card); color: var(--card-foreground);
+    background-image: var(--surface-gradient, none);
+    border: var(--surface-border-width, 1px) solid var(--border);
     border-radius: var(--r); padding: calc(13px * var(--d));
+    box-shadow: var(--surface-shadow, none);
+    backdrop-filter: blur(var(--surface-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--surface-blur, 0px));
   }
   .stat-label {
     font-size: calc(11px * var(--d)); color: var(--muted-foreground);
@@ -232,12 +248,49 @@
   .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: calc(11px * var(--d)); }
   .field label { font-size: calc(11.5px * var(--d)); font-weight: 500; }
   .input {
-    background: var(--background); border: 1px solid var(--input); color: var(--foreground);
+    background: var(--background); border: var(--surface-border-width, 1px) solid var(--input);
+    color: var(--foreground);
     border-radius: calc(var(--r) * 0.85); padding: calc(7px * var(--d)) calc(10px * var(--d));
     font-size: calc(12.5px * var(--d)); font-family: inherit;
+    box-shadow: var(--surface-shadow-inset, none);
   }
   .input.placeholder { color: var(--muted-foreground); }
   .input.focused { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 28%, transparent); }
+
+  /* ---- an open overlay, because elevation and blur only show over content ---- */
+  .page-head .actions { position: relative; }
+  .pop {
+    position: absolute; top: calc(100% + 7px); right: 0; z-index: 4; width: calc(184px * var(--d));
+    background-color: var(--popover); color: var(--popover-foreground);
+    background-image: var(--surface-gradient, none);
+    border: var(--surface-border-width, 1px) solid var(--border); border-radius: var(--r);
+    box-shadow: var(--surface-shadow-raised, 0 12px 30px -12px rgb(0 0 0 / 0.35));
+    backdrop-filter: blur(var(--surface-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--surface-blur, 0px));
+    padding: calc(5px * var(--d)); text-align: left;
+  }
+  .pop b {
+    display: block; font-size: calc(9.5px * var(--d)); text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted-foreground); padding: 4px 8px 5px;
+  }
+  .pop i {
+    display: block; font-style: normal; padding: calc(6px * var(--d)) 8px;
+    border-radius: calc(var(--r) * 0.7); font-size: calc(12px * var(--d));
+  }
+  .pop i.on { background: var(--accent); color: var(--accent-foreground); }
+
+  /* ---- the four things a variable cannot express ---- */
+  /* Brutalism draws every edge in ink, not just the cards. */
+  .kit-hard .btn, .kit-hard .icon-btn, .kit-hard .search, .kit-hard .input { border-color: var(--border); }
+  .kit-hard .badge { border: 2px solid var(--border); }
+  /* Soft UI debosses its controls into the page rather than outlining them. */
+  .kit-soft .search, .kit-soft .input { border: 0; background: var(--background); box-shadow: var(--surface-shadow-inset); }
+  .kit-soft .icon-btn { border: 0; box-shadow: var(--surface-shadow-raised); }
+  /* Glass chrome is frosted too — an opaque sidebar next to glass cards reads as a bug. */
+  .kit-glass aside { background-color: var(--card); backdrop-filter: blur(var(--surface-blur)); -webkit-backdrop-filter: blur(var(--surface-blur)); }
+  .kit-glass .search, .kit-glass .input { background: var(--card); }
+  /* Flat and outlined keep controls quiet: no borrowed elevation on buttons. */
+  .kit-flat .btn, .kit-outlined .btn { box-shadow: none; }
   .hint { font-size: calc(11px * var(--d)); color: var(--muted-foreground); }
   .mono { font-family: var(--font-mono); font-size: calc(11.5px * var(--d)); }
 
@@ -299,6 +352,8 @@ const OPTIONS = [
     thesis: "Cool neutrals, indigo action colour, tight geometry — the safe, credible dashboard read.",
     hue: 275,
     density: "comfortable",
+    surface: "elevated",
+    surfaceNote: "hairline border, diffuse shadow",
     fonts: {
       display: "'Inter', ui-sans-serif, system-ui, sans-serif",
       body: "'Inter', ui-sans-serif, system-ui, sans-serif",
@@ -326,6 +381,13 @@ const OPTIONS = [
       input: "#DEE1E8",
       ring: "#4C52D0",
       sidebar: "#F9FAFD",
+      "surface-border-width": "1px",
+      "surface-shadow": "0 1px 2px 0 rgb(0 0 0 / 0.05), 0 10px 24px -10px rgb(0 0 0 / 0.16)",
+      "surface-shadow-raised": "0 2px 4px -1px rgb(0 0 0 / 0.08), 0 14px 32px -12px rgb(0 0 0 / 0.22)",
+      "surface-shadow-inset": "none",
+      "surface-blur": "0px",
+      "surface-gradient": "none",
+      "surface-wash": "none",
     },
     dark: {
       radius: "0.5rem",
@@ -349,6 +411,13 @@ const OPTIONS = [
       input: "#FFFFFF29",
       ring: "#7C8CFF",
       sidebar: "#12161E",
+      "surface-border-width": "1px",
+      "surface-shadow": "0 1px 2px 0 rgb(0 0 0 / 0.095), 0 10px 24px -10px rgb(0 0 0 / 0.304)",
+      "surface-shadow-raised": "0 2px 4px -1px rgb(0 0 0 / 0.152), 0 14px 32px -12px rgb(0 0 0 / 0.418)",
+      "surface-shadow-inset": "none",
+      "surface-blur": "0px",
+      "surface-gradient": "none",
+      "surface-wash": "none",
     },
   },
   {
@@ -357,6 +426,8 @@ const OPTIONS = [
     thesis: "Paper background, ink text, serif headlines, terracotta accent — reads like print, not software.",
     hue: 35,
     density: "spacious",
+    surface: "outlined",
+    surfaceNote: "2px rule, no shadow",
     fonts: {
       display: "'Source Serif 4', ui-serif, Georgia, serif",
       body: "'Inter', ui-sans-serif, system-ui, sans-serif",
@@ -384,6 +455,13 @@ const OPTIONS = [
       input: "#DCD7CD",
       ring: "#AE4024",
       sidebar: "#F9F5EC",
+      "surface-border-width": "2px",
+      "surface-shadow": "none",
+      "surface-shadow-raised": "none",
+      "surface-shadow-inset": "none",
+      "surface-blur": "0px",
+      "surface-gradient": "none",
+      "surface-wash": "none",
     },
     dark: {
       radius: "0.25rem",
@@ -407,6 +485,13 @@ const OPTIONS = [
       input: "#FFFFFF29",
       ring: "#E67D58",
       sidebar: "#201914",
+      "surface-border-width": "2px",
+      "surface-shadow": "none",
+      "surface-shadow-raised": "none",
+      "surface-shadow-inset": "none",
+      "surface-blur": "0px",
+      "surface-gradient": "none",
+      "surface-wash": "none",
     },
   },
   {
@@ -415,6 +500,8 @@ const OPTIONS = [
     thesis: "Dark-first, near-monochrome surfaces, one acid accent, mono labels, sharp corners — instrument panel.",
     hue: 122,
     density: "compact",
+    surface: "glass",
+    surfaceNote: "translucent surfaces, backdrop blur, lit top edge",
     fonts: {
       display: "'Inter', ui-sans-serif, system-ui, sans-serif",
       body: "'Inter', ui-sans-serif, system-ui, sans-serif",
@@ -424,9 +511,9 @@ const OPTIONS = [
       radius: "0.125rem",
       background: "#F5F5F5",
       foreground: "#0B0B0B",
-      card: "#FFFFFF",
+      card: "#FFFFFFC7",
       "card-foreground": "#0B0B0B",
-      popover: "#FFFFFF",
+      popover: "#FFFFFFC7",
       "popover-foreground": "#0B0B0B",
       primary: "#1B1B1B",
       "primary-foreground": "#D3FB58",
@@ -442,14 +529,21 @@ const OPTIONS = [
       input: "#CECECE",
       ring: "#718E00",
       sidebar: "#EBEBEB",
+      "surface-border-width": "1px",
+      "surface-shadow": "0 8px 32px -12px rgb(0 0 0 / 0.22)",
+      "surface-shadow-raised": "0 14px 44px -14px rgb(0 0 0 / 0.3)",
+      "surface-shadow-inset": "inset 0 1px 0 0 rgb(255 255 255 / 0.2)",
+      "surface-blur": "14px",
+      "surface-gradient": "linear-gradient(160deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.05))",
+      "surface-wash": "radial-gradient(90% 70% at 12% 0%, #A8FF3E29, transparent 60%), radial-gradient(80% 60% at 100% 8%, #A8FF3E1A, transparent 62%)",
     },
     dark: {
       radius: "0.125rem",
       background: "#090909",
       foreground: "#F2F2F2",
-      card: "#121212",
+      card: "#1E1E1EB8",
       "card-foreground": "#F2F2F2",
-      popover: "#121212",
+      popover: "#1E1E1EB8",
       "popover-foreground": "#F2F2F2",
       primary: "#B8E100",
       "primary-foreground": "#0A1000",
@@ -465,6 +559,13 @@ const OPTIONS = [
       input: "#FFFFFF24",
       ring: "#B8E100",
       sidebar: "#0D0D0D",
+      "surface-border-width": "1px",
+      "surface-shadow": "0 8px 32px -12px rgb(0 0 0 / 0.418)",
+      "surface-shadow-raised": "0 14px 44px -14px rgb(0 0 0 / 0.57)",
+      "surface-shadow-inset": "inset 0 1px 0 0 rgb(255 255 255 / 0.12)",
+      "surface-blur": "14px",
+      "surface-gradient": "linear-gradient(160deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.03))",
+      "surface-wash": "radial-gradient(90% 70% at 12% 0%, #A8FF3E3D, transparent 60%), radial-gradient(80% 60% at 100% 8%, #A8FF3E29, transparent 62%)",
     },
   },
   {
@@ -473,6 +574,8 @@ const OPTIONS = [
     thesis: "Lavender-tinted off-white, violet primary, generous 16px radii — approachable consumer SaaS.",
     hue: 295,
     density: "spacious",
+    surface: "soft",
+    surfaceNote: "borderless, dual soft shadow, debossed inputs",
     fonts: {
       display: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
       body: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
@@ -500,6 +603,13 @@ const OPTIONS = [
       input: "#DCD9E2",
       ring: "#7847D0",
       sidebar: "#F6F4FB",
+      "surface-border-width": "0px",
+      "surface-shadow": "-6px -6px 14px #FFFFFF, 7px 7px 18px #DAD6E4",
+      "surface-shadow-raised": "-3px -3px 8px #FFFFFF, 4px 4px 10px #DAD6E4",
+      "surface-shadow-inset": "inset 3px 3px 7px #DAD6E4, inset -3px -3px 7px #FFFFFF",
+      "surface-blur": "0px",
+      "surface-gradient": "linear-gradient(145deg, #FBFAFE, #F1EFF7)",
+      "surface-wash": "none",
     },
     dark: {
       radius: "1rem",
@@ -523,6 +633,13 @@ const OPTIONS = [
       input: "#FFFFFF29",
       ring: "#AD8DFD",
       sidebar: "#191621",
+      "surface-border-width": "0px",
+      "surface-shadow": "-6px -6px 14px #2A2733, 7px 7px 18px #14121A",
+      "surface-shadow-raised": "-3px -3px 8px #2A2733, 4px 4px 10px #14121A",
+      "surface-shadow-inset": "inset 3px 3px 7px #14121A, inset -3px -3px 7px #2A2733",
+      "surface-blur": "0px",
+      "surface-gradient": "linear-gradient(145deg, #23212C, #1B1922)",
+      "surface-wash": "none",
     },
   },
   {
@@ -531,6 +648,8 @@ const OPTIONS = [
     thesis: "Pure white, near-zero chroma neutrals, restrained teal — dense data without visual noise.",
     hue: 195,
     density: "compact",
+    surface: "flat",
+    surfaceNote: "hairline border, no shadow",
     fonts: {
       display: "'Public Sans', ui-sans-serif, system-ui, sans-serif",
       body: "'Public Sans', ui-sans-serif, system-ui, sans-serif",
@@ -558,6 +677,13 @@ const OPTIONS = [
       input: "#D7DEE0",
       ring: "#006E6F",
       sidebar: "#F6FAFB",
+      "surface-border-width": "1px",
+      "surface-shadow": "none",
+      "surface-shadow-raised": "none",
+      "surface-shadow-inset": "none",
+      "surface-blur": "0px",
+      "surface-gradient": "none",
+      "surface-wash": "none",
     },
     dark: {
       radius: "0.375rem",
@@ -581,6 +707,13 @@ const OPTIONS = [
       input: "#FFFFFF26",
       ring: "#2CB3B3",
       sidebar: "#0B1619",
+      "surface-border-width": "1px",
+      "surface-shadow": "none",
+      "surface-shadow-raised": "none",
+      "surface-shadow-inset": "none",
+      "surface-blur": "0px",
+      "surface-gradient": "none",
+      "surface-wash": "none",
     },
   },
 ];
@@ -665,7 +798,7 @@ function appMarkup(opt) {
   ).join("");
 
   return `
-  <div class="app ${opt.density}">
+  <div class="app ${opt.density} kit-${opt.surface || "flat"}">
     <aside>
       <div class="brand"><span class="dot"></span>${PROJECT.split(" ")[0]}</div>
       <div class="nav-item on"><span class="ic"></span>Overview</div>
@@ -692,6 +825,12 @@ function appMarkup(opt) {
           <div class="actions">
             <button class="btn outline">Export</button>
             <button class="btn primary${showFocus ? " ring" : ""}">New report</button>
+            <div class="pop">
+              <b>Report type</b>
+              <i class="on">Revenue summary</i>
+              <i>Churn cohort</i>
+              <i>Account health</i>
+            </div>
           </div>
         </div>
 
@@ -752,7 +891,7 @@ function appMarkup(opt) {
           The quick brown fox jumps over the lazy dog. Body copy at reading size, on the
           surface it will actually sit on — this is where a font choice succeeds or fails.
         </p>
-        <p class="stack">display: ${opt.fonts.display.split(",")[0]} &nbsp;·&nbsp; body: ${opt.fonts.body.split(",")[0]} &nbsp;·&nbsp; radius: ${opt[mode].radius} &nbsp;·&nbsp; density: ${opt.density}</p>
+        <p class="stack">display: ${opt.fonts.display.split(",")[0]} &nbsp;·&nbsp; body: ${opt.fonts.body.split(",")[0]} &nbsp;·&nbsp; radius: ${opt[mode].radius} &nbsp;·&nbsp; density: ${opt.density} &nbsp;·&nbsp; surface: ${opt.surface || "flat"}${opt.surfaceNote ? ` (${opt.surfaceNote})` : ""}</p>
       </div>
     </div>
   </div>`;
@@ -767,8 +906,7 @@ function render() {
       <span class="letter">${LETTERS[i]}</span>
       <span class="tab-text">
         <span class="tab-name">${o.name}</span>
-        <span class="tab-sub">${[o.role, o.accent && `accent ${o.accent}`, o[mode].radius]
-          .filter(Boolean).join(" · ")}</span>
+        <span class="tab-sub">${[o.surface, o[mode].radius].filter(Boolean).join(" · ")}</span>
       </span>
       <span class="sw" style="${tokenStyle(o)}">
         ${SWATCHES.map((s) => `<i style="background:var(--${s})" title="${s}"></i>`).join("")}
@@ -785,8 +923,10 @@ function render() {
           <p>${o.thesis}</p>
         </div>
         <div class="meta">
-          <code>radius ${o[mode].radius}</code><br>
-          <code>${o.density}</code><br>
+          <code>${[o.role, `${o.surface || "flat"} surface`].filter(Boolean).join(" · ")}</code><br>
+          ${o.surfaceNote ? `<code>${o.surfaceNote}</code><br>` : ""}
+          <code>radius ${o[mode].radius} · ${o.density}</code><br>
+          ${o.accent ? `<code>accent ${o.accent}</code><br>` : ""}
           <code>primary ${o[mode].primary}</code>
         </div>
       </div>
@@ -804,6 +944,9 @@ function render() {
 
 function switchTo(i) {
   active = ((i % OPTIONS.length) + OPTIONS.length) % OPTIONS.length;
+  // In the URL so a specific option can be linked, reloaded, or reopened where
+  // it was left — "look at C again" is a normal thing to want.
+  history.replaceState(null, "", `#${LETTERS[active]}`);
   render();
   // Keep the focus on the tab that is now selected, so arrow-key switching and
   // click switching leave the page in the same state for a keyboard user.
@@ -816,7 +959,7 @@ function pick(id) {
   const i = OPTIONS.findIndex((o) => o.id === id);
   const el = document.getElementById("pick");
   el.innerHTML = picked
-    ? `Marked <b>${LETTERS[i]} — ${OPTIONS[i].name}</b>. Tell Claude the letter, or which parts to combine.`
+    ? `Marked <b>${LETTERS[i]} — ${OPTIONS[i].name}</b>. Tell Claude the letter, or which parts to combine — you'll get an implementation plan to review before any code is written.`
     : "Switch tabs to compare, then mark the one you want.";
   el.className = picked ? "" : "dim";
   render();
@@ -845,6 +988,9 @@ document.addEventListener("keydown", (e) => {
   else return;
   e.preventDefault();
 });
+
+const fromHash = LETTERS.indexOf((location.hash || "").slice(1, 2).toUpperCase());
+if (fromHash >= 0 && fromHash < OPTIONS.length) active = fromHash;
 
 render();
 </script>

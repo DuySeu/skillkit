@@ -51,3 +51,49 @@ contrast gate are in SKILL.md → Seeding the Options.
 Only 6 of 84 style rows declare a radius, so most are inferred from the style's
 keywords or stepped off a ladder. The script says which, per option. A data-dense
 console with 1rem corners is wrong even if the ladder produced it.
+
+## The surface kit
+
+Each option also gets one of six surface treatments — `flat`, `outlined`, `elevated`,
+`soft`, `glass`, `hard` — which is what makes the styles visibly different from each
+other rather than differently coloured. It becomes the seven `--surface-*` variables
+documented in `shadcn-tokens.md`.
+
+How the kit is chosen, in order:
+
+1. **The style's name**, for the styles whose whole identity is their surface —
+   Glassmorphism, Claymorphism, Neumorphism, Brutalism, Memphis, Material, Bento. A
+   name match wins outright, because several rows describe a technique they are
+   contrasting themselves *against*: Neo Brutalism's own cell reads "hard offset
+   shadows (4–8px, no blur)", and matching the word "blur" there classified it as glass.
+2. **The technique cells** — `Effects & Animation`, `CSS/Technical Keywords`,
+   `Design System Variables`. This is where the database actually records shadows,
+   border weights and blur radii.
+3. **A stepped ladder** (`flat` → `elevated` → `outlined`) when the row names no
+   technique at all. 32 of 84 rows land here, and the script says so per option.
+
+A row that names a heavy border *and* rules shadows out ("thick 4px borders, no
+shadows, strictly 2D") gets `outlined` rather than `hard`. The database is being
+precise there, so the shadow half of the kit is dropped instead of overridden.
+
+Kit distinctness is a *bias*, not a guarantee: distinct style categories are not
+automatically distinct surfaces — Minimalism, Flat Design and Swiss Style all draw a
+hairline and no shadow — so an unused kit is preferred when filling each slot. If the
+query only ranks flat styles, the set can still repeat one; that shows up in the tab
+strip, where every tab prints its kit.
+
+### Kits that change the palette
+
+Three treatments are not paint on top of arbitrary colours, so the script adjusts the
+tokens and reports each adjustment:
+
+- **`glass`** makes `card` and `popover` translucent, and derives the page wash the blur
+  samples. Contrast is then enforced against the *composited* surface, not the opaque
+  one — otherwise the seeder's "passes by construction" promise would not survive the
+  gate reading the same file.
+- **`soft`** sets card = popover = background (soft UI extrudes the surface out of the
+  page) and drops a pure-white page to 0.95 lightness, because a white surface has no
+  headroom for the highlight above it. Real neumorphic themes sit on #E8E8E8 for the
+  same reason.
+- **`hard`** and **`outlined`** move `border` and `input` toward the foreground. A 3px
+  border in a hairline colour is a thick smudge; weight and colour have to move together.

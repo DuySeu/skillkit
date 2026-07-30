@@ -2,6 +2,8 @@
 
 The shadcn variable vocabulary is the lingua franca for this skill: design every option in these names, then map them onto whatever the target framework actually uses (see `framework-recipes.md`).
 
+> **The shipped token file carries no comments.** `index.css` (or `app.css` / `globals.css` / `styles.css`) is declarations only — no `/* … */`, no section banners, and not the `/* Option B - … */` header that `seed-options.py` writes onto the option CSS you port from. Comments in the examples below annotate *this reference*; they do not travel into the project. Reasoning about values lives in `docs/design/DECISIONS.md`.
+
 ## The Token Set
 
 | Token | Meaning | Contrast partner |
@@ -279,6 +281,41 @@ Even when the file ships hex, *think* in OKLCH — it is the only one of the thr
 - **Alpha:** `oklch(1 0 0 / 10%)` is valid and is what shadcn uses for dark-mode borders.
 
 Derive a full palette from one seed by holding `C` and `H` and walking `L`; adjust `C` down at the extremes (very light and very dark colours cannot hold high chroma).
+
+## The Surface Kit — `--surface-*`
+
+**Seven variables that carry the visual style, and the half of a direction that colour tokens cannot express.** Not part of stock shadcn; `seed-options.py` writes them into every option, the preview harness renders them, and the implementation ports them alongside the colours. Drop them and a glassmorphism pick ships as flat cards in glass-ish colours — the user picked a *treatment*, and the treatment lives here.
+
+| Variable | What it controls | Flat | Glass | Soft (neumorphic) | Hard (brutalist) |
+|---|---|---|---|---|---|
+| `--surface-border-width` | outline weight on cards, chrome, controls | `1px` | `1px` | `0px` | `3px` |
+| `--surface-shadow` | resting elevation of a card | `none` | diffuse | dual light/dark | hard offset |
+| `--surface-shadow-raised` | buttons, popovers, sticky bars | `none` | deeper diffuse | tighter dual | shorter offset |
+| `--surface-shadow-inset` | debossed inputs / lit top edge | `none` | top highlight | pressed-in | `none` |
+| `--surface-blur` | `backdrop-filter` radius | `0px` | `14px` | `0px` | `0px` |
+| `--surface-gradient` | `background-image` on a surface | `none` | sheen | soft convexity | `none` |
+| `--surface-wash` | `background-image` on the page | `none` | tinted, so the blur has something to sample | `none` | `none` |
+
+Six kits: `flat`, `outlined`, `elevated`, `soft`, `glass`, `hard`. The kit name is recorded in `DECISIONS.md`; the values are in the token file.
+
+Two of them change the *colour* tokens as well, which is why they cannot be bolted on afterwards:
+
+- **`glass`** makes `--card` and `--popover` translucent (`#RRGGBBAA` / `oklch(… / a)`). `contrast-check.mjs` composites them over `--background` before checking text on them, which is exactly what the browser does.
+- **`soft`** sets `card` = `popover` = `background` (soft UI extrudes a surface out of the page rather than layering one on top) and keeps the page off pure white so a highlight can exist above it. `hard` and `outlined` darken `--border`/`--input` toward the ink, because a 3px hairline is a smudge, not a heavy border.
+
+Usage, in the components:
+
+```css
+.card {
+  background-color: var(--card);
+  background-image: var(--surface-gradient);
+  border: var(--surface-border-width) solid var(--border);
+  box-shadow: var(--surface-shadow);
+  backdrop-filter: blur(var(--surface-blur));
+}
+```
+
+A handful of things a variable cannot express — ink borders on every control for `hard`, frosted chrome for `glass`, debossed inputs for `soft` — key off the kit name instead. The harness does it with a `kit-<name>` class on the app root; do the same in the real app.
 
 ## Non-Colour Tokens Worth Defining
 

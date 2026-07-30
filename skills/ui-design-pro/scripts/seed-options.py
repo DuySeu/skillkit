@@ -589,6 +589,244 @@ def radius_for(style_row, slot, notes=None):
     return fallback
 
 
+# ======================================================================
+# Surface treatment -- the part of a style that is not a colour
+# ======================================================================
+#
+# A palette, a font pairing and a radius do not make a style visible.
+# Glassmorphism, brutalism and neumorphism differ from each other -- and from
+# plain flat design -- in *how a surface is drawn*: border weight, shadow
+# geometry, translucency, sheen. Without this layer every option renders as the
+# same flat card in a different hue, which is exactly the "the options differ
+# only in hue" failure the skill warns about, one level below colour.
+#
+# So each option also carries a surface kit: seven CSS variables that the
+# preview applies to cards, buttons, inputs and overlays, and that the
+# implementation ports alongside the colour tokens.
+#
+#   --surface-border-width   how heavy the outline is
+#   --surface-shadow         resting elevation of a card
+#   --surface-shadow-raised  buttons, popovers, sticky bars
+#   --surface-shadow-inset   debossed inputs (neumorphism's signature)
+#   --surface-blur           backdrop-filter radius; 0 for everything but glass
+#   --surface-gradient       background-image on a surface (sheen, soft convexity)
+#   --surface-wash           background-image on the page, so glass has
+#                            something worth blurring
+#
+# Matched in order -- the first hit wins, so the specific techniques are listed
+# before the generic ones.
+# Matched against the style's NAME first, before any technique text. A style
+# whose whole identity is its surface ("Claymorphism") must not be re-classified
+# by a stray "thick border" three columns later -- and several rows describe a
+# technique they are contrasting themselves against.
+SURFACE_NAME_HINTS = [
+    ("glass", re.compile(r"glassmorph|frosted|acrylic|aero\b", re.I)),
+    ("soft",  re.compile(r"neumorph|claymorph|soft ui|soft.?3d", re.I)),
+    ("hard",  re.compile(r"brutal|memphis|y2k|neo.?geo", re.I)),
+    ("elevated", re.compile(r"material design|bento", re.I)),
+]
+
+SURFACE_HINTS = [
+    ("hard",  re.compile(r"brutal|memphis|y2k|neo.?geo|\bsticker\b|hard shadow|hard offset|"
+                         r"offset shadow|\bbold border|thick border|border(?:width|-b)?:?\s*[34]", re.I)),
+    # No bare "blur": half the style rows say "no blur" as a *contrast* with
+    # their own hard shadows, and a negation is not a match.
+    ("glass", re.compile(r"glassmorph|frosted|backdrop-filter|backdrop blur|\bglass\b|acrylic|"
+                         r"blur\(", re.I)),
+    ("soft",  re.compile(r"neumorph|soft ui|claymorph|\bclay\b|embossed|debossed|soft.?3d|"
+                         r"inflat|squish|puffy|multiple shadow|shadow.?soft|soft box-shadow", re.I)),
+    ("elevated", re.compile(r"material design|elevation|card.?based|bento|\bdepth\b|"
+                            r"drop shadow|box-shadow:\s*0", re.I)),
+    ("outlined", re.compile(r"wireframe|\boutline|editorial|swiss|typographic|"
+                            r"grid-based|magazine|newspaper|technical draw", re.I)),
+    ("flat",  re.compile(r"minimal|\bflat\b|no box-shadow|shadow:\s*none|\bclean\b", re.I)),
+]
+
+# Some rows name a heavy border AND rule shadows out in the same breath
+# ("thick 4px borders, no shadows, strictly 2D"). The database is being precise
+# there, so the shadow half of the kit is dropped rather than overridden.
+NO_SHADOW_HINT = re.compile(r"no shadows?\b|shadows?:\s*none|box-shadow:\s*none|strictly 2d|"
+                            r"zero shadow|flat.{0,12}no depth", re.I)
+SHADOWLESS_SWAP = {"hard": "outlined", "elevated": "flat"}
+
+# A page-level colour wash is orthogonal to the surface kit: an "aurora
+# gradient" style can be flat-surfaced and still want a tinted page.
+WASH_HINT = re.compile(r"gradient|aurora|mesh|\bglow\b|vibrant background|iridescen|"
+                       r"holograph|duotone", re.I)
+
+# Nothing in the row settles it -> step the ladder, so consecutive options don't
+# all land on the same treatment.
+SURFACE_LADDER = ["flat", "elevated", "outlined"]
+
+SURFACE_BLURB = {
+    "flat":     "hairline border, no shadow",
+    "outlined": "2px rule, no shadow",
+    "elevated": "hairline border, diffuse shadow",
+    "soft":     "borderless, dual soft shadow, debossed inputs",
+    "glass":    "translucent surfaces, backdrop blur, lit top edge",
+    "hard":     "3px border, hard offset shadow",
+}
+
+
+def surface_for(style_row, slot, notes=None):
+    """Which surface kit a style is drawn with.
+
+    Read from the style row's own technique cells -- Effects & Animation and
+    CSS/Technical Keywords are where the database actually records shadows,
+    blur and border weight -- and reported when it had to be guessed.
+    """
+    haystack = " ".join(filter(None, (
+        style_row.get("Style Category"), style_row.get("Keywords"),
+        style_row.get("Effects & Animation"), style_row.get("CSS/Technical Keywords"),
+        style_row.get("Design System Variables"),
+    )))
+    label = style_row.get("Style Category") or "style"
+
+    for kit, pattern in SURFACE_NAME_HINTS:
+        if pattern.search(label):
+            return kit, bool(WASH_HINT.search(haystack))
+
+    for kit, pattern in SURFACE_HINTS:
+        if pattern.search(haystack):
+            swap = SHADOWLESS_SWAP.get(kit)
+            if swap and NO_SHADOW_HINT.search(haystack):
+                if notes is not None:
+                    notes.append(f"surface {swap!r} rather than {kit!r} for {label!r} -- the row "
+                                 f"names the border weight but rules shadows out")
+                kit = swap
+            return kit, bool(WASH_HINT.search(haystack))
+
+    kit = SURFACE_LADDER[slot % len(SURFACE_LADDER)]
+    if notes is not None:
+        notes.append(f"surface {kit!r} is a stepped default -- {label!r} names no "
+                     f"shadow, border or blur technique")
+    return kit, bool(WASH_HINT.search(haystack))
+
+
+def shade(lch, dl, dc=1.0):
+    """Same hue, moved in perceptual lightness. Used for shadow and sheen
+    colours that have to stay in the theme's own family."""
+    L, C, H = lch
+    return (min(1.0, max(0.0, L + dl)), max(0.0, C * dc), H)
+
+
+def mix(lch, other, t):
+    """Move a colour t of the way toward another, keeping its own hue.
+
+    Hue is kept because these mixes exist to derive a *weight* -- a border
+    somewhere between the ink and the page -- and interpolating hue as well
+    would drift the neutral off the palette's temperature.
+    """
+    L, C, H = lch
+    return (L + (other[0] - L) * t, C + (other[1] - C) * t, H)
+
+
+def composite(lch, backdrop, alpha):
+    """What a translucent colour actually looks like over its backdrop.
+
+    Compositing is a source-over blend in gamma-encoded sRGB, which is what the
+    browser does and what contrast-check.mjs re-does when it reads the file. The
+    result goes back into OKLCH so the contrast pass can keep nudging lightness
+    in the space it works in.
+    """
+    fore = oklch_to_srgb(*lch)
+    back = oklch_to_srgb(*backdrop)
+    return srgb_to_oklch(*(f * alpha + b * (1 - alpha) for f, b in zip(fore, back)))
+
+
+def fmt_alpha(lch, alpha):
+    """A token value with an alpha channel, in whichever format --format chose.
+
+    Translucent surfaces are the whole point of glassmorphism, and both the
+    contrast gate and the browser composite them over the page background, so
+    the value has to carry its alpha rather than be pre-flattened.
+    """
+    a = round(min(1.0, max(0.0, alpha)), 3)
+    if _fmt is fmt_oklch:
+        L, C, H = lch
+        L, C = round(min(1.0, max(0.0, L)), 4), round(max(0.0, C), 4)
+        if C < 0.001:
+            return f"oklch({L:g} 0 0 / {a:g})"
+        return f"oklch({L:g} {C:g} {round(H, 1):g} / {a:g})"
+    return fmt_hex(lch) + f"{round(a * 255):02X}"
+
+
+def ink(alpha, mode):
+    """Shadow colour. Real shadows are the absence of light, not a tinted
+    surface, so these stay neutral -- and dark mode needs them heavier to read
+    against a dark background at all."""
+    a = alpha * (1.9 if mode == "dark" else 1.0)
+    return f"rgb(0 0 0 / {round(min(0.85, a), 3):g})"
+
+
+# How translucent a glass surface is. High enough that text on it still clears
+# 4.5:1 once composited, low enough to read as glass rather than as a card.
+GLASS_ALPHA = {"light": 0.78, "dark": 0.72}
+
+
+def surface_tokens(kit, tokens, mode, wash):
+    """The seven --surface-* values for one option in one colour mode.
+
+    `tokens` is the mode's OKLCH map, so every derived colour comes out of the
+    option's own palette rather than from a fixed grey.
+    """
+    card = tokens.get("card") or tokens["background"]
+    fg = tokens["foreground"]
+    primary = tokens["primary"]
+    accent = tokens.get("accent") or primary
+    dark = mode == "dark"
+
+    out = {
+        "surface-border-width": "1px",
+        "surface-shadow": "none",
+        "surface-shadow-raised": "none",
+        "surface-shadow-inset": "none",
+        "surface-blur": "0px",
+        "surface-gradient": "none",
+        "surface-wash": "none",
+    }
+
+    if kit == "outlined":
+        out["surface-border-width"] = "2px"
+
+    elif kit == "elevated":
+        out["surface-shadow"] = f"0 1px 2px 0 {ink(0.05, mode)}, 0 10px 24px -10px {ink(0.16, mode)}"
+        out["surface-shadow-raised"] = f"0 2px 4px -1px {ink(0.08, mode)}, 0 14px 32px -12px {ink(0.22, mode)}"
+
+    elif kit == "soft":
+        lift = fmt(shade(card, 0.075 if not dark else 0.055))
+        press = fmt(shade(card, -0.075 if not dark else -0.045))
+        out["surface-border-width"] = "0px"
+        out["surface-shadow"] = f"-6px -6px 14px {lift}, 7px 7px 18px {press}"
+        out["surface-shadow-raised"] = f"-3px -3px 8px {lift}, 4px 4px 10px {press}"
+        out["surface-shadow-inset"] = f"inset 3px 3px 7px {press}, inset -3px -3px 7px {lift}"
+        out["surface-gradient"] = f"linear-gradient(145deg, {fmt(shade(card, 0.02))}, {fmt(shade(card, -0.02))})"
+
+    elif kit == "glass":
+        sheen = 0.20 if not dark else 0.12
+        out["surface-blur"] = "14px"
+        out["surface-shadow"] = f"0 8px 32px -12px {ink(0.22, mode)}"
+        out["surface-shadow-raised"] = f"0 14px 44px -14px {ink(0.30, mode)}"
+        out["surface-shadow-inset"] = f"inset 0 1px 0 0 rgb(255 255 255 / {sheen:g})"
+        out["surface-gradient"] = (f"linear-gradient(160deg, rgb(255 255 255 / {sheen:g}), "
+                                  f"rgb(255 255 255 / {sheen / 4:g}))")
+        wash = True
+
+    elif kit == "hard":
+        edge = fmt(fg) if not dark else fmt(shade(fg, -0.12))
+        out["surface-border-width"] = "3px"
+        out["surface-shadow"] = f"5px 5px 0 0 {edge}"
+        out["surface-shadow-raised"] = f"3px 3px 0 0 {edge}"
+
+    if wash:
+        a1, a2 = (0.16, 0.10) if not dark else (0.24, 0.16)
+        out["surface-wash"] = (
+            f"radial-gradient(90% 70% at 12% 0%, {fmt_alpha(primary, a1)}, transparent 60%), "
+            f"radial-gradient(80% 60% at 100% 8%, {fmt_alpha(accent, a2)}, transparent 62%)")
+
+    return out
+
+
 DENSITY_LABELS = [
     (3, "spacious"),
     (7, "comfortable"),
@@ -777,6 +1015,20 @@ def pick_options(colors, styles, typos, count, variance, brand=None, dark_ok=Fal
                   or MONO_HINT.search(t.get("Body Font") or "")]
 
     used_styles, used_typos, used_hues, used_palettes = set(), set(), [], set()
+    used_surfaces = set()
+
+    def surface_of(row):
+        """The surface kit a style row would render with, for diversity biasing.
+
+        Distinct style *categories* are not automatically distinct *surfaces*:
+        Minimalism, Flat Design and Swiss Style are three rows that all draw a
+        hairline border and no shadow. Preferring an unused kit is what stops a
+        set of five from being five flat cards in different hues.
+        """
+        return surface_for(row, len(options))[0]
+
+    def fresh_surface(pool):
+        return [s for s in pool if surface_of(s) not in used_surfaces]
 
     def claim(pool, used, key, *preferred_pools):
         """First unused row, checking the preferred pools before the fallback."""
@@ -936,23 +1188,27 @@ def pick_options(colors, styles, typos, count, variance, brand=None, dark_ok=Fal
             if style_row is not None:
                 safe_bucket = shape_bucket(style_row)
         elif role == "bolder":
-            style_row = claim(styles, used_styles, "Style Category", by_complex_desc)
+            style_row = claim(styles, used_styles, "Style Category",
+                              fresh_surface(by_complex_desc), by_complex_desc)
             typo_row = claim(typos, used_typos, "Font Pairing Name")
         elif role == "structural":
-            # Differs from `safe` in corner treatment AND in typographic
-            # character, not just in hue. When safe came back rounded, sharp is
-            # preferred here explicitly -- the reverse of "five soft options".
+            # Differs from `safe` in corner treatment, surface treatment AND
+            # typographic character, not just in hue. When safe came back
+            # rounded, sharp is preferred here explicitly -- the reverse of
+            # "five soft options".
             opposite = "sharp" if safe_bucket in ("round", "depth") else "round"
             first_choice = [s for s in styles if shape_bucket(s) == opposite]
             other_bucket = [s for s in styles if shape_bucket(s) != safe_bucket]
             style_row = claim(styles, used_styles, "Style Category",
-                              first_choice, other_bucket, by_complex_asc)
+                              fresh_surface(first_choice), first_choice,
+                              fresh_surface(other_bucket), other_bucket, by_complex_asc)
             typo_row = claim(typos, used_typos, "Font Pairing Name", serif_typos, mono_typos)
             if style_row is not None and shape_bucket(style_row) == safe_bucket:
                 notes.append(f"structural: no style available outside the {safe_bucket!r} corner "
                              f"family -- this slot differs in type and palette only")
         else:
-            style_row = claim(styles, used_styles, "Style Category", fill_styles)
+            style_row = claim(styles, used_styles, "Style Category",
+                              fresh_surface(fill_styles), fill_styles)
             typo_row = claim(typos, used_typos, "Font Pairing Name")
 
         if style_row is None or typo_row is None:
@@ -960,6 +1216,8 @@ def pick_options(colors, styles, typos, count, variance, brand=None, dark_ok=Fal
             notes.append(f"{role}: skipped -- ran out of distinct {short} "
                          f"({len(styles)} styles, {len(typos)} pairings available)")
             continue
+
+        used_surfaces.add(surface_of(style_row))
 
         if brand is not None:
             idx, color_row, h = take_palette_pinned()
@@ -1008,6 +1266,52 @@ def build_option(raw, index, density_dial, brand=None):
     dark = derive_dark(light, shape_bucket(style_row), brand=brand,
                        label=f"{ident}/dark", notes=notes)
 
+    # The surface kit is decided before the contrast pass because a glass kit
+    # makes `card` and `popover` translucent, and a translucent surface is a
+    # different background to check text against. The alpha-carrying value is
+    # what gets written; the composited value is what gets checked -- which is
+    # exactly what the browser and contrast-check.mjs both do with it.
+    kit, wash = surface_for(style_row, index, notes)
+
+    # Two kits need the palette itself adjusted, because the treatment is not
+    # something you can paint on top of any set of colours.
+    if kit == "soft":
+        # Soft UI extrudes a surface out of the page: the card is the SAME
+        # colour as the background and the two shadows do all the work. A pure
+        # white card has no headroom for a highlight above it, so the pair is
+        # dropped off the ceiling -- which is why real neumorphic themes sit on
+        # #E8E8E8 rather than on white.
+        for mode_name, tok in (("light", light), ("dark", dark)):
+            page = tok["background"]
+            if mode_name == "light" and page[0] > 0.96:
+                page = (0.95, page[1], page[2])
+                tok["background"] = page
+                notes.append(f"{ident}/{mode_name}: page dropped to 0.95 lightness so the soft "
+                             f"surface has room for a highlight above it")
+            for slot in ("card", "popover"):
+                if slot in tok:
+                    tok[slot] = page
+    elif kit in ("hard", "outlined"):
+        # A 3px border in a hairline colour is not a heavy border, it is a thick
+        # smudge. The weight and the colour have to move together.
+        weight = 0.0 if kit == "hard" else 0.45
+        for mode_name, tok in (("light", light), ("dark", dark)):
+            edge = mix(tok["foreground"], tok["background"], weight)
+            for slot in ("border", "input"):
+                if slot in tok:
+                    tok[slot] = edge
+        notes.append(f"{ident}: border darkened toward the ink for the {kit!r} surface "
+                     f"-- a heavy border needs a heavy colour")
+
+    translucent = {}
+    if kit == "glass":
+        for mode_name, tok in (("light", light), ("dark", dark)):
+            alpha = GLASS_ALPHA[mode_name]
+            for slot in ("card", "popover"):
+                if slot in tok:
+                    translucent[(mode_name, slot)] = fmt_alpha(tok[slot], alpha)
+                    tok[slot] = composite(tok[slot], tok["background"], alpha)
+
     if not enforce_contrast(light, f"{ident}/light", notes):
         return None, notes
     if not enforce_contrast(dark, f"{ident}/dark", notes):
@@ -1024,20 +1328,34 @@ def build_option(raw, index, density_dial, brand=None):
     body = (typo_row.get("Body Font") or "").strip()
     category = typo_row.get("Category") or ""
 
+    light_out = {"radius": radius, **{k: fmt(light[k]) for k in TOKEN_ORDER if k in light},
+                 **surface_tokens(kit, light, "light", wash)}
+    dark_out = {"radius": radius, **{k: fmt(dark[k]) for k in TOKEN_ORDER if k in dark},
+                **surface_tokens(kit, dark, "dark", wash)}
+    for (mode_name, slot), value in translucent.items():
+        (light_out if mode_name == "light" else dark_out)[slot] = value
+
+    surface_label = f"{kit} — {SURFACE_BLURB[kit]}" + (" , tinted page" if wash and kit != "glass" else "")
+    notes.append(f"surface {kit!r} ({SURFACE_BLURB[kit]}) for {name!r}"
+                 + (" with a tinted page wash" if wash else ""))
+
     option = {
         "id": ident,
         "name": name,
         "thesis": build_thesis(style_row, color_row, typo_row),
         "hue": round(light["primary"][2]),
         "density": density_label(density_dial),
+        "surface": kit,
+        "surfaceNote": SURFACE_BLURB[kit] + (", tinted page" if wash and kit != "glass" else ""),
         "fonts": {
             "display": font_stack(heading, category),
             "body": font_stack(body, category),
             "mono": "ui-monospace, SFMono-Regular, Menlo, monospace",
         },
-        "light": {"radius": radius, **{k: fmt(light[k]) for k in TOKEN_ORDER if k in light}},
-        "dark": {"radius": radius, **{k: fmt(dark[k]) for k in TOKEN_ORDER if k in dark}},
+        "light": light_out,
+        "dark": dark_out,
         "_families": [f for f in (heading, body) if f],
+        "_surface_label": surface_label,
         "_accent_strategy": strategy,
         "_role": raw["role"],
         "_palette": color_row.get("Product Type", ""),
@@ -1061,6 +1379,8 @@ def js_options_literal(options):
         out.append(f'    thesis: {json_module.dumps(o["thesis"])},')
         out.append(f'    hue: {o["hue"]},')
         out.append(f'    density: {json_module.dumps(o["density"])},')
+        out.append(f'    surface: {json_module.dumps(o["surface"])},')
+        out.append(f'    surfaceNote: {json_module.dumps(o["surfaceNote"])},')
         out.append(f'    role: {json_module.dumps(o["_role"])},')
         if o["_accent_strategy"]:
             out.append(f'    accent: {json_module.dumps(o["_accent_strategy"])},')
@@ -1129,7 +1449,9 @@ def render_option_css(option, letter):
                      f"{option['_accent_strategy']} to it.")
     lines += [
         f"   Fonts: display {option['fonts']['display'].split(',')[0]},"
-        f" body {option['fonts']['body'].split(',')[0]} */",
+        f" body {option['fonts']['body'].split(',')[0]}",
+        f"   Surface: {option['_surface_label']} -- the --surface-* vars below carry it;"
+        f" port them with the colours or the style is gone */",
         "",
         ":root {",
     ]

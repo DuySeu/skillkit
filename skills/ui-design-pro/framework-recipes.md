@@ -4,11 +4,13 @@ Where the theme lives and what to write, per UI framework. Design the option in 
 
 > **Version gate.** Every API below changed across a recent major. Read the installed version from `package.json` and confirm the syntax against that version's docs before writing. If the installed major does not match what is documented here, trust `package.json` and the library's own docs — not this file, and not memory.
 >
-> On a **new project** there is no `package.json` to read until step 11 has run. Scaffold first (`references/scaffolding.md`), then read the majors the scaffolder actually installed — they are frequently newer than what you expected to get.
+> On a **new project** there is no `package.json` to read until step 12 has run. Scaffold first (`references/scaffolding.md`), then read the majors the scaffolder actually installed — they are frequently newer than what you expected to get.
+
+> **No comments in the CSS token file.** `index.css`, `app.css`, `globals.css`, `styles.css` — values only, zero `/* … */`, including the header on the ported option CSS. Explanatory comments in the examples below are documentation of this file, not something to copy into the project. The rule covers CSS token files only; the JS theme objects on this page (`createTheme`, `definePreset`, `ConfigProvider`) follow the project's normal conventions.
 
 ## Scaffolding a new app
 
-Greenfield only, and only after the user picked a direction. Everything about it — the per-framework commands, the Vite template table, the swap dance that preserves `docs/design/`, the Tailwind v4 and v3 installs, and the shadcn `@/*` alias requirement — is in **`references/scaffolding.md`**. This file picks up once the app exists.
+Greenfield only, and only after the user picked a direction **and approved `docs/design/UI-PLAN.md`**. Everything about it — the per-framework commands, the Vite template table, the swap dance that preserves `docs/design/`, the Tailwind v4 and v3 installs, and the shadcn `@/*` alias requirement — is in **`references/scaffolding.md`**. This file picks up once the app exists.
 
 ## Where the theme lives
 
@@ -350,6 +352,25 @@ Use the shadcn token file verbatim — it is just CSS custom properties. Without
 ```
 
 ---
+
+## Porting the surface kit
+
+The colour tokens map onto whatever the framework uses; the seven `--surface-*` variables (`shadcn-tokens.md`) are **plain CSS custom properties in every one of these frameworks** and are ported verbatim into the token file. They are what makes the picked direction look like the option the user chose rather than like flat cards in the right colours.
+
+| Target | Where the kit goes | How components consume it |
+|---|---|---|
+| Tailwind v4 (shadcn, Tailwind-only) | the same `:root` / `.dark` blocks as the colours | `shadow-(--surface-shadow)`, `border-(length:--surface-border-width)`, or a `.card` rule in `@layer components` |
+| Tailwind v3 | `:root` / `.dark` in the CSS file — **not** `tailwind.config`, these are not colours | `boxShadow: { surface: "var(--surface-shadow)" }` in `theme.extend` if you want a utility |
+| CSS Modules / plain CSS | `:root` / `.dark` | `var(--surface-shadow)` directly |
+| JS theme objects (MUI, Mantine, Chakra, Vuetify, PrimeVue, Ant) | still the CSS token file; reference the vars from the theme object | `shadows: ["none", "var(--surface-shadow)", …]`, `components.MuiCard.styleOverrides` |
+
+Three notes that decide whether it survives the port:
+
+- **`--surface-blur` needs `backdrop-filter` on the element AND a translucent background** — a glass kit whose `--card` was flattened to an opaque hex renders as a plain card and the blur does nothing. Keep the alpha.
+- **`--surface-wash` belongs on the page/app shell**, not on a card. It is what the blur samples.
+- **A few things are per-kit, not per-variable** — ink borders on every control (`hard`), frosted sidebar and topbar (`glass`), debossed inputs (`soft`). Put the kit name on the app root (`class="kit-glass"`) and write those handful of rules against it, exactly as the preview harness does.
+
+Component libraries with their own elevation scale (MUI's `shadows[25]`, Vuetify's `elevation`) will fight this. Override the first two or three levels with the kit's values rather than leaving both systems live.
 
 ## Fonts
 
