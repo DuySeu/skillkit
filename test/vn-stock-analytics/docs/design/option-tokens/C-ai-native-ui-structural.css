@@ -1,0 +1,64 @@
+/* Option C - AI-Native UI
+   Chatbot, conversational, voice; aI purple + generation pink; saas typography.
+   Seeded from: style='AI-Native UI', palette='AI Photo & Avatar Generator', pairing='SaaS Mobile Boutique (Calistoga + Inter)'
+   Fonts: display 'Source Serif 4', body 'Inter', mono 'JetBrains Mono' */
+
+:root {
+  --radius: 0.5rem;
+  --background: #FAF5FF;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #7C3AED;
+  --primary-foreground: #FFFFFF;
+  --secondary: #6366F1;
+  --secondary-foreground: #030303;
+  --muted: #F7F3FD;
+  --muted-foreground: #617188;
+  --accent: #EC4899;
+  --accent-foreground: #1F1F1F;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #EFE7FC;
+  --input: #EFE7FC;
+  --ring: #7C3AED;
+  --sidebar: #F3EEF8;
+  --sidebar-foreground: #0F172A;
+  --chart-1: #8B72D7;
+  --chart-2: #BB5FAA;
+  --chart-3: #D15A65;
+  --chart-4: #3389DC;
+  --chart-5: #009DB6;
+}
+
+.dark {
+  --radius: 0.5rem;
+  --background: #1B181E;
+  --foreground: #F5F2F9;
+  --card: #28242C;
+  --card-foreground: #F5F2F9;
+  --popover: #28242C;
+  --popover-foreground: #F5F2F9;
+  --primary: #9F7CFF;
+  --primary-foreground: #161322;
+  --secondary: #39343D;
+  --secondary-foreground: #F5F2F9;
+  --muted: #39343D;
+  --muted-foreground: #A9A1B0;
+  --accent: #623B4B;
+  --accent-foreground: #F5F2F9;
+  --destructive: #E6443C;
+  --destructive-foreground: #1B0A08;
+  --border: #45404A;
+  --input: #524D58;
+  --ring: #9F7CFF;
+  --sidebar: #221F25;
+  --sidebar-foreground: #F5F2F9;
+  --chart-1: #A38AF2;
+  --chart-2: #D677C3;
+  --chart-3: #ED737C;
+  --chart-4: #4EA2F8;
+  --chart-5: #00B6D0;
+}

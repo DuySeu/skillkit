@@ -1,0 +1,64 @@
+/* Option D - Data-Dense Dashboard
+   Multiple charts/widgets, data tables, kpi cards; gold trust + purple tech; financial typography.
+   Seeded from: style='Data-Dense Dashboard', palette='Fintech/Crypto', pairing='Financial Trust'
+   Fonts: display 'IBM Plex Sans', body 'IBM Plex Sans', mono 'IBM Plex Mono' */
+
+:root {
+  --radius: 0.25rem;
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+  --card: #222735;
+  --card-foreground: #F8FAFC;
+  --popover: #222735;
+  --popover-foreground: #F8FAFC;
+  --primary: #F59E0B;
+  --primary-foreground: #0F172A;
+  --secondary: #FBBF24;
+  --secondary-foreground: #0F172A;
+  --muted: #272F42;
+  --muted-foreground: #94A3B8;
+  --accent: #8B5CF6;
+  --accent-foreground: #0B0B0B;
+  --destructive: #EF4444;
+  --destructive-foreground: #1B1B1B;
+  --border: #334155;
+  --input: #334155;
+  --ring: #F59E0B;
+  --sidebar: #131C2F;
+  --sidebar-foreground: #F8FAFC;
+  --chart-1: #BE7200;
+  --chart-2: #898E00;
+  --chart-3: #179F5A;
+  --chart-4: #D15D51;
+  --chart-5: #C45C99;
+}
+
+.dark {
+  --radius: 0.25rem;
+  --background: #0F1217;
+  --foreground: #F0F3FA;
+  --card: #191C23;
+  --card-foreground: #F0F3FA;
+  --popover: #191C23;
+  --popover-foreground: #F0F3FA;
+  --primary: #D18500;
+  --primary-foreground: #1F1407;
+  --secondary: #242932;
+  --secondary-foreground: #F0F3FA;
+  --muted: #242932;
+  --muted-foreground: #9DA5B4;
+  --accent: #383154;
+  --accent-foreground: #F0F3FA;
+  --destructive: #E54443;
+  --destructive-foreground: #1B0A09;
+  --border: #2E333C;
+  --input: #393D47;
+  --ring: #D18500;
+  --sidebar: #14171D;
+  --sidebar-foreground: #F0F3FA;
+  --chart-1: #D88B08;
+  --chart-2: #A1A716;
+  --chart-3: #3EB972;
+  --chart-4: #ED7668;
+  --chart-5: #DF75B2;
+}

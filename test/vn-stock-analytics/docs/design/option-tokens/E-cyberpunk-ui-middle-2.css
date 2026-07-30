@@ -1,0 +1,64 @@
+/* Option E - Cyberpunk UI
+   Neon, dark mode, terminal; terminal green + alert red; science typography.
+   Seeded from: style='Cyberpunk UI', palette='Autonomous Drone Fleet Manager', pairing='Science/Tech'
+   Fonts: display 'JetBrains Mono', body 'Inter', mono 'JetBrains Mono' */
+
+:root {
+  --radius: 0rem;
+  --background: #0D1117;
+  --foreground: #E6EDF3;
+  --card: #182424;
+  --card-foreground: #E6EDF3;
+  --popover: #182424;
+  --popover-foreground: #E6EDF3;
+  --primary: #00FF41;
+  --primary-foreground: #0F172A;
+  --secondary: #008F11;
+  --secondary-foreground: #0B0B0B;
+  --muted: #25292F;
+  --muted-foreground: #94A3B8;
+  --accent: #FF3333;
+  --accent-foreground: #1D1D1D;
+  --destructive: #EF4444;
+  --destructive-foreground: #1B1B1B;
+  --border: #30363D;
+  --input: #30363D;
+  --ring: #00FF41;
+  --sidebar: #11151C;
+  --sidebar-foreground: #E6EDF3;
+  --chart-1: #429D47;
+  --chart-2: #00A194;
+  --chart-3: #0095CD;
+  --chart-4: #988800;
+  --chart-5: #C56C00;
+}
+
+.dark {
+  --radius: 0rem;
+  --background: #070A0F;
+  --foreground: #EFF4FA;
+  --card: #0E1218;
+  --card-foreground: #EFF4FA;
+  --popover: #0E1218;
+  --popover-foreground: #EFF4FA;
+  --primary: #36B542;
+  --primary-foreground: #0D1A0D;
+  --secondary: #171C24;
+  --secondary-foreground: #EFF4FA;
+  --muted: #171C24;
+  --muted-foreground: #9CA5B4;
+  --accent: #401A16;
+  --accent-foreground: #EFF4FA;
+  --destructive: #E54443;
+  --destructive-foreground: #1B0A09;
+  --border: #1E242C;
+  --input: #262C34;
+  --ring: #36B542;
+  --sidebar: #0B0F14;
+  --sidebar-foreground: #EFF4FA;
+  --chart-1: #5CB65F;
+  --chart-2: #00BBAD;
+  --chart-3: #00AEE7;
+  --chart-4: #B1A100;
+  --chart-5: #E08527;
+}

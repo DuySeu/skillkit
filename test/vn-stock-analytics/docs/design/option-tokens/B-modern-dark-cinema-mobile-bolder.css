@@ -1,0 +1,64 @@
+/* Option B - Modern Dark (Cinema Mobile)
+   Dark mode, cinematic, ambient light; trust teal + professional blue; dashboard typography.
+   Seeded from: style='Modern Dark (Cinema Mobile)', palette='Real Estate/Property', pairing='Dashboard Data'
+   Fonts: display 'Fira Sans', body 'Fira Sans', mono 'Fira Code' */
+
+:root {
+  --radius: 0.75rem;
+  --background: #F0FDFA;
+  --foreground: #134E4A;
+  --card: #FFFFFF;
+  --card-foreground: #134E4A;
+  --popover: #FFFFFF;
+  --popover-foreground: #134E4A;
+  --primary: #0F766E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #14B8A6;
+  --secondary-foreground: #0F172A;
+  --muted: #E8F0F3;
+  --muted-foreground: #5C6B82;
+  --accent: #0369A1;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #99F6E4;
+  --input: #99F6E4;
+  --ring: #0F766E;
+  --sidebar: #E9F6F3;
+  --sidebar-foreground: #134E4A;
+  --chart-1: #00A194;
+  --chart-2: #0095CD;
+  --chart-3: #647EE0;
+  --chart-4: #429D47;
+  --chart-5: #988800;
+}
+
+.dark {
+  --radius: 0.75rem;
+  --background: #131B1A;
+  --foreground: #EDF6F4;
+  --card: #1F2926;
+  --card-foreground: #EDF6F4;
+  --popover: #1F2926;
+  --popover-foreground: #EDF6F4;
+  --primary: #5BA8A0;
+  --primary-foreground: #0E1817;
+  --secondary: #2C3937;
+  --secondary-foreground: #EDF6F4;
+  --muted: #2C3937;
+  --muted-foreground: #95AAA5;
+  --accent: #294C66;
+  --accent-foreground: #EDF6F4;
+  --destructive: #E6443C;
+  --destructive-foreground: #1B0A08;
+  --border: #394643;
+  --input: #455350;
+  --ring: #5BA8A0;
+  --sidebar: #1A2221;
+  --sidebar-foreground: #EDF6F4;
+  --chart-1: #00BBAD;
+  --chart-2: #00AEE7;
+  --chart-3: #7B97FB;
+  --chart-4: #5CB65F;
+  --chart-5: #B1A100;
+}

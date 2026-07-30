@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+/* Dark is the default mode for this app (see docs/design/DECISIONS.md).
+   The class is set on <html> before first paint by the inline script in
+   index.html, so there is no flash of light theme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===========================================================================
+   Option B — "Night Desk"
+   Ported from docs/design/option-tokens/B-modern-dark-cinema-mobile-bolder.css
+   Do not hand-edit values here without re-running the contrast gate:
+     node <skill>/scripts/contrast-check.mjs src/index.css
+   ========================================================================= */
+
+:root {
+  --radius: 0.75rem;
+
+  --background: #F0FDFA;
+  --foreground: #134E4A;
+  --card: #FFFFFF;
+  --card-foreground: #134E4A;
+  --popover: #FFFFFF;
+  --popover-foreground: #134E4A;
+  --primary: #0F766E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #14B8A6;
+  --secondary-foreground: #0F172A;
+  --muted: #E8F0F3;
+  --muted-foreground: #5C6B82;
+  --accent: #0369A1;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #99F6E4;
+  --input: #99F6E4;
+  --ring: #0F766E;
+  --sidebar: #E9F6F3;
+  --sidebar-foreground: #134E4A;
+  --chart-1: #00A194;
+  --chart-2: #0095CD;
+  --chart-3: #647EE0;
+  --chart-4: #429D47;
+  --chart-5: #988800;
+
+  /* --- Bảng giá: the HOSE/HNX/UPCOM five-colour code -----------------------
+     A SEMANTIC scale, deliberately independent of the brand tokens above.
+     These five carry price meaning and may never be re-used as decoration;
+     --primary may never appear inside a price cell. Different roles, never
+     the same visual slot — which is what keeps the teal brand from reading
+     as sàn. Every value clears 4.5:1 on both --background and --card. */
+  --px-ceil: #7E22CE;   /* trần  — ceiling   (tím)     */
+  --px-up: #15803D;     /* tăng  — up        (xanh)    */
+  --px-ref: #A16207;    /* TC    — reference (vàng)    */
+  --px-down: #DC2626;   /* giảm  — down      (đỏ)      */
+  --px-floor: #155E75;  /* sàn   — floor     (xanh lơ) */
+}
+
+.dark {
+  --radius: 0.75rem;
+
+  --background: #131B1A;
+  --foreground: #EDF6F4;
+  --card: #1F2926;
+  --card-foreground: #EDF6F4;
+  --popover: #1F2926;
+  --popover-foreground: #EDF6F4;
+  --primary: #5BA8A0;
+  --primary-foreground: #0E1817;
+  --secondary: #2C3937;
+  --secondary-foreground: #EDF6F4;
+  --muted: #2C3937;
+  --muted-foreground: #95AAA5;
+  --accent: #294C66;
+  --accent-foreground: #EDF6F4;
+  --destructive: #E6443C;
+  --destructive-foreground: #1B0A08;
+  --border: #394643;
+  --input: #455350;
+  --ring: #5BA8A0;
+  --sidebar: #1A2221;
+  --sidebar-foreground: #EDF6F4;
+  --chart-1: #00BBAD;
+  --chart-2: #00AEE7;
+  --chart-3: #7B97FB;
+  --chart-4: #5CB65F;
+  --chart-5: #B1A100;
+
+  --px-ceil: #C084FC;
+  --px-up: #34D399;
+  --px-ref: #FACC15;
+  --px-down: #FB7185;
+  --px-floor: #22D3EE;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-ceil: var(--px-ceil);
+  --color-up: var(--px-up);
+  --color-ref: var(--px-ref);
+  --color-down: var(--px-down);
+  --color-floor: var(--px-floor);
+
+  /* Fira Sans carries Vietnamese diacritics correctly at small sizes. Fira
+     Code has no Vietnamese subset, so it is mono-only — digits and tickers
+     are ASCII, and Vietnamese text never lands in it. */
+  --font-sans: "Fira Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Night Desk's cinematic easing and its ambient glow. */
+  --ease-cinema: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* The focus ring is never removed — only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+
+  :where(a, button, [role="button"], summary, label[for]) {
+    cursor: pointer;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border: 3px solid transparent;
+    border-radius: 99px;
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  /* Prices sit in a tabular mono so digits stay in column down a table. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1;
+    letter-spacing: -0.01em;
+  }
+
+  .glass {
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  }
+
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 8px 24px -12px rgb(0 0 0 / 0.22);
+  }
+
+  .shadow-glow {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent),
+      0 12px 40px -12px color-mix(in oklab, var(--primary) 45%, transparent);
+  }
+}
