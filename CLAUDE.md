@@ -16,10 +16,12 @@ Three parts, one per top-level directory:
 
 `sample/` is git-ignored scratch space. `.claude/` and `.kiro/` at the root are this repo consuming its own output (see below).
 
-## Adding a New Skill
+## Adding or Editing a Skill
 
 1. Write `skills/<name>/SKILL.md` (plus any sibling reference files) using the `writing-skills` skill.
-2. Run `./install.sh --link --force` so `.claude/skills/` gets a symlink for it — new skills are **not** picked up automatically. One run targets one assistant, so add `--kiro` and run again to also link it into `.kiro/skills/`.
+2. For a *new* skill, run `./install.sh --link --force` so `.claude/skills/` gets a symlink for it — new skills are **not** picked up automatically. One run targets one assistant, so add `--kiro` and run again to also link it into `.kiro/skills/`. Editing an existing skill needs no install step: the symlinks make the change live immediately.
+
+**Never commit or push skill changes.** After writing or editing anything under `skills/`, stop and report what changed — the user reviews it and commits/pushes to GitHub themselves. This holds for edits and new skills alike, and regardless of how routine the change looks; don't offer to commit either.
 
 **Do not add the new skill to this file.** CLAUDE.md describes the repo, not the skill catalogue. A skill is discovered and fired from its own `description` frontmatter, so every skill here except `writing-skills` is invoked proactively by the assistant; a list in CLAUDE.md would only rot. `writing-skills` is the one invoked explicitly, when working on skills themselves.
 
