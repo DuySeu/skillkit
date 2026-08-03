@@ -580,6 +580,38 @@ step2 [label="read file"];
 helper1, helper2, step3, pattern4
 **Why bad:** Labels should have semantic meaning
 
+## Mapping the Skill Into a Local Project
+
+**After a new skill passes its tests, ASK the user whether to map it into a local project. Do not decide for them, and do not skip the question.**
+
+A skill under `skills/<name>/` is source only — no assistant loads it from there. It becomes usable when a mapping directory in the project points at it.
+
+**Ask two questions, in order:**
+
+1. "Skill `<name>` is ready. Create a mapping folder for it in a project?" — yes / no
+2. If yes: "Which directory?" — `./.claude/skills/` (Claude Code), `./.kiro/skills/` (Kiro CLI), `~/.claude/skills/` or `~/.kiro/skills/` (global, every project), or a custom path.
+
+Skip question 2 only when the user already named the directory.
+
+**Then create it:**
+
+```bash
+./install.sh --link            # symlink into ./.claude/skills — repo edits take effect immediately
+./install.sh --link --kiro     # into ./.kiro/skills instead (mutually exclusive with --claude)
+./install.sh --link --global   # into ~/.claude/skills
+./install.sh --target DIR      # custom path
+```
+
+Run it **from the target project directory**, not from the skills repo. `--link` symlinks; without it the skill is copied and the copy goes stale. Add `--force` to overwrite an existing mapping without the prompt. New skills are never picked up automatically — install again after adding one.
+
+User says no? Fine — leave the skill in `skills/` and tell them it is unmapped, so they know why their assistant can't see it yet.
+
+| Rationalization | Reality |
+|--------|---------|
+| "Obviously they want `.claude`" | Some projects are Kiro-only, some want it global. Ask. |
+| "I'll map it and mention it afterwards" | That creates directories in their project uninvited. Ask first. |
+| "One skill — mapping is overkill" | Unmapped = unusable. The question costs one line. |
+
 ## STOP: Before Moving to Next Skill
 
 **After writing ANY skill, you MUST STOP and complete the deployment process.**
@@ -629,6 +661,8 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Supporting files only for tools or heavy reference
 
 **Deployment:**
+- [ ] ASK the user whether to map the skill into a local project — never decide for them
+- [ ] If yes, ask which directory (`./.claude/skills/`, `./.kiro/skills/`, global, custom) and create the mapping
 - [ ] Commit skill to git and push to your fork (if configured)
 - [ ] Consider contributing back via PR (if broadly useful)
 
