@@ -1,0 +1,5 @@
+Symlinks into ~/.claude, so it can be edited from this workspace.
+Contents are gitignored (absolute, machine-specific paths) — recreate locally:
+
+  ln -s ~/.claude/CLAUDE.md global/CLAUDE.md
+  ln -s ~/.claude/skills    global/skills
