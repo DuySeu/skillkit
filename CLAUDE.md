@@ -12,7 +12,7 @@ Three parts, one per top-level directory:
 | --- | --- |
 | `skills/` | Source of truth for the skills. This is where a new skill is written. Use the `writing-skills` skill to create or edit one. |
 | `test/` | Scratch projects used to exercise a freshly written skill by actually invoking the AI on it (e.g. `test/vn-stock-analytics` came out of running `ui-design-pro` end to end). Not an automated test suite. |
-| `install.sh`, `project_setup.sh` + `project/` | Run from *another* repo: `install.sh` installs the skills there, `project_setup.sh` scaffolds the folder structure and conventions, sourcing their content from `project/`. |
+| `script/` + `project/` | Run from *another* repo: `script/install_skills.sh` installs the skills there, `script/project_setup.sh` scaffolds the folder structure and conventions. Both resolve their content one level up from `script/` — `../skills` and `../project` — so they must stay inside `script/` in this repo. |
 
 `sample/` is git-ignored scratch space. `.claude/` and `.kiro/` at the root are this repo consuming its own output (see below).
 
@@ -23,7 +23,7 @@ Three parts, one per top-level directory:
 ## Adding or Editing a Skill
 
 1. Write `skills/<name>/SKILL.md` (plus any sibling reference files) using the `writing-skills` skill.
-2. For a *new* skill, run `./install.sh --link --force` so `.claude/skills/` gets a symlink for it — new skills are **not** picked up automatically. One run targets one assistant, so add `--kiro` and run again to also link it into `.kiro/skills/`. Editing an existing skill needs no install step: the symlinks make the change live immediately.
+2. For a *new* skill, run `./script/install_skills.sh --link --force` so `.claude/skills/` gets a symlink for it — new skills are **not** picked up automatically. One run targets one assistant, so add `--kiro` and run again to also link it into `.kiro/skills/`. Editing an existing skill needs no install step: the symlinks make the change live immediately.
 
 **Do not add the new skill to this file.** CLAUDE.md describes the repo, not the skill catalogue. A skill is discovered and fired from its own `description` frontmatter, so every skill here except `writing-skills` is invoked proactively by the assistant; a list in CLAUDE.md would only rot. `writing-skills` is the one invoked explicitly, when working on skills themselves.
 
@@ -32,30 +32,30 @@ The exception worth documenting here is a skill with executable parts or invaria
 ## Commands
 
 ```bash
-# Preview what install.sh would do (safe, no changes)
-./install.sh --dry-run
+# Preview what install_skills.sh would do (safe, no changes)
+./script/install_skills.sh --dry-run
 
 # Install all skills into the current project's ./.claude/skills (default: Claude Code)
-cd /path/to/project && /path/to/this-repo/install.sh   # --kiro installs to ./.kiro/skills instead (mutually exclusive); --target DIR for custom
-./install.sh --global         # install into ~/.claude/skills (or ~/.kiro/skills with --kiro) instead
-./install.sh --link           # symlink instead of copy — edits to this repo take effect immediately
+cd /path/to/project && /path/to/this-repo/script/install_skills.sh   # --kiro installs to ./.kiro/skills instead (mutually exclusive); --target DIR for custom
+./script/install_skills.sh --global         # install into ~/.claude/skills (or ~/.kiro/skills with --kiro) instead
+./script/install_skills.sh --link           # symlink instead of copy — edits to this repo take effect immediately
 
 # Scaffold a Python project (run FROM the target directory — it writes into cwd)
-cd /path/to/new-project && /path/to/this-repo/project_setup.sh [--demo|--production] [--kiro|--claude] [--force]
+cd /path/to/new-project && /path/to/this-repo/script/project_setup.sh [--demo|--production] [--kiro|--claude] [--force]
 
 # Syntax-check a script after editing
-bash -n install.sh
+bash -n script/install_skills.sh
 
 # Run a scaffolded Python project (from its own directory; LOG_LEVEL=DEBUG to change verbosity)
 python3 main.py
 ```
 
-Without `--force`, both scripts skip existing files/skills (install.sh prompts interactively; project_setup.sh silently skips).
+Without `--force`, both scripts skip existing files/skills (install_skills.sh prompts interactively; project_setup.sh silently skips).
 
 ## Architecture
 
 ### skills/ — the installable skills
-Each subdirectory containing a `SKILL.md` is one skill; `install.sh` discovers skills purely by the presence of that file (subdirs without it are skipped with a warning). `SKILL.md` has YAML frontmatter (`name`, `description` — the description is the trigger text the assistant uses to decide when to invoke it) followed by the skill instructions. Supporting files (reviewer prompts, helper docs) live beside `SKILL.md` in the same folder and are installed with it.
+Each subdirectory containing a `SKILL.md` is one skill; `script/install_skills.sh` discovers skills purely by the presence of that file (subdirs without it are skipped with a warning). `SKILL.md` has YAML frontmatter (`name`, `description` — the description is the trigger text the assistant uses to decide when to invoke it) followed by the skill instructions. Supporting files (reviewer prompts, helper docs) live beside `SKILL.md` in the same folder and are installed with it.
 
 The planning-style skills share a pattern worth reusing when writing a new one: a HARD-GATE against writing code before an approved design, a mandatory task checklist, a dot-graph process flow, and a subagent review loop driven by a sibling reviewer-prompt file.
 
@@ -78,7 +78,7 @@ These things about it are load-bearing and easy to break:
 
 From `skills/ui-design-pro/`, run `python3 scripts/validate_data.py && python3 scripts/tests/test_core.py` after touching any CSV or `core.py`.
 
-### project_setup.sh — template sourcing
+### script/project_setup.sh — template sourcing
 Generated file content comes from two places, which matters when changing what gets scaffolded:
 1. **`project/` templates** (editable files): `project/log.py` is the shared logging module (all modes); `project/demo/` and `project/production/` each hold a `coding-conventions.md` + `folder-structure.md` pair selected by `--demo`/`--production`.
 2. **Inline heredocs in the script itself**: `main.py`, `.gitignore`, `README.md`, `requirements.txt`, `__init__.py` files.
@@ -86,7 +86,7 @@ Generated file content comes from two places, which matters when changing what g
 `{{PROJECT_NAME}}` in any template is replaced with the target directory's basename. The `--kiro`/`--claude` flag decides where conventions land: `--kiro` copies the two convention files into `.kiro/steering/` (Kiro auto-loads that dir); `--claude` strips their YAML frontmatter and concatenates them into a single `CLAUDE.md` at the project root (see `write_claude_md`). Keep the demo and production convention pairs structurally parallel — both are consumed by the same code paths.
 
 ### .claude/skills/ and .kiro/skills/ — generated, not hand-edited
-`skills/` is the only source of truth. Both of those directories are this repo dogfooding its own skills, and they contain nothing but relative symlinks — `.claude/skills/<name> -> ../../skills/<name>` — so editing a `SKILL.md` under `skills/` takes effect here immediately, with no copy step. Recreate them with `./install.sh --link --force`. Never hand-write a real file inside them, and never edit through a symlink path in a way that assumes it's a separate copy — it isn't.
+`skills/` is the only source of truth. Both of those directories are this repo dogfooding its own skills, and they contain nothing but relative symlinks — `.claude/skills/<name> -> ../../skills/<name>` — so editing a `SKILL.md` under `skills/` takes effect here immediately, with no copy step. Recreate them with `./script/install_skills.sh --link --force`. Never hand-write a real file inside them, and never edit through a symlink path in a way that assumes it's a separate copy — it isn't.
 
 ### Repo-level conventions vs. templates
 `.kiro/steering/` at the repo root is Kiro steering for working on *this repo* (Vietnamese-language variants of the conventions). It is separate from `project/demo/` (English), which is what gets shipped into scaffolded projects — don't confuse or "sync" the two.

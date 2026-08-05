@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 #
-# install.sh — Install all skills from this repo into the current project's
-# local skills folders (default), or into your global Kiro CLI / Claude Code
-# skills directories with --global.
+# install_skills.sh — Install all skills from this repo into the current
+# project's local skills folders (default), or into your global Kiro CLI /
+# Claude Code skills directories with --global.
 #
-# Usage:
-#   install.sh                 Install into ./.claude/skills (current project, Claude Code — default)
-#   install.sh --kiro          Install for Kiro CLI instead (./.kiro/skills)
-#   install.sh --claude        Install for Claude Code (same as default; cannot combine with --kiro)
-#   install.sh --global        Install into ~/.kiro/skills / ~/.claude/skills instead of the project
-#   install.sh --target DIR    Install into a custom skills directory
-#   install.sh --link          Symlink skills instead of copying (auto-updates with repo)
-#   install.sh --force         Overwrite existing skills without prompting
-#   install.sh --dry-run       Show what would happen without changing anything
-#   install.sh -h | --help     Show this help
+# Usage (the script lives in script/; skills are read from ../skills):
+#   install_skills.sh                Install into ./.claude/skills (current project, Claude Code — default)
+#   install_skills.sh --kiro         Install for Kiro CLI instead (./.kiro/skills)
+#   install_skills.sh --claude       Install for Claude Code (same as default; cannot combine with --kiro)
+#   install_skills.sh --global       Install into ~/.kiro/skills / ~/.claude/skills instead of the project
+#   install_skills.sh --target DIR   Install into a custom skills directory
+#   install_skills.sh --link         Symlink skills instead of copying (auto-updates with repo)
+#   install_skills.sh --force        Overwrite existing skills without prompting
+#   install_skills.sh --dry-run      Show what would happen without changing anything
+#   install_skills.sh -h | --help    Show this help
 #
 set -euo pipefail
 
-# --- Resolve the directory this script lives in (repo root) ---------------
+# --- Resolve the repo root (this script lives in script/) -----------------
 # Follow symlinks so the script also works when linked into a bin dir on PATH.
 SCRIPT_SOURCE="${BASH_SOURCE[0]}"
 while [ -L "$SCRIPT_SOURCE" ]; do
@@ -26,7 +26,8 @@ while [ -L "$SCRIPT_SOURCE" ]; do
   [[ "$SCRIPT_SOURCE" != /* ]] && SCRIPT_SOURCE="$SCRIPT_DIR/$SCRIPT_SOURCE"
 done
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
-SRC_DIR="$SCRIPT_DIR/skills"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SRC_DIR="$REPO_ROOT/skills"
 
 # --- Defaults -------------------------------------------------------------
 INSTALL_KIRO=false
@@ -88,7 +89,7 @@ if [ "$GLOBAL" = true ]; then
 else
   KIRO_DIR="$PWD/.kiro/skills"
   CLAUDE_DIR="$PWD/.claude/skills"
-  if [ "$PWD" = "$SCRIPT_DIR" ]; then
+  if [ "$PWD" = "$REPO_ROOT" ] || [ "$PWD" = "$SCRIPT_DIR" ]; then
     warn "You are inside the skills repo itself — this installs into the repo's own .kiro/.claude."
     warn "Run from your project directory, or use --global for ~/.kiro/skills and ~/.claude/skills."
   fi

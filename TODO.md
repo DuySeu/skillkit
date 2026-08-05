@@ -12,4 +12,4 @@
 
 [] error-handling skill: Review the source code and check specific end-to-end pipeline review is there any solution for error handling when the pipeline get error
 
-[] codebase-onboarding skill: Helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code. Ref: `sample/engineering-codebase-onboarding-engineer.md`
+[x] codebase-onboarding skill: Helps new engineers understand unfamiliar codebases fast by reading source code, tracing code paths, and stating only facts grounded in the code. Ref: `sample/engineering-codebase-onboarding-engineer.md`

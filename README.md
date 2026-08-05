@@ -2,12 +2,12 @@
 
 **The Ultimate Collection of high-performance agentic skills for AI coding assistants — Claude Code, Kiro CLI, Gemini CLI, Codex CLI, Cursor, Copilot & more.**
 
-Repo này gồm bộ **skills** (trong `skills/`) và 2 script tiện ích ở gốc repo:
+Repo này gồm bộ **skills** (trong `skills/`) và 2 script tiện ích trong `script/`:
 
 | Script | Mục đích |
 |--------|----------|
-| [`install.sh`](#1-installsh--cài-skills-vào-kiro-cli--claude-code) | Cài các skill trong `skills/` vào project hiện tại — mặc định Claude Code (`./.claude/skills`), `--kiro` cho Kiro CLI, `--global` để cài toàn cục |
-| [`project_setup.sh`](#2-project_setupsh--scaffold-project-python--convention) | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
+| [`script/install_skills.sh`](#1-scriptinstall_skillssh--cài-skills-vào-kiro-cli--claude-code) | Cài các skill trong `skills/` vào project hiện tại — mặc định Claude Code (`./.claude/skills`), `--kiro` cho Kiro CLI, `--global` để cài toàn cục |
+| [`script/project_setup.sh`](#2-scriptproject_setupsh--scaffold-project-python--convention) | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
 
 ## Yêu cầu
 
@@ -17,7 +17,7 @@ Repo này gồm bộ **skills** (trong `skills/`) và 2 script tiện ích ở g
 Cấp quyền thực thi lần đầu nếu cần:
 
 ```bash
-chmod +x install.sh project_setup.sh
+chmod +x script/install_skills.sh script/project_setup.sh
 ```
 
 ## Chạy script từ mọi terminal (không cần gõ đường dẫn repo)
@@ -29,8 +29,8 @@ Cả hai script đều tự tìm về repo dù được gọi từ đâu (kể c
 
 ```bash
 mkdir -p ~/.local/bin
-ln -sf "$(pwd)/install.sh"       ~/.local/bin/install-skills
-ln -sf "$(pwd)/project_setup.sh" ~/.local/bin/project-setup
+ln -sf "$(pwd)/script/install_skills.sh" ~/.local/bin/install-skills
+ln -sf "$(pwd)/script/project_setup.sh"  ~/.local/bin/project-setup
 ```
 
 Nếu `~/.local/bin` chưa có trong `PATH`, thêm vào `~/.zshrc` (hoặc `~/.bashrc`):
@@ -43,20 +43,20 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ```bash
 # trong ~/.zshrc / ~/.bashrc
-export PATH="/duong/dan/toi/repo:$PATH"
+export PATH="/duong/dan/toi/repo/script:$PATH"
 ```
 
 Mở terminal mới (hoặc `source ~/.zshrc`) rồi dùng ở bất kỳ đâu:
 
 ```bash
-install-skills --dry-run          # (cách 2 thì gõ: install.sh --dry-run)
+install-skills --dry-run          # (cách 2 thì gõ: install_skills.sh --dry-run)
 cd /duong/dan/project-cua-ban
 project-setup --demo --claude     # (cách 2 thì gõ: project_setup.sh --demo --claude)
 ```
 
 ---
 
-## 1. `install.sh` — cài skills vào Kiro CLI / Claude Code
+## 1. `script/install_skills.sh` — cài skills vào Kiro CLI / Claude Code
 
 Quét mọi thư mục con trong `skills/` có chứa `SKILL.md` và cài vào **project hiện tại**.
 Mặc định cài cho **Claude Code** (`./.claude/skills`); truyền `--kiro` để cài cho Kiro CLI
@@ -67,15 +67,15 @@ thì thêm `--global`.
 
 ```bash
 cd /duong/dan/project-cua-ban
-./install.sh                 # cài cho Claude Code: ./.claude/skills (mặc định)
-./install.sh --kiro          # cài cho Kiro CLI: ./.kiro/skills
-./install.sh --claude        # như mặc định (không kết hợp được với --kiro)
-./install.sh --global        # cài toàn cục: ~/.kiro/skills và ~/.claude/skills
-./install.sh --target DIR    # cài vào một thư mục skills tùy chọn
-./install.sh --link          # tạo symlink thay vì copy (tự cập nhật theo repo)
-./install.sh --force         # ghi đè skill đã tồn tại, không hỏi
-./install.sh --dry-run       # xem trước, không thay đổi gì
-./install.sh --help          # xem hướng dẫn
+/duong/dan/repo/script/install_skills.sh                 # cài cho Claude Code: ./.claude/skills (mặc định)
+/duong/dan/repo/script/install_skills.sh --kiro          # cài cho Kiro CLI: ./.kiro/skills
+/duong/dan/repo/script/install_skills.sh --claude        # như mặc định (không kết hợp được với --kiro)
+/duong/dan/repo/script/install_skills.sh --global        # cài toàn cục: ~/.kiro/skills và ~/.claude/skills
+/duong/dan/repo/script/install_skills.sh --target DIR    # cài vào một thư mục skills tùy chọn
+/duong/dan/repo/script/install_skills.sh --link          # tạo symlink thay vì copy (tự cập nhật theo repo)
+/duong/dan/repo/script/install_skills.sh --force         # ghi đè skill đã tồn tại, không hỏi
+/duong/dan/repo/script/install_skills.sh --dry-run       # xem trước, không thay đổi gì
+/duong/dan/repo/script/install_skills.sh --help          # xem hướng dẫn
 ```
 
 ### Cờ
@@ -110,7 +110,7 @@ install-skills --kiro --global
 
 ---
 
-## 2. `project_setup.sh` — scaffold project Python + convention
+## 2. `script/project_setup.sh` — scaffold project Python + convention
 
 Tạo khung một project Python theo convention dataflow (mỗi step một file trong `core/`,
 helper trong `utils/`, logging tập trung), kèm file convention để trợ lý AI **tự nạp**.
@@ -122,12 +122,12 @@ helper trong `utils/`, logging tập trung), kèm file convention để trợ l�
 
 ```bash
 cd /duong/dan/project-cua-ban
-/duong/dan/repo/project_setup.sh                          # demo + kiro (mặc định)
-/duong/dan/repo/project_setup.sh --production             # dùng convention production
-/duong/dan/repo/project_setup.sh --claude                 # ghi convention cho Claude Code
-/duong/dan/repo/project_setup.sh --production --claude     # kết hợp
-/duong/dan/repo/project_setup.sh --force                  # ghi đè file trùng tên
-/duong/dan/repo/project_setup.sh --help                   # xem hướng dẫn
+/duong/dan/repo/script/project_setup.sh                          # demo + kiro (mặc định)
+/duong/dan/repo/script/project_setup.sh --production             # dùng convention production
+/duong/dan/repo/script/project_setup.sh --claude                 # ghi convention cho Claude Code
+/duong/dan/repo/script/project_setup.sh --production --claude     # kết hợp
+/duong/dan/repo/script/project_setup.sh --force                  # ghi đè file trùng tên
+/duong/dan/repo/script/project_setup.sh --help                   # xem hướng dẫn
 ```
 
 ### Cờ
@@ -172,4 +172,4 @@ python3 main.py
   (mỗi bộ có `coding-conventions.md`, `folder-structure.md`).
 - `project/log.py` là logging dùng chung cho mọi mode/CLI.
 - Các file phụ (`main.py`, `.gitignore`, `README.md`, `requirements.txt`, `__init__.py`)
-  được hardcode inline trong `project_setup.sh`.
+  được hardcode inline trong `script/project_setup.sh`.

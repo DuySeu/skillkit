@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-# --- Locate template dir (this script lives at repo root) -------------------
+# --- Locate template dir (this script lives in script/, templates in ../project)
 # Follow symlinks so the script also works when linked into a bin dir on PATH.
 SCRIPT_SOURCE="${BASH_SOURCE[0]}"
 while [ -L "$SCRIPT_SOURCE" ]; do
@@ -41,7 +41,8 @@ while [ -L "$SCRIPT_SOURCE" ]; do
   [[ "$SCRIPT_SOURCE" != /* ]] && SCRIPT_SOURCE="$SCRIPT_DIR/$SCRIPT_SOURCE"
 done
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
-TEMPLATE_DIR="$SCRIPT_DIR/project"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEMPLATE_DIR="$REPO_ROOT/project"
 
 # --- Parse args -------------------------------------------------------------
 FORCE=0
