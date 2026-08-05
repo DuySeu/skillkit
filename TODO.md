@@ -2,7 +2,7 @@
 
 ## Global skills
 
-[] coding-style skill: Must automatically call when user want to implement code. Load the references of each languges(support Python, Typecript, Golang, React for now). Ref: `sample/engineering-ai-engineer.md`, `sample/engineering-multi-agent-systems-architect.md`, `sample/engineering-prompt-engineer.md`, `sample/engineering-rag-pipeline-engineer.md`
+[x] coding-style skill: Must automatically call when user want to implement code. Load the references of each languges(support Python, Typecript, Golang, React for now). Ref: `sample/engineering-ai-engineer.md`, `sample/engineering-multi-agent-systems-architect.md`, `sample/engineering-prompt-engineer.md`, `sample/engineering-rag-pipeline-engineer.md`
 
 [] security-review skill: Review source code to identify specific security best-practice reviews and suggest improvements(Critical/Medium/Low) make sure the security of the app is in production-grade. Use when triggered the skill. Ref: `sample/engineering-code-reviewer.md`
 
