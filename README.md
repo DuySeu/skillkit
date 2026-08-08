@@ -2,12 +2,28 @@
 
 **The Ultimate Collection of high-performance agentic skills for AI coding assistants — Claude Code, Kiro CLI, Gemini CLI, Codex CLI, Cursor, Copilot & more.**
 
-Repo này gồm bộ **skills** (trong `skills/`) và 2 script tiện ích trong `script/`:
+## Cài nhanh (khuyên dùng)
+
+Không cần clone repo — dùng [`skills` CLI](https://github.com/vercel-labs/skills), hỗ trợ 75+ coding agent (Claude Code, Cursor, Codex, Copilot, Kiro CLI, Gemini CLI…):
+
+```bash
+npx skills add https://github.com/DuySeu/skillkit                       # chọn skill + agent tương tác
+npx skills add https://github.com/DuySeu/skillkit --skill ui-design-pro # cài đúng 1 skill
+npx skills add https://github.com/DuySeu/skillkit --all                 # cài mọi skill cho mọi agent
+npx skills add https://github.com/DuySeu/skillkit -g                    # cài toàn cục (~/.claude/skills)
+npx skills add https://github.com/DuySeu/skillkit -l                    # chỉ xem có skill gì
+```
+
+Mặc định CLI symlink vào thư mục agent (`./.claude/skills`); thêm `--copy` nếu muốn copy hẳn.
+Cập nhật về sau bằng `npx skills update`, gỡ bằng `npx skills remove`.
+
+---
+
+Repo này gồm bộ **skills** (trong `skills/`) và một script tiện ích trong `script/`:
 
 | Script | Mục đích |
 |--------|----------|
-| [`script/install_skills.sh`](#1-scriptinstall_skillssh--cài-skills-vào-kiro-cli--claude-code) | Cài các skill trong `skills/` vào project hiện tại — mặc định Claude Code (`./.claude/skills`), `--kiro` cho Kiro CLI, `--global` để cài toàn cục |
-| [`script/project_setup.sh`](#2-scriptproject_setupsh--scaffold-project-python--convention) | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
+| [`script/project_setup.sh`](#scriptproject_setupsh--scaffold-project-python--convention) | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
 
 ## Yêu cầu
 
@@ -17,20 +33,19 @@ Repo này gồm bộ **skills** (trong `skills/`) và 2 script tiện ích trong
 Cấp quyền thực thi lần đầu nếu cần:
 
 ```bash
-chmod +x script/install_skills.sh script/project_setup.sh
+chmod +x script/project_setup.sh
 ```
 
 ## Chạy script từ mọi terminal (không cần gõ đường dẫn repo)
 
-Cả hai script đều tự tìm về repo dù được gọi từ đâu (kể cả qua symlink), nên chỉ cần
-đưa chúng vào `PATH` một lần sau khi clone. Có 2 cách:
+Script tự tìm về repo dù được gọi từ đâu (kể cả qua symlink), nên chỉ cần
+đưa nó vào `PATH` một lần sau khi clone. Có 2 cách:
 
 **Cách 1 — symlink vào `~/.local/bin` (khuyên dùng):**
 
 ```bash
 mkdir -p ~/.local/bin
-ln -sf "$(pwd)/script/install_skills.sh" ~/.local/bin/install-skills
-ln -sf "$(pwd)/script/project_setup.sh"  ~/.local/bin/project-setup
+ln -sf "$(pwd)/script/project_setup.sh" ~/.local/bin/project-setup
 ```
 
 Nếu `~/.local/bin` chưa có trong `PATH`, thêm vào `~/.zshrc` (hoặc `~/.bashrc`):
@@ -49,68 +64,29 @@ export PATH="/duong/dan/toi/repo/script:$PATH"
 Mở terminal mới (hoặc `source ~/.zshrc`) rồi dùng ở bất kỳ đâu:
 
 ```bash
-install-skills --dry-run          # (cách 2 thì gõ: install_skills.sh --dry-run)
 cd /duong/dan/project-cua-ban
 project-setup --demo --claude     # (cách 2 thì gõ: project_setup.sh --demo --claude)
 ```
 
 ---
 
-## 1. `script/install_skills.sh` — cài skills vào Kiro CLI / Claude Code
+## Dev skill trong repo này
 
-Quét mọi thư mục con trong `skills/` có chứa `SKILL.md` và cài vào **project hiện tại**.
-Mặc định cài cho **Claude Code** (`./.claude/skills`); truyền `--kiro` để cài cho Kiro CLI
-(`./.kiro/skills`) — chỉ chọn một trong hai. Muốn cài toàn cục (mọi project dùng chung)
-thì thêm `--global`.
-
-### Cách chạy
+`.claude/skills/` và `.kiro/skills/` ở gốc repo chỉ chứa symlink trỏ ngược vào `skills/`,
+nhờ vậy sửa `SKILL.md` là có hiệu lực ngay mà không cần cài lại. Thêm skill mới thì tạo
+symlink cho nó:
 
 ```bash
-cd /duong/dan/project-cua-ban
-/duong/dan/repo/script/install_skills.sh                 # cài cho Claude Code: ./.claude/skills (mặc định)
-/duong/dan/repo/script/install_skills.sh --kiro          # cài cho Kiro CLI: ./.kiro/skills
-/duong/dan/repo/script/install_skills.sh --claude        # như mặc định (không kết hợp được với --kiro)
-/duong/dan/repo/script/install_skills.sh --global        # cài toàn cục: ~/.kiro/skills và ~/.claude/skills
-/duong/dan/repo/script/install_skills.sh --target DIR    # cài vào một thư mục skills tùy chọn
-/duong/dan/repo/script/install_skills.sh --link          # tạo symlink thay vì copy (tự cập nhật theo repo)
-/duong/dan/repo/script/install_skills.sh --force         # ghi đè skill đã tồn tại, không hỏi
-/duong/dan/repo/script/install_skills.sh --dry-run       # xem trước, không thay đổi gì
-/duong/dan/repo/script/install_skills.sh --help          # xem hướng dẫn
+for d in skills/*/; do
+  ln -sfn "../../$d" ".claude/skills/$(basename "$d")"
+done
 ```
 
-### Cờ
-
-| Cờ | Ý nghĩa |
-|----|---------|
-| `--kiro` | Cài cho Kiro CLI (`./.kiro/skills`, hoặc `~/.kiro/skills` nếu kèm `--global`) |
-| `--claude` | Cài cho Claude Code — chính là mặc định (`./.claude/skills`, hoặc `~/.claude/skills` nếu kèm `--global`) |
-| `--global` | Cài vào thư mục toàn cục trong `$HOME` thay vì project hiện tại |
-| `--target DIR` | Cài vào thư mục tùy chọn (có thể lặp lại) |
-| `--link` | Symlink thay vì copy — skill tự cập nhật khi repo đổi |
-| `--force` | Ghi đè skill trùng tên mà không hỏi |
-| `--dry-run` | Chỉ in ra những gì sẽ làm |
-
-`--kiro` và `--claude` loại trừ nhau — truyền cả hai sẽ báo lỗi. Không truyền gì → Claude Code.
-
-### Ví dụ
-
-```bash
-# Cài skills cho project đang làm (chạy từ thư mục project) — Claude Code
-cd ~/Workspace/my-project && install-skills
-
-# Thử trước xem sẽ cài gì mà không thay đổi
-install-skills --dry-run
-
-# Dev skill: symlink để sửa repo là có hiệu lực ngay trong project
-install-skills --link
-
-# Cài cho Kiro CLI, toàn cục cho mọi project
-install-skills --kiro --global
-```
+Đổi `.claude` thành `.kiro` để làm tương tự cho Kiro CLI.
 
 ---
 
-## 2. `script/project_setup.sh` — scaffold project Python + convention
+## `script/project_setup.sh` — scaffold project Python + convention
 
 Tạo khung một project Python theo convention dataflow (mỗi step một file trong `core/`,
 helper trong `utils/`, logging tập trung), kèm file convention để trợ lý AI **tự nạp**.

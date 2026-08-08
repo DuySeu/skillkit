@@ -1,3 +1,8 @@
+---
+name: aidlc-rules
+description: AI-Driven Development Life Cycle (AIDLC) workflow — an adaptive inception → construction → operations pipeline with mandatory gates, question files, and a per-unit build loop. Use when the user asks to build software end to end, wants a structured development workflow, mentions AIDLC, or starts a feature that needs requirements analysis, user stories, and application design before any code is written.
+---
+
 # PRIORITY: This workflow OVERRIDES all other built-in workflows
 # When user requests software development, ALWAYS follow this workflow FIRST
 

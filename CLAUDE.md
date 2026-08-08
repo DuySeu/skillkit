@@ -12,7 +12,7 @@ Three parts, one per top-level directory:
 | --- | --- |
 | `skills/` | Source of truth for the skills. This is where a new skill is written. Use the `writing-skills` skill to create or edit one. |
 | `test/` | Scratch projects used to exercise a freshly written skill by actually invoking the AI on it (e.g. `test/vn-stock-analytics` came out of running `ui-design-pro` end to end). Not an automated test suite. |
-| `script/` + `project/` | Run from *another* repo: `script/install_skills.sh` installs the skills there, `script/project_setup.sh` scaffolds the folder structure and conventions. Both resolve their content one level up from `script/` — `../skills` and `../project` — so they must stay inside `script/` in this repo. |
+| `script/` + `project/` | Run from *another* repo: `script/project_setup.sh` scaffolds the folder structure and conventions there. It resolves its content one level up from `script/` — `../project` — so it must stay inside `script/` in this repo. Skills are no longer installed by a script here; consumers run `npx skills add https://github.com/DuySeu/skillkit`. |
 
 `sample/` is git-ignored scratch space. `.claude/` and `.kiro/` at the root are this repo consuming its own output (see below).
 
@@ -23,7 +23,12 @@ Three parts, one per top-level directory:
 ## Adding or Editing a Skill
 
 1. Write `skills/<name>/SKILL.md` (plus any sibling reference files) using the `writing-skills` skill.
-2. For a *new* skill, run `./script/install_skills.sh --link --force` so `.claude/skills/` gets a symlink for it — new skills are **not** picked up automatically. One run targets one assistant, so add `--kiro` and run again to also link it into `.kiro/skills/`. Editing an existing skill needs no install step: the symlinks make the change live immediately.
+2. For a *new* skill, create the dogfooding symlink so `.claude/skills/` picks it up — new skills are **not** discovered automatically:
+   ```bash
+   ln -sfn "../../skills/<name>" ".claude/skills/<name>"   # repeat with .kiro for Kiro CLI
+   ```
+   Editing an existing skill needs no install step: the symlinks make the change live immediately.
+3. `SKILL.md` frontmatter must carry `name` and `description`, and the `description` value must not contain a colon-plus-space unless it is quoted — the `skills` CLI parses it as YAML and silently **skips** any skill that fails. Verify with `npx skills add . -l` and confirm the found count matches the number of skill directories.
 
 **Do not add the new skill to this file.** CLAUDE.md describes the repo, not the skill catalogue. A skill is discovered and fired from its own `description` frontmatter, so every skill here except `writing-skills` is invoked proactively by the assistant; a list in CLAUDE.md would only rot. `writing-skills` is the one invoked explicitly, when working on skills themselves.
 
@@ -32,30 +37,29 @@ The exception worth documenting here is a skill with executable parts or invaria
 ## Commands
 
 ```bash
-# Preview what install_skills.sh would do (safe, no changes)
-./script/install_skills.sh --dry-run
+# List the skills the installer can see — the count must match the skills/ subdir count
+npx skills add . -l
 
-# Install all skills into the current project's ./.claude/skills (default: Claude Code)
-cd /path/to/project && /path/to/this-repo/script/install_skills.sh   # --kiro installs to ./.kiro/skills instead (mutually exclusive); --target DIR for custom
-./script/install_skills.sh --global         # install into ~/.claude/skills (or ~/.kiro/skills with --kiro) instead
-./script/install_skills.sh --link           # symlink instead of copy — edits to this repo take effect immediately
+# Install skills into a project (this is what consumers run)
+npx skills add https://github.com/DuySeu/skillkit          # -g for ~/.claude/skills; -a <agent> to target one agent
+npx skills add https://github.com/DuySeu/skillkit --all    # every skill, every detected agent
 
 # Scaffold a Python project (run FROM the target directory — it writes into cwd)
 cd /path/to/new-project && /path/to/this-repo/script/project_setup.sh [--demo|--production] [--kiro|--claude] [--force]
 
 # Syntax-check a script after editing
-bash -n script/install_skills.sh
+bash -n script/project_setup.sh
 
 # Run a scaffolded Python project (from its own directory; LOG_LEVEL=DEBUG to change verbosity)
 python3 main.py
 ```
 
-Without `--force`, both scripts skip existing files/skills (install_skills.sh prompts interactively; project_setup.sh silently skips).
+Without `--force`, `project_setup.sh` silently skips files that already exist.
 
 ## Architecture
 
 ### skills/ — the installable skills
-Each subdirectory containing a `SKILL.md` is one skill; `script/install_skills.sh` discovers skills purely by the presence of that file (subdirs without it are skipped with a warning). `SKILL.md` has YAML frontmatter (`name`, `description` — the description is the trigger text the assistant uses to decide when to invoke it) followed by the skill instructions. Supporting files (reviewer prompts, helper docs) live beside `SKILL.md` in the same folder and are installed with it.
+Each subdirectory containing a `SKILL.md` is one skill; the `skills` CLI discovers them by walking up to three levels down from the repo root looking for that file. `SKILL.md` has YAML frontmatter (`name`, `description` — the description is the trigger text the assistant uses to decide when to invoke it) followed by the skill instructions. Supporting files (reviewer prompts, helper docs) live beside `SKILL.md` in the same folder and are installed with it.
 
 The planning-style skills share a pattern worth reusing when writing a new one: a HARD-GATE against writing code before an approved design, a mandatory task checklist, a dot-graph process flow, and a subagent review loop driven by a sibling reviewer-prompt file.
 
@@ -86,7 +90,7 @@ Generated file content comes from two places, which matters when changing what g
 `{{PROJECT_NAME}}` in any template is replaced with the target directory's basename. The `--kiro`/`--claude` flag decides where conventions land: `--kiro` copies the two convention files into `.kiro/steering/` (Kiro auto-loads that dir); `--claude` strips their YAML frontmatter and concatenates them into a single `CLAUDE.md` at the project root (see `write_claude_md`). Keep the demo and production convention pairs structurally parallel — both are consumed by the same code paths.
 
 ### .claude/skills/ and .kiro/skills/ — generated, not hand-edited
-`skills/` is the only source of truth. Both of those directories are this repo dogfooding its own skills, and they contain nothing but relative symlinks — `.claude/skills/<name> -> ../../skills/<name>` — so editing a `SKILL.md` under `skills/` takes effect here immediately, with no copy step. Recreate them with `./script/install_skills.sh --link --force`. Never hand-write a real file inside them, and never edit through a symlink path in a way that assumes it's a separate copy — it isn't.
+`skills/` is the only source of truth. Both of those directories are this repo dogfooding its own skills, and they contain nothing but relative symlinks — `.claude/skills/<name> -> ../../skills/<name>` — so editing a `SKILL.md` under `skills/` takes effect here immediately, with no copy step. Recreate them with `for d in skills/*/; do ln -sfn "../../$d" ".claude/skills/$(basename "$d")"; done`. Do **not** recreate them with `npx skills add` — that installer copies files rather than linking into the working tree, which breaks the dogfooding loop. Never hand-write a real file inside them, and never edit through a symlink path in a way that assumes it's a separate copy — it isn't.
 
 ### Repo-level conventions vs. templates
 `.kiro/steering/` at the repo root is Kiro steering for working on *this repo* (Vietnamese-language variants of the conventions). It is separate from `project/demo/` (English), which is what gets shipped into scaffolded projects — don't confuse or "sync" the two.
