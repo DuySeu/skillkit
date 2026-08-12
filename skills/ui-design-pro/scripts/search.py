@@ -4,7 +4,7 @@
 UI/UX Pro Max Search - BM25 search engine for UI/UX style guides
 Usage: python search.py "<query>" [--domain <domain>] [--stack <stack>] [--max-results 3]
        python search.py "<query>" --design-system [-p "Project Name"]
-       python search.py "<query>" --design-system --variance 8 --motion 9 --density 7
+       python search.py "<query>" --design-system --variance 8 --density 7
 
 Domains: style, color, chart, landing, product, ux, typography, google-fonts, icons, gsap, react
 Stacks (web only): react, nextjs, vue, nuxtjs, nuxt-ui, svelte, astro, angular, laravel,
@@ -12,7 +12,6 @@ Stacks (web only): react, nextjs, vue, nuxtjs, nuxt-ui, svelte, astro, angular, 
 
 Design dials (1-10, only with --design-system):
   --variance   DESIGN_VARIANCE: 1=centered/minimal, 10=bold/asymmetric
-  --motion     MOTION_INTENSITY: 1=subtle, 10=complex; attaches a GSAP snippet from motion.csv
   --density    VISUAL_DENSITY: 1=spacious, 10=dense/dashboard; overrides the spacing scale
 
 Nothing here writes to disk. --design-system returns one seed recommendation for
@@ -96,7 +95,6 @@ if __name__ == "__main__":
                              "it costs ~3x the tokens for the same content")
     # Design dials (1-10), only applied with --design-system
     parser.add_argument("--variance", type=int, choices=range(1, 11), metavar="1-10", help="DESIGN_VARIANCE dial: 1=centered/minimal, 10=bold/asymmetric (only with --design-system)")
-    parser.add_argument("--motion", type=int, choices=range(1, 11), metavar="1-10", help="MOTION_INTENSITY dial: 1=subtle, 10=complex; pulls a matching GSAP snippet from motion.csv (only with --design-system)")
     parser.add_argument("--density", type=int, choices=range(1, 11), metavar="1-10", help="VISUAL_DENSITY dial: 1=spacious, 10=dense/dashboard; overrides the spacing scale (only with --design-system)")
 
     args = parser.parse_args()
@@ -108,7 +106,6 @@ if __name__ == "__main__":
             args.project_name,
             args.format,
             variance=args.variance,
-            motion=args.motion,
             density=args.density,
         )
 

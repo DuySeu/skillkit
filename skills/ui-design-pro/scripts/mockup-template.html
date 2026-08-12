@@ -8,7 +8,7 @@
 <!--
   HOW TO USE THIS FILE
   1. Copy it to <project>/docs/design/ui-options.html
-  2. Replace PROJECT, CONCEPT, INSPIRATION, ARCHETYPE and ANIMATION below.
+  2. Replace PROJECT, CONCEPT, INSPIRATION and ARCHETYPE below.
   3. Replace the OPTIONS array with your 3-5 directions. Keep the token names —
      they are the shadcn vocabulary, so the winner ports to code by copy.
   4. Update the Google Fonts <link> to the families your options actually use.
@@ -19,16 +19,15 @@
   the same form the sidecar CSS files use, so a value can be moved between the
   two by copy. chart-1..5 are derived from `hue` when not set explicitly.
 
-  A direction is four things, and all four are previewed here: colour, type,
-  surface treatment (the --surface-* kit), and motion (the `motion` field).
-  ARCHETYPE decides WHICH product the four are demonstrated on — an option set
-  for a storefront that previews as an admin console is answering a question
-  nobody asked.
+  A direction is three things, and all three are previewed here: colour, type,
+  and surface treatment (the --surface-* kit). ARCHETYPE decides WHICH product
+  they are demonstrated on — an option set for a storefront that previews as an
+  admin console is answering a question nobody asked.
 
   One option is shown at a time and the tab bar switches between them: the
   comparison that matters is "does THIS screen work", and a stacked page
   answers "how do these five differ" instead. Arrow keys and 1-5 switch;
-  `d` toggles dark mode, `r` replays the entrance animation.
+  `d` toggles dark mode. Variant swap is instant.
 -->
 
 <!-- FONTS: edit to match the OPTIONS below -->
@@ -74,8 +73,6 @@
   .concept .refs { margin-top: 7px; display: flex; gap: 8px; flex-wrap: wrap; font-size: 12.5px; }
   .concept .refs a { display: inline-flex; gap: 6px; align-items: center; padding: 2px 9px; border: 1px solid var(--ui-line); border-radius: 999px; text-decoration: none; }
   .concept .refs a:hover { border-color: var(--ui-accent); }
-  .rm-note { display: none; margin-top: 10px; font-size: 12.5px; color: #f0c274; }
-  @media (prefers-reduced-motion: reduce) { .rm-note { display: block; } }
 
   .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
   .ctl {
@@ -328,54 +325,16 @@
     margin: 6px 0 0; max-width: 62ch; font-size: calc(13px * var(--d)); }
   .type-specimen .stack { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); margin-top: 9px; }
 
-  /* ---- motion: the axis a still mockup cannot show ----
-     Colour, type, and surface are all visible in a screenshot. How a screen
-     ARRIVES and how it answers a pointer is not — and it is half of what makes
-     a launch page feel like a launch page and a trading console feel like a
-     trading console. So each option carries a motion personality and renders
-     it here. Every value below reads from a --mo-* variable set per option in
-     tokenStyle(), which is why two options can share a palette and still feel
-     nothing alike. */
-  .app {
-    --mo-in: 220ms;                          /* entrance duration */
-    --mo-dur: 150ms;                         /* state-change duration */
-    --mo-ease: cubic-bezier(0.2, 0.8, 0.3, 1);
-    --mo-rise: 10px;
-    --mo-scale: 1;
-    --mo-stagger: 45ms;
-    --mo-lift: -2px;
-  }
+  /* Quiet state transitions so controls do not look broken. No entrance or
+     hover-lift choreography — the pick is about colour, type, and surface. */
   .app .card, .app .btn, .app .prod, .app .nav-item, .app .chip, .app .site-nav a {
-    transition: transform var(--mo-dur) var(--mo-ease),
-                box-shadow var(--mo-dur) var(--mo-ease),
-                background-color var(--mo-dur) var(--mo-ease),
-                border-color var(--mo-dur) var(--mo-ease),
-                color var(--mo-dur) var(--mo-ease);
+    transition: box-shadow 150ms ease-out,
+                background-color 150ms ease-out,
+                border-color 150ms ease-out,
+                color 150ms ease-out;
   }
-  body[data-anim="on"] .app .reveal {
-    animation: reveal var(--mo-in) var(--mo-ease) both;
-    animation-delay: calc(var(--i, 0) * var(--mo-stagger));
-  }
-  @keyframes reveal {
-    from { opacity: 0; transform: translateY(var(--mo-rise)) scale(var(--mo-scale)); }
-    to   { opacity: 1; transform: none; }
-  }
-  /* Hover is a transform on the element itself, never on its container, so
-     nothing around it reflows — the same rule the reviewer checks for. */
-  body[data-anim="on"] .app .card:hover,
-  body[data-anim="on"] .app .prod:hover {
-    transform: translateY(var(--mo-lift)); box-shadow: var(--surface-shadow-raised, none);
-  }
-  body[data-anim="on"] .app .btn:hover { transform: translateY(calc(var(--mo-lift) * 0.5)); }
-  body[data-anim="on"] .app .nav-item:hover,
-  body[data-anim="on"] .app .site-nav a:hover { color: var(--foreground); }
-  /* Not negotiable, and it is also what the shipped app has to do. The banner
-     in the header says so out loud, because a silently static preview reads as
-     a broken file rather than as a respected OS setting. */
-  @media (prefers-reduced-motion: reduce) {
-    body[data-anim="on"] .app .reveal { animation: none; }
-    .app *, .app *::before, .app *::after { transition-duration: 1ms !important; }
-  }
+  .app .nav-item:hover,
+  .app .site-nav a:hover { color: var(--foreground); }
 
   /* ---- archetype: landing ---- */
   .topbar.site { gap: calc(18px * var(--d)); }
@@ -539,14 +498,7 @@
     <div class="controls">
       <button class="ctl" id="mode" aria-pressed="false">Dark mode: off</button>
       <button class="ctl" id="focus" aria-pressed="false">Show focus states: off</button>
-      <button class="ctl" id="anim" aria-pressed="true">Motion: on</button>
-      <button class="ctl" id="replay">↻ Replay motion</button>
-      <span class="hint-key"><kbd>←</kbd> <kbd>→</kbd> switch · <kbd>1</kbd>–<kbd>5</kbd> jump · <kbd>d</kbd> dark · <kbd>r</kbd> replay</span>
-    </div>
-    <div class="rm-note">
-      Your system is set to “reduce motion”, so the previews are rendering static. That is
-      correct behaviour and the shipped app will do the same — turn the OS setting off
-      temporarily if you want to judge the motion in each direction.
+      <span class="hint-key"><kbd>←</kbd> <kbd>→</kbd> switch · <kbd>1</kbd>–<kbd>5</kbd> jump · <kbd>d</kbd> dark</span>
     </div>
   </header>
 
@@ -582,10 +534,6 @@ const INSPIRATION = [
 // that previews as an admin console is answering a question nobody asked.
 const ARCHETYPE = "dashboard";
 
-// Did the user ask for animation? false renders every option at the `still`
-// tier and disables the motion controls, so nothing is sold that was not asked
-// for. Per-option personality lives in each option's `motion` field.
-const ANIMATION = true;
 
 const OPTIONS = [
   {
@@ -596,7 +544,6 @@ const OPTIONS = [
     density: "comfortable",
     surface: "elevated",
     surfaceNote: "hairline border, diffuse shadow",
-    motion: { tier: 4, style: "calm", note: "short cross-fades, 1px hover lift — motion that never interrupts a number being read" },
     fonts: {
       display: "'Inter', ui-sans-serif, system-ui, sans-serif",
       body: "'Inter', ui-sans-serif, system-ui, sans-serif",
@@ -671,7 +618,6 @@ const OPTIONS = [
     density: "spacious",
     surface: "outlined",
     surfaceNote: "2px rule, no shadow",
-    motion: { tier: 3, style: "crisp", note: "fast, linear, no bounce — the page behaves like print that happens to respond" },
     fonts: {
       display: "'Source Serif 4', ui-serif, Georgia, serif",
       body: "'Inter', ui-sans-serif, system-ui, sans-serif",
@@ -746,7 +692,6 @@ const OPTIONS = [
     density: "compact",
     surface: "glass",
     surfaceNote: "translucent surfaces, backdrop blur, lit top edge",
-    motion: { tier: 8, style: "cinematic", note: "long staggered reveals, deep hover lift — surfaces float in rather than appear" },
     fonts: {
       display: "'Inter', ui-sans-serif, system-ui, sans-serif",
       body: "'Inter', ui-sans-serif, system-ui, sans-serif",
@@ -821,7 +766,6 @@ const OPTIONS = [
     density: "spacious",
     surface: "soft",
     surfaceNote: "borderless, dual soft shadow, debossed inputs",
-    motion: { tier: 7, style: "springy", note: "slight overshoot on entrance and press — the surfaces read as physical" },
     fonts: {
       display: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
       body: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
@@ -896,7 +840,6 @@ const OPTIONS = [
     density: "compact",
     surface: "flat",
     surfaceNote: "hairline border, no shadow",
-    motion: { tier: 1, style: "still", note: "state changes only, no entrance animation — nothing moves that was not asked to" },
     fonts: {
       display: "'Public Sans', ui-sans-serif, system-ui, sans-serif",
       body: "'Public Sans', ui-sans-serif, system-ui, sans-serif",
@@ -974,7 +917,6 @@ let mode = "light";
 let showFocus = false;
 let picked = null;
 let active = 0;
-let animOn = true;
 
 /** OKLCH -> #RRGGBB, so every colour on the page is in one form (Ottosson). */
 function oklchHex(L, C, H) {
@@ -1010,24 +952,6 @@ function charts(opt, m) {
   return [0, 42, 84, -42, -84].map((d) => oklchHex(L, 0.15, (opt.hue + d + 360) % 360));
 }
 
-/** Motion personalities. Each is a complete feel, not a speed setting: the
- *  entrance distance, the easing curve, and the hover lift move together,
- *  because 700ms with a linear curve is sluggish while 700ms with an ease-out
- *  is cinematic. `still` is what an option renders as when the user said no to
- *  animation — state changes only, which every UI needs regardless. */
-const MOTION_SPECS = {
-  still:     { in: "1ms",   dur: "110ms", rise: "0px",  scale: "1",     stagger: "0ms",   lift: "0px",  ease: "linear" },
-  calm:      { in: "300ms", dur: "180ms", rise: "6px",  scale: "1",     stagger: "40ms",  lift: "-1px", ease: "cubic-bezier(0.4, 0, 0.2, 1)" },
-  crisp:     { in: "200ms", dur: "140ms", rise: "10px", scale: "1",     stagger: "40ms",  lift: "-2px", ease: "cubic-bezier(0.2, 0.8, 0.3, 1)" },
-  springy:   { in: "420ms", dur: "220ms", rise: "16px", scale: "0.97",  stagger: "70ms",  lift: "-4px", ease: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
-  cinematic: { in: "760ms", dur: "300ms", rise: "28px", scale: "0.985", stagger: "120ms", lift: "-6px", ease: "cubic-bezier(0.16, 1, 0.3, 1)" },
-};
-
-/** The style an option actually renders at, after the global answer. */
-function motionOf(opt) {
-  if (!ANIMATION || !animOn) return { tier: 1, style: "still", note: "animation not requested" };
-  return opt.motion || { tier: 5, style: "crisp", note: "" };
-}
 
 function tokenStyle(opt) {
   const t = opt[mode];
@@ -1036,10 +960,6 @@ function tokenStyle(opt) {
   decl.push(`--font-display:${opt.fonts.display}`);
   decl.push(`--font-body:${opt.fonts.body}`);
   decl.push(`--font-mono:${opt.fonts.mono}`);
-  const m = MOTION_SPECS[motionOf(opt).style] || MOTION_SPECS.crisp;
-  decl.push(`--mo-in:${m.in}`, `--mo-dur:${m.dur}`, `--mo-rise:${m.rise}`,
-            `--mo-scale:${m.scale}`, `--mo-stagger:${m.stagger}`,
-            `--mo-lift:${m.lift}`, `--mo-ease:${m.ease}`);
   return decl.join(";");
 }
 
@@ -1134,7 +1054,6 @@ function railMarkup(opt) {
 }
 
 function typeSpecimen(opt) {
-  const mo = motionOf(opt);
   return `
   <div class="type-specimen">
     <p class="display">${opt.name}</p>
@@ -1142,7 +1061,7 @@ function typeSpecimen(opt) {
       The quick brown fox jumps over the lazy dog. Body copy at reading size, on the
       surface it will actually sit on — this is where a font choice succeeds or fails.
     </p>
-    <p class="stack">display: ${opt.fonts.display.split(",")[0]} &nbsp;·&nbsp; body: ${opt.fonts.body.split(",")[0]} &nbsp;·&nbsp; radius: ${opt[mode].radius} &nbsp;·&nbsp; density: ${opt.density} &nbsp;·&nbsp; surface: ${opt.surface || "flat"}${opt.surfaceNote ? ` (${opt.surfaceNote})` : ""} &nbsp;·&nbsp; motion: ${mo.style}</p>
+    <p class="stack">display: ${opt.fonts.display.split(",")[0]} &nbsp;·&nbsp; body: ${opt.fonts.body.split(",")[0]} &nbsp;·&nbsp; radius: ${opt[mode].radius} &nbsp;·&nbsp; density: ${opt.density} &nbsp;·&nbsp; surface: ${opt.surface || "flat"}${opt.surfaceNote ? ` (${opt.surfaceNote})` : ""}</p>
   </div>`;
 }
 
@@ -1493,7 +1412,6 @@ function renderConcept() {
 
 function render() {
   document.getElementById("title").textContent = `UI directions — ${PROJECT}`;
-  document.body.dataset.anim = ANIMATION && animOn ? "on" : "off";
 
   document.getElementById("tabs").innerHTML = OPTIONS.map((o, i) => `
     <button class="tab" role="tab" id="tab-${i}" aria-selected="${i === active}"
@@ -1501,7 +1419,7 @@ function render() {
       <span class="letter">${LETTERS[i]}</span>
       <span class="tab-text">
         <span class="tab-name">${o.name}</span>
-        <span class="tab-sub">${[o.surface, o[mode].radius, motionOf(o).style].filter(Boolean).join(" · ")}</span>
+        <span class="tab-sub">${[o.surface, o[mode].radius].filter(Boolean).join(" · ")}</span>
       </span>
       <span class="sw" style="${tokenStyle(o)}">
         ${SWATCHES.map((s) => `<i style="background:var(--${s})" title="${s}"></i>`).join("")}
@@ -1509,7 +1427,6 @@ function render() {
     </button>`).join("");
 
   const o = OPTIONS[active];
-  const mo = motionOf(o);
   const isPicked = picked === o.id;
   document.getElementById("board").innerHTML = `
     <section class="option" id="opt-${o.id}" data-id="${o.id}">
@@ -1523,11 +1440,9 @@ function render() {
           ${o.surfaceNote ? `<code>${o.surfaceNote}</code><br>` : ""}
           <code>radius ${o[mode].radius} · ${o.density}</code><br>
           ${o.accent ? `<code>accent ${o.accent}</code><br>` : ""}
-          <code>motion ${mo.style}${mo.tier ? ` (tier ${mo.tier})` : ""}</code><br>
           <code>primary ${o[mode].primary}</code>
         </div>
       </div>
-      ${mo.note ? `<p class="dim" style="margin:-4px 0 12px;font-size:12.5px">Motion — ${mo.note}</p>` : ""}
       <div class="frame" style="${tokenStyle(o)}">${appMarkup(o)}</div>
       <div class="pickrow">
         <button class="ctl pickbtn" aria-pressed="${isPicked}" onclick="pick('${o.id}')">
@@ -1577,18 +1492,6 @@ document.getElementById("focus").addEventListener("click", (e) => {
   render();
 });
 
-// Motion is a comparison, not a decoration: seeing the same screen with it on
-// and off is how a user decides whether they want it at all.
-document.getElementById("anim").addEventListener("click", (e) => {
-  animOn = !animOn;
-  e.target.textContent = `Motion: ${animOn ? "on" : "off"}`;
-  e.target.setAttribute("aria-pressed", String(animOn));
-  render();
-});
-
-// Entrance animations play once per mount, and re-rendering the board remounts
-// it — so "replay" is just a redraw.
-document.getElementById("replay").addEventListener("click", render);
 
 document.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -1596,7 +1499,6 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === "ArrowLeft") switchTo(active - 1);
   else if (/^[1-9]$/.test(e.key) && +e.key <= OPTIONS.length) switchTo(+e.key - 1);
   else if (e.key === "d" || e.key === "D") document.getElementById("mode").click();
-  else if (e.key === "r" || e.key === "R") document.getElementById("replay").click();
   else return;
   e.preventDefault();
 });
@@ -1604,26 +1506,11 @@ document.addEventListener("keydown", (e) => {
 const fromHash = LETTERS.indexOf((location.hash || "").slice(1, 2).toUpperCase());
 if (fromHash >= 0 && fromHash < OPTIONS.length) active = fromHash;
 
-// Animation was not asked for: the controls stay visible but inert, so the
-// preview does not silently imply a motion decision nobody made.
-if (!ANIMATION) {
-  animOn = false;
-  for (const id of ["anim", "replay"]) {
-    const el = document.getElementById(id);
-    el.disabled = true;
-    el.style.opacity = "0.45";
-    el.style.cursor = "not-allowed";
-  }
-  const a = document.getElementById("anim");
-  a.textContent = "Motion: not requested";
-  a.setAttribute("aria-pressed", "false");
-  a.title = "You said this product does not need animation, so every option renders static.";
-}
 
 document.getElementById("subtitle").textContent =
   `The same screen — ${ARCHETYPE_LABEL[ARCHETYPE] || "a miniature app"} — rendered with a different ` +
-  `design direction per tab. Switch tabs to compare, toggle light/dark (both modes matter), and watch ` +
-  `how each one moves. Pick a letter, or say which parts of which options to combine.`;
+  `design direction per tab. Switch tabs to compare and toggle light/dark (both modes matter). ` +
+  `Pick a letter, or say which parts of which options to combine.`;
 
 renderConcept();
 render();

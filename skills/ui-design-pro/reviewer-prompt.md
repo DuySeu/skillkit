@@ -15,7 +15,6 @@ Task tool (general-purpose):
 
     **Chosen direction:** [OPTION_NAME] — [ONE_LINE_THESIS]
     **Surface kit:** [flat|outlined|elevated|soft|glass|hard] — [WHAT_IT_DRAWS]
-    **Motion:** [still|calm|crisp|springy|cinematic] at tier [N] — or "declined; state transitions only"
     **Approved plan:** [PATH_TO_UI-PLAN.md] — read it first; it is the agreed scope
     **Brand colour:** [HEX_OR_"none — the direction proposed its own"]
     **Token file:** [TOKEN_FILE_PATH]
@@ -48,7 +47,6 @@ Task tool (general-purpose):
     | Fidelity | Implementation actually matches the chosen direction's thesis (a "bold editorial" pick that shipped as default grey is a failure) |
     | Surface kit ported | All seven `--surface-*` variables present in BOTH modes, and components consuming them (`var(--surface-shadow)`, `var(--surface-border-width)`) rather than hardcoding their own shadows and 1px borders. Colours ported without the kit is a headline failure, not a detail: it ships a flat app in the right palette, which is not the option the user picked |
     | Surface kit honoured | The rendered treatment matches the kit. `glass` needs a translucent `card` (an opaque hex means the blur does nothing) plus `backdrop-filter` and the page wash; `soft` needs borderless surfaces and debossed inputs; `hard` needs the heavy border in the ink colour on controls too, not just on cards |
-    | Motion fidelity | The motion the plan names is what shipped. `cinematic` with 120ms fades is not cinematic; `still` with staggered entrance animations is animation the user declined. If the plan says animation was declined, no entrance, scroll, or hover-transform motion exists anywhere — state-change transitions are fine and expected |
     | Framework fit | Theme written against the INSTALLED major version's API |
     | Scope | Exactly the components in the plan's scope table — nothing missing, no unrequested extras. An addition is as much a finding as an omission |
     | Plan fidelity | Stack, default colour mode, font load method, and file paths match what `UI-PLAN.md` says. Deviations are allowed but must be reported back to the user; a silent one is a finding |
@@ -63,10 +61,15 @@ Task tool (general-purpose):
     | Emoji as icons | Any emoji used as a structural icon (nav, settings, status, buttons). Icons must be SVG from one library — Lucide, Phosphor, Heroicons. Emoji are font-dependent, render differently per platform, and cannot take a token colour |
     | Icon family discipline | One icon library, one stroke width per visual layer, and filled vs outline not mixed at the same hierarchy level |
     | Icon sizing | Sizes come from a token scale (`icon-sm`/`icon-md`/`icon-lg`), not arbitrary 20/24/28px chosen per usage |
-    | Layout-stable interaction | Hover and press states use colour, opacity, shadow, or border — never a transform that shifts surrounding content |
+    | Layout-stable interaction | Hover/press may use colour, opacity, shadow, border, or a subtle `:active { transform: scale(0.97) }` (0.95–0.98) on the control itself. A transform that shifts siblings or reflows layout is a defect. Missing press feedback on buttons is a defect |
+    | Transition properties | Named properties only — never `transition: all`. Animate only `transform` and `opacity`, never `width`/`height`/`padding`/`top` |
+    | Transition timing | Press 100–160ms; tooltips/popovers 125–200ms; dropdowns 150–250ms; modals/drawers ≤300ms. Instant (0ms) on a control reads as broken; over 500ms reads as sluggish. Keyboard / high-frequency actions must have no animation |
+    | Easing | Enter and UI feedback use ease-out (or a strong custom ease-out). `ease-in` on UI is a defect. Exit may be shorter than enter, still ease-out |
+    | Enter scale | Entrance animations must not start from `scale(0)` — use ≥ `scale(0.95)` with opacity |
+    | Transform origin | Popovers/menus/tooltips origin toward their trigger; modals stay `transform-origin: center` |
+    | Hover on touch | Hover-only motion gated behind `@media (hover: hover) and (pointer: fine)` |
+    | Reduced motion | `prefers-reduced-motion: reduce` drops movement/position; short opacity/colour fades that aid comprehension may remain |
     | Cursor affordance | `cursor-pointer` on every clickable element, including clickable cards and rows, not just `<button>` |
-    | Transition timing | 150-300ms on state changes. Instant (0ms) reads as broken; over 500ms reads as sluggish. Never animate `width`/`height` — use `transform` |
-    | Reduced motion | `prefers-reduced-motion` honoured; animation reduced or disabled, not merely shortened |
     | Modal scrim | Overlay behind a dialog/drawer is strong enough to isolate the foreground (roughly 40-60% black). A weak scrim leaves the background competing |
     | Sticky element clearance | No content hidden behind a fixed/sticky header, footer, or CTA bar. Scroll containers have matching top/bottom insets |
     | Spacing rhythm | A consistent 4/8px scale for padding, gaps, and section spacing — not arbitrary increments |
@@ -90,6 +93,7 @@ Task tool (general-purpose):
     - Emoji standing in for icons anywhere in the shipped components
     - `outline: none` with no replacement focus indicator
     - Scaffold demo content still shipping next to the real UI (Vite logo, counter, `App.css`)
+    - `transition: all`, `ease-in` on UI controls, `scale(0)` entrances, or animation on a keyboard/high-frequency action
 
     ## Output Format
 
@@ -100,8 +104,16 @@ Task tool (general-purpose):
     **Issues (if any):**
     - [File:line]: [specific issue] - [why it matters]
 
+    For motion / transition / press-feedback polish findings, also include a markdown table (required when any such issue exists):
+
+    | Before | After | Why |
+    | --- | --- | --- |
+    | `transition: all 300ms` | `transition: transform 160ms ease-out` | Name exact properties; avoid `all` |
+
+    Do not list Before/After as separate lines — one table, one row per finding.
+
     **Recommendations (advisory):**
     - [suggestions that don't block approval]
 ```
 
-**Reviewer returns:** Status, Issues (if any), Recommendations
+**Reviewer returns:** Status, Issues (if any), Recommendations. Motion polish findings must include the Before | After | Why table.

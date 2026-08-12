@@ -1,0 +1,1196 @@
+<!doctype html>
+<html lang="vi" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype — Landing hero (VN Stock)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================================
+   Tokens — lifted from test/vn-stock-analytics/src/index.css ("Night Desk",
+   dark mode, which is that app's default). Variants share them on purpose:
+   every direction here should look like it could ship in that product.
+   ========================================================================= */
+:root {
+  --background: #131B1A;
+  --foreground: #EDF6F4;
+  --card: #1F2926;
+  --primary: #5BA8A0;
+  --primary-foreground: #0E1817;
+  --secondary: #2C3937;
+  --muted: #2C3937;
+  --muted-foreground: #95AAA5;
+  --accent: #294C66;
+  --border: #394643;
+  --ring: #5BA8A0;
+
+  /* Bảng giá five-colour code — semantic, never decoration. */
+  --px-ceil: #C084FC;
+  --px-up: #34D399;
+  --px-ref: #FACC15;
+  --px-down: #FB7185;
+  --px-floor: #22D3EE;
+
+  --radius: 0.75rem;
+  --font-sans: "Fira Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#stage { min-height: 100vh; }
+
+button, input { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: calc(var(--radius) - 4px);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  letter-spacing: -0.01em;
+}
+
+.px-ceil  { color: var(--px-ceil); }
+.px-up    { color: var(--px-up); }
+.px-ref   { color: var(--px-ref); }
+.px-down  { color: var(--px-down); }
+.px-floor { color: var(--px-floor); }
+
+/* --- Shared page furniture ------------------------------------------------ */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 88px; /* clears the picker */
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 64px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.nav-links a { transition: color 150ms ease-out; }
+.nav-links a:hover { color: var(--foreground); }
+
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out, transform 120ms ease-out;
+}
+.btn:active { transform: scale(0.98); }
+
+.btn-primary { background: var(--primary); color: var(--primary-foreground); font-weight: 600; }
+.btn-primary:hover { background: color-mix(in oklab, var(--primary) 88%, #fff); }
+
+.btn-outline { border-color: var(--border); color: var(--foreground); }
+.btn-outline:hover { background: var(--secondary); }
+
+.btn-ghost { color: var(--muted-foreground); }
+.btn-ghost:hover { color: var(--foreground); background: var(--secondary); }
+
+.btn-sm { height: 34px; padding: 0 14px; font-size: 13px; }
+
+/* ===========================================================================
+   Variant 1 — "Bảng Điện": the live board is the hero.
+   ========================================================================= */
+.v-board .tape {
+  overflow: hidden;
+  height: 34px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 60%, transparent);
+}
+
+.v-board .tape-track {
+  display: flex;
+  gap: 28px;
+  width: max-content;
+  height: 34px;
+  align-items: center;
+  padding-left: 28px;
+  font-size: 12.5px;
+  animation: tape-scroll 46s linear infinite;
+}
+
+@keyframes tape-scroll { to { transform: translateX(-50%); } }
+
+.v-board .tape-item { display: flex; gap: 7px; align-items: baseline; }
+.v-board .tape-sym { color: var(--muted-foreground); letter-spacing: 0.04em; }
+
+.v-board .hero {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(360px, 5fr) minmax(520px, 7fr);
+  gap: 56px;
+  align-items: center;
+  padding: 56px 48px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.v-board .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--secondary);
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.v-board .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--px-up);
+  animation: pulse-dot 2s ease-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.v-board h1 {
+  margin: 20px 0 0;
+  font-size: clamp(2.4rem, 3.4vw, 3.3rem);
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.035em;
+}
+.v-board h1 em { font-style: normal; color: var(--primary); }
+
+.v-board .lede {
+  margin: 18px 0 0;
+  max-width: 46ch;
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+.v-board .cta-row { display: flex; gap: 12px; margin-top: 28px; }
+
+.v-board .trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.v-board .trust li { display: flex; align-items: center; gap: 7px; }
+.v-board .trust svg { color: var(--primary); flex: none; }
+
+.v-board .panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 24px 60px -30px rgb(0 0 0 / 0.7);
+  overflow: hidden;
+}
+
+.v-board .panel-head {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.v-board .index-chip {
+  flex: none;
+  min-width: 138px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 3px);
+  background: color-mix(in oklab, var(--background) 55%, transparent);
+}
+.v-board .index-chip .label { font-size: 11px; letter-spacing: 0.06em; color: var(--muted-foreground); }
+.v-board .index-chip .value { margin-top: 5px; font-size: 17px; font-weight: 500; }
+.v-board .index-chip .delta { margin-left: 7px; font-size: 12px; }
+
+.v-board table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+.v-board thead th {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  text-align: right;
+}
+.v-board thead th:first-child { text-align: left; }
+
+.v-board tbody tr {
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 55%, transparent);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: row-in 220ms var(--ease-out) forwards;
+}
+.v-board tbody tr:last-child { border-bottom: 0; }
+
+@keyframes row-in { to { opacity: 1; transform: none; } }
+
+.v-board tbody td { padding: 10px 16px; text-align: right; }
+.v-board tbody td:first-child { text-align: left; }
+
+.v-board .sym { font-weight: 600; letter-spacing: 0.02em; }
+.v-board .co { display: block; margin-top: 2px; font-size: 11.5px; color: var(--muted-foreground); }
+
+.v-board .flash-up   { animation: flash-up 420ms ease-out; }
+.v-board .flash-down { animation: flash-down 420ms ease-out; }
+
+@keyframes flash-up {
+  from { background: color-mix(in oklab, var(--px-up) 20%, transparent); }
+  to { background: transparent; }
+}
+@keyframes flash-down {
+  from { background: color-mix(in oklab, var(--px-down) 20%, transparent); }
+  to { background: transparent; }
+}
+
+.v-board .panel-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--background) 45%, transparent);
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.v-board .legend { margin-left: auto; display: flex; gap: 12px; }
+.v-board .legend span { display: flex; align-items: center; gap: 5px; }
+.v-board .swatch { width: 8px; height: 8px; border-radius: 2px; }
+
+/* ===========================================================================
+   Variant 2 — "Luận Điểm": editorial. Type and air; data reduced to one line.
+   ========================================================================= */
+.v-editorial .nav { border-bottom: 0; justify-content: center; position: relative; }
+.v-editorial .nav .nav-right { position: absolute; right: 32px; margin: 0; }
+
+.v-editorial .ed {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+  text-align: center;
+}
+
+.v-editorial .reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: reveal-in 280ms var(--ease-out) forwards;
+}
+
+@keyframes reveal-in { to { opacity: 1; transform: none; } }
+
+.v-editorial .stamp {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.v-editorial h1 {
+  margin: 26px 0 0;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-weight: 300;
+  /* Vietnamese stacks tone marks above capitals — headings need the headroom. */
+  line-height: 1.12;
+  letter-spacing: -0.045em;
+}
+.v-editorial h1 em { font-style: italic; font-weight: 400; color: var(--primary); }
+
+.v-editorial .lede {
+  margin: 28px 0 0;
+  max-width: 56ch;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--muted-foreground);
+}
+
+.v-editorial .signup {
+  display: flex;
+  gap: 8px;
+  margin-top: 36px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  transition: border-color 150ms ease-out;
+}
+.v-editorial .signup:focus-within { border-color: var(--ring); }
+
+.v-editorial .signup input {
+  width: 300px;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  outline: none;
+}
+.v-editorial .signup input::placeholder { color: var(--muted-foreground); }
+.v-editorial .signup .btn { border-radius: 999px; }
+
+.v-editorial .note { margin: 14px 0 0; font-size: 13px; color: var(--muted-foreground); }
+
+.v-editorial .rule {
+  width: 100%;
+  height: 1px;
+  margin: 56px 0 0;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+
+.v-editorial .strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 32px;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.v-editorial .strip b { font-weight: 500; letter-spacing: 0.04em; color: var(--foreground); }
+.v-editorial .strip .val { margin: 0 7px 0 9px; color: var(--foreground); }
+
+.v-editorial .byline {
+  margin-top: 40px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+/* ===========================================================================
+   Variant 3 — "Đối Thoại": the hero is a working AI composer.
+   ========================================================================= */
+.v-chat .hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 64px 24px 40px;
+}
+
+.v-chat .rise {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: reveal-in 260ms var(--ease-out) forwards;
+}
+
+.v-chat h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 3.8vw, 3rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  text-align: center;
+}
+.v-chat h1 em { font-style: normal; color: var(--primary); }
+
+.v-chat .sub {
+  margin: 16px 0 0;
+  max-width: 50ch;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.v-chat .composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  margin-top: 36px;
+  padding: 10px 10px 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 18px 44px -26px rgb(0 0 0 / 0.8);
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+}
+.v-chat .composer:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 18%, transparent), 0 18px 44px -26px rgb(0 0 0 / 0.8);
+}
+
+.v-chat .composer input {
+  flex: 1;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 15.5px;
+}
+.v-chat .composer input::placeholder { color: var(--muted-foreground); }
+
+.v-chat .send {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  transition: transform 120ms ease-out, background-color 150ms ease-out;
+}
+.v-chat .send:hover { background: color-mix(in oklab, var(--primary) 88%, #fff); }
+.v-chat .send:active { transform: scale(0.94); }
+
+.v-chat .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.v-chat .chip {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13.5px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color 150ms ease-out, border-color 150ms ease-out, background-color 150ms ease-out, transform 120ms ease-out;
+}
+.v-chat .chip:hover { color: var(--foreground); border-color: var(--primary); background: var(--secondary); }
+.v-chat .chip:active { transform: scale(0.97); }
+
+.v-chat .thread { width: 100%; margin-top: 28px; display: flex; flex-direction: column; gap: 18px; }
+
+.v-chat .bubble-in {
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  transform-origin: top center;
+  animation: bubble-in 240ms var(--ease-out) forwards;
+}
+
+@keyframes bubble-in { to { opacity: 1; transform: none; } }
+
+.v-chat .msg-user {
+  align-self: flex-end;
+  max-width: 78%;
+  padding: 11px 16px;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.v-chat .msg-ai {
+  display: flex;
+  gap: 12px;
+  max-width: 100%;
+}
+
+.v-chat .avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.v-chat .answer { flex: 1; font-size: 15px; line-height: 1.62; }
+.v-chat .answer strong { font-weight: 600; }
+
+.v-chat .caret {
+  display: inline-block;
+  width: 7px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--primary);
+  animation: caret-blink 1s steps(2, start) infinite;
+}
+
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+.v-chat .thinking { display: flex; gap: 5px; padding: 8px 0; }
+.v-chat .thinking i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  animation: think 1.1s ease-out infinite;
+}
+.v-chat .thinking i:nth-child(2) { animation-delay: 0.15s; }
+.v-chat .thinking i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes think {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.v-chat .evidence {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.v-chat .evidence-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px 0;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.v-chat .bars { display: flex; flex-direction: column; gap: 9px; padding: 12px 14px 14px; }
+.v-chat .bar-row { display: grid; grid-template-columns: 86px 1fr 88px; align-items: center; gap: 12px; font-size: 13px; }
+.v-chat .bar-track { display: block; height: 7px; border-radius: 999px; background: var(--secondary); overflow: hidden; }
+.v-chat .bar-fill {
+  display: block; /* a bare span ignores width, which is the whole bar */
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: bar-grow 280ms var(--ease-out) forwards;
+}
+.v-chat .bar-fill.dim { background: color-mix(in oklab, var(--muted-foreground) 55%, transparent); }
+.v-chat .bar-val { text-align: right; color: var(--muted-foreground); }
+
+@keyframes bar-grow { to { transform: scaleX(1); } }
+
+.v-chat .cites { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 14px 14px; }
+.v-chat .cite {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  transition: color 150ms ease-out, border-color 150ms ease-out;
+}
+.v-chat .cite:hover { color: var(--foreground); border-color: var(--primary); }
+
+.v-chat .disclaimer { margin-top: 22px; font-size: 12.5px; color: var(--muted-foreground); text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===========================================================================
+   Picker — harness chrome. Verbatim from the skill's PICKER.md; do not restyle.
+   ========================================================================= */
+.proto-picker {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 8px 24px rgba(0, 0, 0, 0.24),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.proto-picker-highlight {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  will-change: transform;
+}
+
+.proto-picker[data-ready] .proto-picker-highlight {
+  transition:
+    transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+    width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+}
+
+.proto-picker-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font: inherit;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+.proto-picker-item:active { transform: scale(0.97); }
+
+.proto-picker-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+.proto-picker-item[data-active] { color: #fff; }
+
+.proto-picker-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.proto-picker-replay { padding: 0 10px; font-size: 14px; }
+
+.proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<nav class="proto-picker" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Bảng Điện</button>
+  <button class="proto-picker-item">Luận Điểm</button>
+  <button class="proto-picker-item">Đối Thoại</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+/* --- Mock market data ------------------------------------------------------
+   Realistic HOSE names and price levels in nghìn đồng. `ref` is giá tham chiếu,
+   which is what the five-colour code is measured against. `limit` marks a stock
+   already at trần/sàn — those do not tick, because a stock at its limit cannot
+   move further that session. */
+const TICKERS = [
+  { sym: "VCB", co: "Vietcombank",        ref: 91.20,  price: 92.10,  vol: 2.14 },
+  { sym: "HPG", co: "Hòa Phát",           ref: 26.70,  price: 26.45,  vol: 18.62 },
+  { sym: "FPT", co: "FPT Corp",           ref: 130.50, price: 132.80, vol: 4.07 },
+  { sym: "VNM", co: "Vinamilk",           ref: 65.80,  price: 65.90,  vol: 3.31 },
+  { sym: "MWG", co: "Thế Giới Di Động",   ref: 60.30,  price: 62.10,  vol: 9.85 },
+  { sym: "SSI", co: "Chứng khoán SSI",    ref: 28.80,  price: 28.35,  vol: 12.40 },
+  { sym: "VIC", co: "Vingroup",           ref: 39.80,  price: 42.55,  vol: 7.73, limit: "ceil" },
+  { sym: "PDR", co: "Phát Đạt",           ref: 19.40,  price: 18.05,  vol: 5.18, limit: "floor" },
+];
+
+const INDICES = [
+  { label: "VN-INDEX",    value: 1285.42, delta: 11.18, pct: 0.88 },
+  { label: "VN30",        value: 1342.07, delta: 14.90, pct: 1.12 },
+  { label: "HNX-INDEX",   value: 236.74,  delta: 1.02,  pct: 0.43 },
+  { label: "UPCOM-INDEX", value: 92.15,   delta: -0.18, pct: -0.20 },
+];
+
+const CHECK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+/* Formats a number the Vietnamese way — dot for thousands, comma for decimals. */
+function vn(n, digits) {
+  return n.toLocaleString("vi-VN", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+/* Maps a price against its reference to the bảng giá five-colour code. */
+function pxClass(row) {
+  if (row.limit === "ceil") return "px-ceil";
+  if (row.limit === "floor") return "px-floor";
+  const d = row.price - row.ref;
+  if (d > 0.001) return "px-up";
+  if (d < -0.001) return "px-down";
+  return "px-ref";
+}
+
+function signed(n, digits) {
+  return (n > 0 ? "+" : n < 0 ? "−" : "") + vn(Math.abs(n), digits);
+}
+
+/* Timers owned by the mounted variant; the harness clears them on every swap. */
+let cleanups = [];
+
+function navHtml(cta) {
+  return `
+    <header class="nav">
+      <a class="brand" href="#"><span class="brand-mark">V</span>VNQuant</a>
+      <nav class="nav-links">
+        <a href="#">Bảng giá</a>
+        <a href="#">Phân tích</a>
+        <a href="#">Trợ lý AI</a>
+        <a href="#">Bảng giá gói</a>
+      </nav>
+      <div class="nav-right">
+        <button class="btn btn-ghost btn-sm">Đăng nhập</button>
+        <button class="btn btn-primary btn-sm">${cta}</button>
+      </div>
+    </header>`;
+}
+
+/* ===========================================================================
+   Variant 1 — Bảng Điện
+   ========================================================================= */
+const board = {
+  render() {
+    const tapeItems = TICKERS.concat(TICKERS).map((t) => {
+      const pct = ((t.price - t.ref) / t.ref) * 100;
+      return `<span class="tape-item"><span class="tape-sym">${t.sym}</span>
+        <span class="num ${pxClass(t)}">${vn(t.price, 2)}</span>
+        <span class="num ${pxClass(t)}">${signed(pct, 2)}%</span></span>`;
+    }).join("");
+
+    const chips = INDICES.map((i) => `
+      <div class="index-chip">
+        <div class="label">${i.label}</div>
+        <div class="value num ${i.pct > 0 ? "px-up" : i.pct < 0 ? "px-down" : "px-ref"}">${vn(i.value, 2)}
+          <span class="delta num">${signed(i.pct, 2)}%</span>
+        </div>
+      </div>`).join("");
+
+    const rows = TICKERS.map((t, i) => {
+      const chg = t.price - t.ref;
+      const pct = (chg / t.ref) * 100;
+      const cls = pxClass(t);
+      return `
+        <tr data-sym="${t.sym}" style="animation-delay:${i * 28}ms">
+          <td><span class="sym">${t.sym}</span><span class="co">${t.co}</span></td>
+          <td class="num px-ref" data-cell="ref">${vn(t.ref, 2)}</td>
+          <td class="num ${cls}" data-cell="price">${vn(t.price, 2)}</td>
+          <td class="num ${cls}" data-cell="chg">${signed(chg, 2)}</td>
+          <td class="num ${cls}" data-cell="pct">${signed(pct, 2)}%</td>
+          <td class="num" data-cell="vol">${vn(t.vol, 2)}M</td>
+        </tr>`;
+    }).join("");
+
+    return `
+      <div class="page v-board">
+        <div class="tape"><div class="tape-track">${tapeItems}</div></div>
+        ${navHtml("Dùng thử")}
+        <main class="hero">
+          <div>
+            <span class="eyebrow"><span class="live-dot"></span>HOSE · HNX · UPCOM — trực tiếp</span>
+            <h1>Cả ba sàn,<br><em>một</em> màn hình.</h1>
+            <p class="lede">Bảng giá thời gian thực giữ đúng quy ước màu trần — tăng — tham chiếu — giảm — sàn mà bạn đã quen, cộng thêm lớp phân tích và trợ lý AI hiểu tiếng Việt.</p>
+            <div class="cta-row">
+              <button class="btn btn-primary">Mở bảng giá miễn phí</button>
+              <button class="btn btn-outline">Xem trợ lý AI</button>
+            </div>
+            <ul class="trust">
+              <li>${CHECK} Độ trễ dưới 2 giây</li>
+              <li>${CHECK} Dữ liệu đối chiếu công bố chính thức</li>
+              <li>${CHECK} Miễn phí 14 ngày, không cần thẻ</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head">${chips}</div>
+            <table>
+              <thead>
+                <tr><th>Mã</th><th>TC</th><th>Giá</th><th>+/−</th><th>%</th><th>KL</th></tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <div class="panel-foot">
+              <span>Phiên chiều · <span class="num" data-clock>14:32:07</span></span>
+              <div class="legend">
+                <span><i class="swatch" style="background:var(--px-ceil)"></i>Trần</span>
+                <span><i class="swatch" style="background:var(--px-up)"></i>Tăng</span>
+                <span><i class="swatch" style="background:var(--px-ref)"></i>TC</span>
+                <span><i class="swatch" style="background:var(--px-down)"></i>Giảm</span>
+                <span><i class="swatch" style="background:var(--px-floor)"></i>Sàn</span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>`;
+  },
+
+  init() {
+    // Work on a copy so repeated mounts always start from the same prices.
+    const live = TICKERS.map((t) => ({ ...t }));
+    const movable = live.filter((t) => !t.limit);
+    const clock = document.querySelector("[data-clock]");
+    let seconds = 14 * 3600 + 32 * 60 + 7;
+
+    // One random row re-prices per beat, exactly as a real board feels.
+    const tickTimer = setInterval(() => {
+      const t = movable[Math.floor(Math.random() * movable.length)];
+      const step = (Math.random() < 0.5 ? -1 : 1) * (Math.round(Math.random() * 3 + 1) * 0.05);
+      const next = Math.max(t.ref * 0.94, Math.min(t.ref * 1.06, t.price + step));
+      const up = next > t.price;
+      t.price = Math.round(next * 100) / 100;
+      t.vol = Math.round((t.vol + Math.random() * 0.06) * 100) / 100;
+
+      const row = document.querySelector(`.v-board tr[data-sym="${t.sym}"]`);
+      if (!row) return;
+      const chg = t.price - t.ref;
+      const pct = (chg / t.ref) * 100;
+      const cls = pxClass(t);
+      row.querySelector('[data-cell="price"]').textContent = vn(t.price, 2);
+      row.querySelector('[data-cell="chg"]').textContent = signed(chg, 2);
+      row.querySelector('[data-cell="pct"]').textContent = signed(pct, 2) + "%";
+      row.querySelector('[data-cell="vol"]').textContent = vn(t.vol, 2) + "M";
+      // The TC column stays yellow — it is the reference, not a movement.
+      row.querySelectorAll("[data-cell]").forEach((cell) => {
+        if (cell.dataset.cell !== "vol" && cell.dataset.cell !== "ref") cell.className = "num " + cls;
+      });
+
+      row.classList.remove("flash-up", "flash-down");
+      void row.offsetWidth; // restart the flash even on back-to-back ticks
+      row.classList.add(up ? "flash-up" : "flash-down");
+    }, 1100);
+
+    const clockTimer = setInterval(() => {
+      seconds += 1;
+      const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const s = String(seconds % 60).padStart(2, "0");
+      if (clock) clock.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    cleanups.push(() => clearInterval(tickTimer), () => clearInterval(clockTimer));
+  },
+};
+
+/* ===========================================================================
+   Variant 2 — Luận Điểm
+   ========================================================================= */
+const editorial = {
+  render() {
+    const strip = INDICES.map((i) => {
+      const cls = i.pct > 0 ? "px-up" : i.pct < 0 ? "px-down" : "px-ref";
+      return `<span><b>${i.label}</b><span class="val num">${vn(i.value, 2)}</span><span class="num ${cls}">${signed(i.pct, 2)}%</span></span>`;
+    }).join("");
+
+    // Each block reveals in sequence; delay is the only thing that varies.
+    const step = (delay, html) => `<div class="reveal" style="animation-delay:${delay}ms">${html}</div>`;
+
+    return `
+      <div class="page v-editorial">
+        ${navHtml("Đăng ký")}
+        <main class="ed">
+          ${step(0, `<div class="stamp">Số 12 · 08.08.2026 · Bản tin phiên chiều</div>`)}
+          ${step(60, `<h1>Đọc thị trường,<br>không chỉ <em>nhìn bảng giá</em>.</h1>`)}
+          ${step(120, `<p class="lede">Mỗi phiên, chúng tôi rút gọn hàng nghìn dòng dữ liệu HOSE, HNX và UPCOM thành một luận điểm bạn đọc hết trong bốn phút — kèm số liệu gốc và nguồn trích dẫn để bạn tự kiểm chứng.</p>`)}
+          ${step(180, `
+            <form class="signup" onsubmit="return false">
+              <input type="email" placeholder="email@congty.vn" aria-label="Email">
+              <button class="btn btn-primary" type="submit">Nhận bản tin</button>
+            </form>
+            <p class="note">Miễn phí 14 ngày · Huỷ bất cứ lúc nào · 18.400 nhà đầu tư đang đọc</p>`)}
+          ${step(240, `
+            <hr class="rule">
+            <div class="strip">${strip}</div>
+            <p class="byline">“Phần khó không phải là dữ liệu — phần khó là biết dòng nào đáng đọc.”</p>`)}
+        </main>
+      </div>`;
+  },
+};
+
+/* ===========================================================================
+   Variant 3 — Đối Thoại
+   ========================================================================= */
+const ANSWERS = {
+  "hpg": {
+    q: "HPG có đang bị định giá thấp so với ngành thép không?",
+    text: "Ở mức <strong>26.450 đ</strong>, HPG giao dịch tại P/E trượt 12 tháng là <strong>13,4×</strong> — thấp hơn trung bình ngành thép niêm yết (16,1×) nhưng cao hơn chính nó ở đáy 2023 (9,8×). Biên lợi nhuận gộp quý gần nhất hồi phục lên 13,2% nhờ giá quặng hạ; rủi ro chính vẫn là chu kỳ bất động sản dân dụng và giá điện đầu vào cho Dung Quất 2.",
+    bars: [
+      { label: "HPG", value: 13.4, max: 20, dim: false, fmt: "13,4×" },
+      { label: "HSG", value: 15.8, max: 20, dim: true, fmt: "15,8×" },
+      { label: "NKG", value: 18.9, max: 20, dim: true, fmt: "18,9×" },
+    ],
+    barsTitle: "P/E trượt 12 tháng",
+    cites: ["BCTC hợp nhất Q2/2026 — HPG", "Sở GDCK TP.HCM", "Bản tin ngành thép VSA"],
+  },
+  "vcb": {
+    q: "So sánh VCB và TCB trong quý này",
+    text: "VCB giữ NIM <strong>3,1%</strong> với tỷ lệ nợ xấu 0,98% — thấp nhất nhóm quốc doanh; TCB đánh đổi chất lượng lấy tăng trưởng, NIM <strong>4,3%</strong> nhưng nợ xấu 1,42% và tỷ trọng cho vay bất động sản cao gấp đôi. Quý này VCB tăng 0,99%, TCB đi ngang tại tham chiếu.",
+    bars: [
+      { label: "VCB", value: 3.1, max: 5, dim: false, fmt: "NIM 3,1%" },
+      { label: "TCB", value: 4.3, max: 5, dim: true, fmt: "NIM 4,3%" },
+    ],
+    barsTitle: "Biên lãi thuần Q2/2026",
+    cites: ["BCTC riêng lẻ Q2/2026 — VCB", "BCTC hợp nhất Q2/2026 — TCB", "SBV — thống kê tín dụng"],
+  },
+  "steel": {
+    q: "Dòng tiền khối ngoại đang chảy vào nhóm nào?",
+    text: "Mười phiên gần nhất, khối ngoại mua ròng <strong>2.140 tỷ đồng</strong>, tập trung ở ngân hàng (VCB, CTG) và bán lẻ (MWG). Chiều bán ròng nghiêng về bất động sản — riêng nhóm này bị rút <strong>870 tỷ</strong>, phần lớn từ hai mã đang chịu áp lực thanh khoản.",
+    bars: [
+      { label: "Ngân hàng", value: 1180, max: 1400, dim: false, fmt: "+1.180 tỷ" },
+      { label: "Bán lẻ", value: 640, max: 1400, dim: false, fmt: "+640 tỷ" },
+      { label: "BĐS", value: 870, max: 1400, dim: true, fmt: "−870 tỷ" },
+    ],
+    barsTitle: "Giao dịch ròng khối ngoại · 10 phiên",
+    cites: ["HOSE — thống kê giao dịch NĐTNN", "HNX — báo cáo phiên"],
+  },
+};
+
+const chat = {
+  render() {
+    const chips = [
+      { key: "hpg", label: "HPG có bị định giá thấp?" },
+      { key: "vcb", label: "So sánh VCB và TCB quý này" },
+      { key: "steel", label: "Khối ngoại đang mua nhóm nào?" },
+    ].map((c) => `<button class="chip" data-key="${c.key}">${c.label}</button>`).join("");
+
+    return `
+      <div class="page v-chat">
+        ${navHtml("Dùng thử")}
+        <main class="hero">
+          <h1 class="rise">Hỏi về thị trường Việt Nam<br><em>bằng tiếng Việt</em>.</h1>
+          <p class="sub rise" style="animation-delay:60ms">Trợ lý đọc báo cáo tài chính, dữ liệu giao dịch và công bố thông tin, rồi trả lời kèm số liệu gốc — mỗi câu đều truy được về nguồn.</p>
+          <div class="composer rise" style="animation-delay:120ms">
+            <input id="proto-q" placeholder="Ví dụ: HPG có đang bị định giá thấp không?" aria-label="Câu hỏi">
+            <button class="send" aria-label="Gửi câu hỏi">↑</button>
+          </div>
+          <div class="chips rise" style="animation-delay:180ms">${chips}</div>
+          <div class="thread" id="proto-thread"></div>
+          <p class="disclaimer rise" style="animation-delay:240ms">Nội dung mang tính tham khảo, không phải khuyến nghị đầu tư.</p>
+        </main>
+      </div>`;
+  },
+
+  init() {
+    const input = document.getElementById("proto-q");
+    const thread = document.getElementById("proto-thread");
+    const timers = [];
+    const after = (ms, fn) => timers.push(setTimeout(fn, ms));
+
+    // Streams an answer word by word, then reveals its evidence card.
+    function stream(answer) {
+      const ai = document.createElement("div");
+      ai.className = "msg-ai bubble-in";
+      ai.innerHTML = `<div class="avatar">AI</div><div class="answer"><div class="thinking"><i></i><i></i><i></i></div></div>`;
+      thread.appendChild(ai);
+      const body = ai.querySelector(".answer");
+
+      after(650, () => {
+        // A <strong> block plus its trailing punctuation is one token, so the
+        // stream never paints a half-open tag.
+        const words = answer.text.match(/<strong>[\s\S]*?<\/strong>\S*|\S+/g);
+        let i = 0;
+        const write = setInterval(() => {
+          i += 2;
+          body.innerHTML = words.slice(0, i).join(" ") + '<span class="caret"></span>';
+          if (i >= words.length) {
+            clearInterval(write);
+            body.innerHTML = answer.text;
+            body.insertAdjacentHTML("beforeend", evidenceHtml(answer));
+          }
+        }, 38);
+        timers.push(() => clearInterval(write));
+        cleanups.push(() => clearInterval(write));
+      });
+    }
+
+    function evidenceHtml(answer) {
+      const bars = answer.bars.map((b, i) => `
+        <div class="bar-row">
+          <span>${b.label}</span>
+          <span class="bar-track"><span class="bar-fill${b.dim ? " dim" : ""}" style="width:${(b.value / b.max) * 100}%;animation-delay:${i * 70}ms"></span></span>
+          <span class="bar-val num">${b.fmt}</span>
+        </div>`).join("");
+      const cites = answer.cites.map((c) => `<a class="cite" href="#">◇ ${c}</a>`).join("");
+      return `
+        <div class="evidence">
+          <div class="evidence-head">${answer.barsTitle}</div>
+          <div class="bars">${bars}</div>
+          <div class="cites">${cites}</div>
+        </div>`;
+    }
+
+    function ask(question, answer) {
+      const user = document.createElement("div");
+      user.className = "msg-user bubble-in";
+      user.textContent = question;
+      thread.appendChild(user);
+      stream(answer);
+      input.value = "";
+    }
+
+    document.querySelectorAll(".v-chat .chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const answer = ANSWERS[chip.dataset.key];
+        ask(answer.q, answer);
+      });
+    });
+
+    // Free text falls back to the valuation answer — enough to show the shape.
+    const submit = () => {
+      const q = input.value.trim();
+      if (!q) return;
+      ask(q, ANSWERS.hpg);
+    };
+    document.querySelector(".v-chat .send").addEventListener("click", submit);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submit();
+    });
+
+    cleanups.push(() => timers.forEach((t) => (typeof t === "function" ? t() : clearTimeout(t))));
+  },
+};
+
+/* ===========================================================================
+   Picker wiring — behaviour contract from PICKER.md, extended only so a
+   variant can attach its own listeners and timers after mount.
+   ========================================================================= */
+const variants = [board, editorial, chat];
+
+const stage = document.getElementById("stage");
+const picker = document.querySelector(".proto-picker");
+const highlight = picker.querySelector(".proto-picker-highlight");
+const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+const replay = picker.querySelector(".proto-picker-replay");
+let current = 0;
+
+function moveHighlight() {
+  const el = items[current];
+  highlight.style.width = el.offsetWidth + "px";
+  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+}
+
+function mount(i) {
+  cleanups.forEach((fn) => fn());
+  cleanups = [];
+  stage.innerHTML = "";
+  // Clear first, render next frame, so entrance animations re-run.
+  requestAnimationFrame(() => {
+    stage.innerHTML = variants[i].render();
+    variants[i].init?.();
+  });
+}
+
+function setActive(i) {
+  if (i < 0 || i >= variants.length) return;
+  current = i;
+  items.forEach((el, j) => {
+    el.toggleAttribute("data-active", j === i);
+    if (j === i) el.setAttribute("aria-current", "true");
+    else el.removeAttribute("aria-current");
+  });
+  moveHighlight();
+  const url = new URL(location);
+  url.searchParams.set("v", i + 1);
+  history.replaceState(null, "", url);
+  mount(i);
+}
+
+items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+replay?.addEventListener("click", () => mount(current));
+window.addEventListener("resize", moveHighlight);
+
+document.addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const num = parseInt(e.key, 10);
+  if (num >= 1 && num <= variants.length) setActive(num - 1);
+  else if (e.key === "ArrowRight") setActive((current + 1) % variants.length);
+  else if (e.key === "ArrowLeft") setActive((current - 1 + variants.length) % variants.length);
+  else if (e.key === "r" || e.key === "R") mount(current);
+});
+
+setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+// Enable the slide only after first paint, so load doesn't animate.
+requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>

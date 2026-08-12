@@ -16,9 +16,19 @@ balancing:
   builds it. Anything left undecided here gets decided by guessing at the keyboard, which
   is why *Risks & open questions* is a real section and not a formality.
 
-**What each section is for** — the full table (what it holds, why it exists, what it
-feeds in the implementation phase) is in SKILL.md → *The Plan File*. Read it once; this
-file is the shape, that table is the reasoning.
+**What each section is for.** Every section exists because something specific goes wrong
+without it; none of them is a summary of the others.
+
+| Section | What it holds | Why it is there | What it feeds in the implementation phase |
+|---|---|---|---|
+| **Direction** | Letter, name, thesis, the option's token file path, surface kit, brand colour, accent strategy | Names *which* of the presented options was picked, unambiguously. "The blue one" is not a record. | Step 12 ports from the named CSS file — no re-deriving colours, no reopening the choice |
+| **Stack** | FE framework, UI framework, styling engine, each with its major version, plus the exact scaffold and install commands on greenfield | Version is where a plan silently goes wrong: Tailwind 3 vs 4 and Chakra 2 vs 3 are different products with the same name. Writing the commands out is what lets the user veto an install *before* it runs | Step 11 runs these commands verbatim; steps 12-14 write against these majors |
+| **Tokens & fonts** | Token file path, default colour mode, how the mode is toggled, each font family mapped to its token, and the load method | These are the four decisions that are painful to reverse once components exist. Default mode in particular is proposed here, not asked earlier | Steps 12-13 are this section, executed |
+| **Scope** | A table: each component/page, its file path, what it contains | The single most valuable section to review. Scope is where "add a theme" becomes a fortnight, and a table makes an over-broad build visible in ten seconds. It is **proposed** by you — the user's job is to cut it | Step 14 builds exactly these rows, in this order. A component not in the table is unapproved work |
+| **Out of scope** | What is deliberately not in this pass | Turns silence into a decision. Without it "no auth screens" reads as an oversight and gets built anyway | Prevents step 14 from expanding; the reviewer flags additions as findings |
+| **Steps** | The running order, as a numbered list | Makes the sequence reviewable — a user can see that scaffolding happens before tokens and tokens before components | The implementation phase's actual running order |
+| **Verification** | The exact commands that must pass | Defines done before work starts, so "done" is not a judgement call at the end | Step 15 runs these |
+| **Risks & open questions** | Anything genuinely undecided, and any version API to confirm after install | This is the pressure valve. Without it, an uncertainty gets resolved by guessing mid-build and nobody finds out | Answered by the user at Gate 2, or verified at the step that needs it |
 
 **What stays out**, per section — a plan that restates the code is a second copy to keep
 in sync:
@@ -27,7 +37,6 @@ in sync:
 |---|---|
 | Direction | The token values — they are in the option CSS |
 | Stack | Alternatives already ruled out |
-| Motion | A keyframe spec — the personality and the tier are the decision |
 | Tokens & fonts | A restated token table |
 | Scope | Anything the user did not ask for, padded out to look thorough |
 | Steps | Prose restating the skill's checklist |
@@ -77,19 +86,6 @@ npx shadcn@latest init        # if a component library was chosen
 
 Existing project — nothing is scaffolded; the majors above were read from `package.json`.
 
-## Motion
-
-- Animation: **<requested / declined>**
-- Personality: `<still / calm / crisp / springy / cinematic>` at tier <N> — <what it does: entrance distance, easing, hover lift>
-- What moves: <e.g. card entrance on first paint, hover lift on cards and rows, page transitions>
-- What does not: <e.g. no scroll-triggered reveals, no parallax, no loading skeleton animation>
-- `prefers-reduced-motion` is honoured — animation disabled, not merely shortened
-
-Or, when animation was declined:
-
-- Animation: **declined.** No entrance, scroll, or hover-transform motion. State changes still
-  transition at 150-300ms — that is a control not looking broken, not animation. Step 15 is skipped.
-
 ## Tokens & fonts
 
 - Token file: `src/index.css` — both modes, ported from the option CSS (colours + `--surface-*`), **no comments**
@@ -97,6 +93,7 @@ Or, when animation was declined:
 - Display font: `<Family>` → `--font-serif` / `--font-sans`, loaded via <Google Fonts link / @fontsource-variable / system stack>
 - Body font: `<Family>` → `--font-sans`
 - Mono: `<Family or "none — omit the token">`
+- Motion: press 100–160ms / popovers 125–200ms / dropdowns 150–250ms / modals ≤300ms; ease-out only (no `ease-in`); `transform`+`opacity` only; no animation on keyboard/high-frequency actions; popovers origin-aware, modals centered; honour `prefers-reduced-motion`
 
 ## Scope — <N> items
 
@@ -118,8 +115,7 @@ Proposed, not requested. Cut or add anything.
 2. Write the token file from the option CSS — light + dark, comment-free
 3. Wire the fonts and map them to the font tokens
 4. Build scope items in order: <1 → 2 → …>, each verified in both modes
-5. Motion pass — <personality> at tier <N> / or: skipped, animation was declined
-6. Delete the scaffold's demo content and set the real `<title>` (greenfield only)
+5. Delete the scaffold's demo content and set the real `<title>` (greenfield only)
 
 ## Verification
 

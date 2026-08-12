@@ -1,5 +1,13 @@
-Symlinks into ~/.claude, so it can be edited from this workspace.
-Contents are gitignored (absolute, machine-specific paths) — recreate locally:
+Symlinks into the agents' user-level config dirs, so they can be edited from this workspace.
+Contents are gitignored (absolute, machine-specific paths) - recreate locally:
 
-  ln -s ~/.claude/CLAUDE.md global/CLAUDE.md
-  ln -s ~/.claude/skills    global/skills
+  mkdir -p global/claude global/cursor ~/.cursor/skills ~/.cursor/rules
+
+  ln -s ~/.claude/CLAUDE.md global/claude/CLAUDE.md
+  ln -s ~/.claude/skills    global/claude/skills
+  ln -s ~/.cursor/skills    global/cursor/skills
+  ln -s ~/.cursor/rules     global/cursor/rules
+
+Cursor paths come from the managed block in ~/.cursor/.gitignore: skills/ is
+"user's personal skills", rules/ is "user-level cursor rules". skills-cursor/ is
+Cursor's own built-in set and is deliberately not mapped.

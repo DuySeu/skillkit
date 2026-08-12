@@ -18,7 +18,7 @@ Load this file when doing a UI review/audit pass, or when you need the full chec
 - `heading-hierarchy` - Sequential h1→h6, no level skip
 - `color-not-only` - Don't convey info by color alone (add icon/text)
 - `dynamic-type` - Support system text scaling; avoid truncation as text grows (Apple Dynamic Type, MD)
-- `reduced-motion` - Respect prefers-reduced-motion; reduce/disable animations when requested (Apple Reduced Motion API, MD)
+- `reduced-motion` - Respect prefers-reduced-motion: drop movement/position; keep short opacity/colour fades that aid comprehension (Apple Reduced Motion API, MD)
 - `voiceover-sr` - Meaningful accessibilityLabel/accessibilityHint; logical reading order for VoiceOver/screen readers (Apple HIG, MD)
 - `escape-routes` - Provide cancel/back in modals and multi-step flows (Apple HIG)
 - `keyboard-shortcuts` - Preserve system and a11y shortcuts; offer keyboard alternatives for drag-and-drop (Apple HIG)
@@ -35,7 +35,7 @@ Load this file when doing a UI review/audit pass, or when you need the full chec
 - `tap-delay` - Use touch-action: manipulation to reduce 300ms delay (Web)
 - `standard-gestures` - Use platform standard gestures consistently; don't redefine (e.g. swipe-back, pinch-zoom) (Apple HIG)
 - `system-gestures` - Don't block system gestures (Control Center, back swipe, etc.) (Apple HIG)
-- `press-feedback` - Visual feedback on press (ripple/highlight; MD state layers)
+- `press-feedback` - Visual feedback on press: colour/opacity/shadow/border and/or subtle `:active` scale ~0.97 on the control (must not reflow siblings)
 - `haptic-feedback` - Use haptic for confirmations and important actions; avoid overuse (Apple HIG)
 - `gesture-alternative` - Don't rely on gesture-only interactions; always provide visible controls for critical actions
 - `safe-area-awareness` - Keep primary touch targets away from notch, Dynamic Island, gesture bar and screen edges
@@ -120,11 +120,11 @@ Load this file when doing a UI review/audit pass, or when you need the full chec
 
 ### 7. Animation (MEDIUM)
 
-- `duration-timing` - Use 150–300ms for micro-interactions; complex transitions ≤400ms; avoid >500ms (MD)
+- `duration-timing` - Press 100–160ms; micro-interactions typically 150–300ms; modals/drawers ≤300ms; complex ≤400ms; avoid >500ms for UI; no animation on keyboard/high-frequency actions (MD)
 - `transform-performance` - Use transform/opacity only; avoid animating width/height/top/left
 - `loading-states` - Show skeleton or progress indicator when loading exceeds 300ms
 - `excessive-motion` - Animate 1-2 key elements per view max
-- `easing` - Use ease-out for entering, ease-in for exiting; avoid linear for UI transitions
+- `easing` - Use ease-out (or a strong custom ease-out) for enter and UI feedback; never ease-in on UI (feels sluggish); exit may be shorter than enter but still ease-out; avoid linear except constant motion (marquee, progress)
 - `motion-meaning` - Every animation must express a cause-effect relationship, not just be decorative (Apple HIG)
 - `state-transition` - State changes (hover / active / expanded / collapsed / modal) should animate smoothly, not snap
 - `continuity` - Page/screen transitions should maintain spatial continuity (shared element, directional slide) (Apple HIG)
@@ -136,12 +136,13 @@ Load this file when doing a UI review/audit pass, or when you need the full chec
 - `interruptible` - Animations must be interruptible; user tap/gesture cancels in-progress animation immediately (Apple HIG)
 - `no-blocking-animation` - Never block user input during an animation; UI must stay interactive (Apple HIG)
 - `fade-crossfade` - Use crossfade for content replacement within the same container (MD)
-- `scale-feedback` - Subtle scale (0.95–1.05) on press for tappable cards/buttons; restore on release (HIG, MD)
+- `scale-feedback` - Subtle scale on press for buttons/pressables (`:active` ~0.97, range 0.95–0.98); transform on the control only — must not shift siblings or reflow; restore on release (HIG, MD)
 - `gesture-feedback` - Drag, swipe, and pinch must provide real-time visual response tracking the finger (MD Motion)
 - `hierarchy-motion` - Use translate/scale direction to express hierarchy: enter from below = deeper, exit upward = back (MD)
 - `motion-consistency` - Unify duration/easing tokens globally; all animations share the same rhythm and feel
 - `opacity-threshold` - Fading elements should not linger below opacity 0.2; either fade fully or remain visible
-- `modal-motion` - Modals/sheets should animate from their trigger source (scale+fade or slide-in) for spatial context (HIG, MD)
+- `modal-motion` - Modals stay centered (`transform-origin: center`); popovers/menus/tooltips scale from their trigger for spatial context
+- `no-high-frequency-motion` - Keyboard-triggered and high-frequency actions (shortcuts, command palette) get no animation; frequent hover/list nav: remove or near-zero
 - `navigation-direction` - Forward navigation animates left/up; backward animates right/down — keep direction logically consistent (HIG)
 - `layout-shift-avoid` - Animations must not cause layout reflow or CLS; use transform for position changes
 

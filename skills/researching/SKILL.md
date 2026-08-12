@@ -7,7 +7,7 @@ description: Use when asked to research or explain a topic — "what is X", "exp
 
 ## Overview
 
-Two instincts ruin topic research: answering from stale training data, and equating thorough with long. This skill enforces the opposite: **search first, answer short, takeaway first.**
+Three instincts ruin topic research: answering from stale training data, equating thorough with long, and writing in the shorthand of someone who already knows the field. This skill enforces the opposite: **search first, answer short, takeaway first, and say it in words the reader actually has.**
 
 **Violating the letter of these rules is violating the spirit of these rules.**
 
@@ -34,13 +34,43 @@ Never put the "mental model to keep" at the end. That's the lede; lead with it.
 
 "Be thorough", "comprehensive", "brain-dump everything" are NOT licenses for length. Thorough = well-chosen 500 words + an offer to drill into specific parts. A 1,500-word wall serves the writer, not the beginner. If material won't fit, it becomes the drill-down menu at the end, not extra sections.
 
-## Rule 4: Zero unexplained jargon
+## Rule 4: Zero unexplained jargon, zero unexpanded abbreviations
 
-Every technical term gets a plain-language gloss on first use ("KEM — a way for two parties to agree on a secret key"). If a term isn't worth glossing, it isn't worth including.
+Every technical term gets a plain-language gloss on first use. If a term isn't worth glossing, it isn't worth including.
+
+**Every abbreviation, acronym, or initialism gets its full form in parentheses on first use, then the gloss.** Shape: `ABBR (Full Words Behind It - what it actually does in plain language)`.
+
+- `KEM (Key Encapsulation Mechanism - cách hai bên thống nhất một khoá bí mật chung)`
+- `RAG (Retrieval-Augmented Generation - mô hình tra cứu tài liệu trước rồi mới trả lời)`
+- `TTFT (Time To First Token - thời gian từ lúc gửi câu hỏi tới lúc chữ đầu tiên hiện ra)`
+
+This applies even to abbreviations you consider common knowledge (API, LLM, SDK, CI, JWT). "Everyone knows this one" is the exact assumption that loses a beginner. After the first expansion, use the short form freely - expand once, not every time.
+
+An abbreviation inside a quoted product name, a command, a flag, or a file path stays verbatim: expand it in the prose around it, never rewrite the literal string.
 
 ## Rule 5: Separate stable from fast-changing
 
 Label which parts are timeless fundamentals (safe to remember for years) and which are current-state (true as of the cited date, will drift). Every fast-changing claim carries a date and a source; fundamentals don't need citations.
+
+## Rule 6: One language per answer
+
+Answer entirely in the language the user asked in. A Vietnamese question gets a Vietnamese answer - not Vietnamese scaffolding with English clauses dropped in, and not an English paragraph with Vietnamese connectors.
+
+Half-and-half sentences are the failure mode to kill:
+
+| Bad | Good |
+|---|---|
+| "Model này handle được long context tốt hơn" | "Mô hình này xử lý ngữ cảnh dài tốt hơn" |
+| "Bạn cần deploy nó lên production trước khi test performance" | "Bạn cần triển khai lên môi trường thật trước khi đo hiệu năng" |
+| "Nó improve accuracy nhưng tăng latency" | "Nó tăng độ chính xác nhưng chậm hơn (độ trễ cao hơn)" |
+
+An English term survives untranslated only when it is genuinely a name, not a word:
+
+- Proper nouns and product names: Claude Code, PostgreSQL, Kubernetes.
+- Literal code: identifiers, flags, commands, file paths, config keys.
+- Terms of art with no settled Vietnamese equivalent, where translating would make it *harder* to search or discuss with other engineers: `transformer`, `embedding`, `container`, `token`. Keep the English word, and gloss it in Vietnamese once: "embedding (vector số biểu diễn ý nghĩa của một đoạn văn bản)".
+
+When in doubt, translate. If a term needs to stay in English, keep it in English every time it appears - don't alternate between "độ trễ" and "latency" for the same idea in one answer.
 
 ## Rationalizations — all of them mean STOP
 
@@ -52,6 +82,9 @@ Label which parts are timeless fundamentals (safe to remember for years) and whi
 | "They asked for a thorough brain-dump" | Thorough = right 500 words + drill-down offers, not 1,700 words. |
 | "The topic is technical, jargon is unavoidable" | Then gloss it. Unexplained jargon = failed answer for a beginner. |
 | "My summary paragraph is at the end" | The takeaway goes first. Move it. |
+| "API / LLM / SDK is universally known" | Expand it anyway, once. You don't know what this reader knows. |
+| "The English word is shorter / more precise" | Shorter for you, opaque for them. Translate it, or gloss it and stay consistent. |
+| "Devs here talk half-English anyway" | Casual speech isn't a written explanation for a beginner. Pick one language. |
 
 ## Red Flags — if you notice these, start over
 
@@ -60,3 +93,5 @@ Label which parts are timeless fundamentals (safe to remember for years) and whi
 - A "one-paragraph version to keep" appears at the bottom
 - A time-sensitive claim has no date or source
 - A beginner would need to look up a term you used
+- An acronym appears anywhere in the draft without its full form given once
+- Any sentence mixes two languages, or the same concept appears under both its English and its translated name

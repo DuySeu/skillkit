@@ -98,32 +98,6 @@ tokens and reports each adjustment:
 - **`hard`** and **`outlined`** move `border` and `input` toward the foreground. A 3px
   border in a hairline colour is a thick smudge; weight and colour have to move together.
 
-## The motion personality
-
-Each option also carries one of five motion personalities — `still`, `calm`, `crisp`,
-`springy`, `cinematic` — chosen the same way the surface kit is: spread across the set so
-the user is picking motion at the same time as colour, not inheriting it.
-
-- The `--motion` dial (inferred from the concept, overridable) sets the **centre**. The
-  slot offsets `[0, +2, -2, +1, -1]` spread the set around it, clamped to 1-10, and each
-  step off the dial is reported. Near an extreme the spread compresses and several
-  options share a personality — that is deliberate. A clinical dashboard at dial 2
-  should not be offered a cinematic direction just so the tab strip looks varied, and
-  sliding the window upward would hand a tier-5 option to a concept that asked for 1.
-- The tier maps to a personality: 1-2 `still`, 3-4 `calm`, 5-6 `crisp`, 7-8 `springy`,
-  9-10 `cinematic`. Each is a complete feel — entrance distance, easing curve, stagger,
-  and hover lift move together, because 700ms with a linear curve is sluggish while
-  700ms with an ease-out is cinematic.
-- **`--no-animation` overrides everything**: every option becomes `still` at tier 1, and
-  the preview disables its motion controls rather than hiding them, so the user can see
-  that the decision was theirs.
-- Motion is **not a token**. It ships as transitions/GSAP in the implementation phase, so
-  it appears in the option CSS only as a line in the provenance header — which is
-  stripped when the file is ported, like the rest of that header.
-
-Check each personality against its own option at step 8: `cinematic` on the brutalist
-direction is a contradiction the ladder cannot see.
-
 ## The archetype
 
 The preview renders one of four miniature products — `dashboard`, `landing`, `ecommerce`,

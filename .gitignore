@@ -24,6 +24,7 @@ env/
 *.log
 
 sample/
+skills-lock.json
 
 # Machine-local symlinks into ~/.claude (folder kept by global/.gitkeep)
 global/*

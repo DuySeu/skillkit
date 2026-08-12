@@ -43,19 +43,14 @@ SEARCH_CONFIG = {
 }
 
 # ============ DESIGN DIALS (1-10) ============
-# Inspired by taste-skill's DESIGN_VARIANCE / MOTION_INTENSITY / VISUAL_DENSITY
-# knobs: three optional 1-10 sliders that bias the existing query-based search
-# instead of replacing it. Each dial buckets into a low/mid/high tier.
+# Inspired by taste-skill's DESIGN_VARIANCE / VISUAL_DENSITY knobs: two optional
+# 1-10 sliders that bias the existing query-based search instead of replacing it.
+# Each dial buckets into a low/mid/high tier.
 DIAL_TIERS = {
     "variance": [
         (1, 3, {"label": "Centered / Minimal", "style_keywords": ["Minimalism", "Exaggerated Minimalism", "centered", "symmetric", "grid-based"]}),
         (4, 7, {"label": "Balanced / Modern", "style_keywords": ["modern", "structured", "balanced"]}),
         (8, 10, {"label": "Bold / Asymmetric", "style_keywords": ["Brutalism", "Bento Grids", "asymmetric", "experimental"]}),
-    ],
-    "motion": [
-        (1, 3, {"label": "Subtle", "tier": "Subtle"}),
-        (4, 7, {"label": "Standard", "tier": "Standard"}),
-        (8, 10, {"label": "Complex", "tier": "Complex"}),
     ],
     "density": [
         (1, 3, {"label": "Spacious", "spacing": {"xs": "4px", "sm": "8px", "md": "24px", "lg": "32px", "xl": "48px", "2xl": "64px", "3xl": "96px"}}),
@@ -204,15 +199,14 @@ class DesignSystemGenerator:
         return search_result.get("results", [])
 
     def generate(self, query: str, project_name: str = None,
-                 variance: int = None, motion: int = None, density: int = None) -> dict:
+                 variance: int = None, density: int = None) -> dict:
         """Generate complete design system recommendation.
 
-        variance/motion/density are optional 1-10 dials (see DIAL_TIERS) that bias
-        style selection, pull in a matching motion.csv snippet, and override the
-        spacing scale, without changing behavior when left unset.
+        variance/density are optional 1-10 dials (see DIAL_TIERS) that bias style
+        selection and override the spacing scale, without changing behavior when
+        left unset.
         """
         variance_info = _resolve_dial("variance", variance)
-        motion_info = _resolve_dial("motion", motion)
         density_info = _resolve_dial("density", density)
 
         # Step 1: First search product to get category
@@ -246,18 +240,6 @@ class DesignSystemGenerator:
         best_color = color_results[0] if color_results else {}
         best_typography = typography_results[0] if typography_results else {}
         best_landing = landing_results[0] if landing_results else {}
-
-        # MOTION_INTENSITY dial: pull a matching GSAP skeleton from motion.csv
-        # (the domain key is "gsap", not "motion").
-        motion_snippet = {}
-        if motion_info:
-            motion_result = search(f"{query} {motion_info['tier']}", "gsap", 5)
-            motion_matches = motion_result.get("results", [])
-            tiered = [m for m in motion_matches if m.get("Intensity Tier") == motion_info["tier"]]
-            if tiered:
-                motion_snippet = tiered[0]
-            elif motion_matches:
-                motion_snippet = motion_matches[0]
 
         # Step 5: Build final recommendation
         # Combine effects from both reasoning and style search
@@ -324,12 +306,9 @@ class DesignSystemGenerator:
             "dials": {
                 "variance": variance_info["value"] if variance_info else None,
                 "variance_label": variance_info["label"] if variance_info else None,
-                "motion": motion_info["value"] if motion_info else None,
-                "motion_label": motion_info["label"] if motion_info else None,
                 "density": density_info["value"] if density_info else None,
                 "density_label": density_info["label"] if density_info else None,
             },
-            "motion_snippet": motion_snippet,
             "spacing_scale": density_info["spacing"] if density_info else None,
         }
 
@@ -376,7 +355,6 @@ def format_ascii_box(design_system: dict) -> str:
     effects = design_system.get("key_effects", "")
     anti_patterns = design_system.get("anti_patterns", "")
     dials = design_system.get("dials", {})
-    motion_snippet = design_system.get("motion_snippet", {})
 
     def wrap_text(text: str, prefix: str, width: int) -> list:
         """Wrap long text into multiple lines."""
@@ -411,12 +389,10 @@ def format_ascii_box(design_system: dict) -> str:
     lines.append("┌" + "─" * w + "┐")
 
     # Design Dials section (only if at least one dial was set)
-    if any(dials.get(k) is not None for k in ("variance", "motion", "density")):
+    if any(dials.get(k) is not None for k in ("variance", "density")):
         lines.append(section_header("DESIGN DIALS", BOX_WIDTH + 1))
         if dials.get("variance") is not None:
             lines.append(f"│  Variance: {dials['variance']}/10 — {dials['variance_label']}".ljust(BOX_WIDTH) + "│")
-        if dials.get("motion") is not None:
-            lines.append(f"│  Motion:   {dials['motion']}/10 — {dials['motion_label']}".ljust(BOX_WIDTH) + "│")
         if dials.get("density") is not None:
             lines.append(f"│  Density:  {dials['density']}/10 — {dials['density_label']}".ljust(BOX_WIDTH) + "│")
 
@@ -506,17 +482,6 @@ def format_ascii_box(design_system: dict) -> str:
         for line in wrap_text(effects, "│     ", BOX_WIDTH):
             lines.append(line.ljust(BOX_WIDTH) + "│")
 
-    # Motion section (GSAP skeleton, only if --motion dial was set)
-    if motion_snippet:
-        lines.append(section_header("MOTION", BOX_WIDTH + 1))
-        lines.append(f"│  {motion_snippet.get('Category', '')} ({motion_snippet.get('Intensity Tier', '')})".ljust(BOX_WIDTH) + "│")
-        lines.append(f"│     Trigger: {motion_snippet.get('Trigger', '')} | Duration: {motion_snippet.get('Duration', '')} | Easing: {motion_snippet.get('Easing', '')}".ljust(BOX_WIDTH) + "│")
-        for line in wrap_text(f"GSAP: {motion_snippet.get('GSAP Snippet', '')}", "│     ", BOX_WIDTH):
-            lines.append(line.ljust(BOX_WIDTH) + "│")
-        if motion_snippet.get("Framework Notes"):
-            for line in wrap_text(f"Framework: {motion_snippet.get('Framework Notes', '')}", "│     ", BOX_WIDTH):
-                lines.append(line.ljust(BOX_WIDTH) + "│")
-
     # Anti-patterns section
     if anti_patterns:
         lines.append(section_header("AVOID", BOX_WIDTH + 1))
@@ -528,10 +493,9 @@ def format_ascii_box(design_system: dict) -> str:
     checklist_items = [
         "[ ] No emojis as icons (use SVG: Heroicons/Lucide)",
         "[ ] cursor-pointer on all clickable elements",
-        "[ ] Hover states with smooth transitions (150-300ms)",
+        "[ ] Hover/press: named transitions (no transition: all); ease-out; 100-300ms; no motion on keyboard actions",
         "[ ] Light mode: text contrast 4.5:1 minimum",
         "[ ] Focus states visible for keyboard nav",
-        "[ ] prefers-reduced-motion respected",
         "[ ] Responsive: 375px, 768px, 1024px, 1440px"
     ]
     for item in checklist_items:
@@ -552,19 +516,16 @@ def format_markdown(design_system: dict) -> str:
     effects = design_system.get("key_effects", "")
     anti_patterns = design_system.get("anti_patterns", "")
     dials = design_system.get("dials", {})
-    motion_snippet = design_system.get("motion_snippet", {})
 
     lines = []
     lines.append(f"## Design System: {project}")
     lines.append("")
 
     # Design Dials section (only if at least one dial was set)
-    if any(dials.get(k) is not None for k in ("variance", "motion", "density")):
+    if any(dials.get(k) is not None for k in ("variance", "density")):
         lines.append("### Design Dials")
         if dials.get("variance") is not None:
             lines.append(f"- **Variance:** {dials['variance']}/10 — {dials['variance_label']}")
-        if dials.get("motion") is not None:
-            lines.append(f"- **Motion:** {dials['motion']}/10 — {dials['motion_label']}")
         if dials.get("density") is not None:
             lines.append(f"- **Density:** {dials['density']}/10 — {dials['density_label']}")
         lines.append("")
@@ -656,23 +617,6 @@ def format_markdown(design_system: dict) -> str:
         lines.append(f"{effects}")
         lines.append("")
 
-    # Motion section (GSAP skeleton, only if --motion dial was set)
-    if motion_snippet:
-        lines.append("### Motion")
-        lines.append(f"**{motion_snippet.get('Category', '')}** ({motion_snippet.get('Intensity Tier', '')}) — Trigger: {motion_snippet.get('Trigger', '')} | Duration: {motion_snippet.get('Duration', '')} | Easing: `{motion_snippet.get('Easing', '')}`")
-        lines.append("```js")
-        lines.append(motion_snippet.get("GSAP Snippet", ""))
-        lines.append("```")
-        if motion_snippet.get("Framework Notes"):
-            lines.append(f"*Framework notes: {motion_snippet.get('Framework Notes', '')}*")
-        motion_do = motion_snippet.get("Do", "")
-        motion_dont = motion_snippet.get("Don't", "")
-        if motion_do:
-            lines.append(f"- ✅ {motion_do}")
-        if motion_dont:
-            lines.append(f"- ❌ {motion_dont}")
-        lines.append("")
-
     # Anti-patterns section
     if anti_patterns:
         lines.append("### Avoid (Anti-patterns)")
@@ -684,10 +628,9 @@ def format_markdown(design_system: dict) -> str:
     lines.append("### Pre-Delivery Checklist")
     lines.append("- [ ] No emojis as icons (use SVG: Heroicons/Lucide)")
     lines.append("- [ ] cursor-pointer on all clickable elements")
-    lines.append("- [ ] Hover states with smooth transitions (150-300ms)")
+    lines.append("- [ ] Hover/press: named transitions (no transition: all); ease-out; 100-300ms; no motion on keyboard actions")
     lines.append("- [ ] Light mode: text contrast 4.5:1 minimum")
     lines.append("- [ ] Focus states visible for keyboard nav")
-    lines.append("- [ ] prefers-reduced-motion respected")
     lines.append("- [ ] Responsive: 375px, 768px, 1024px, 1440px")
     lines.append("")
 
@@ -696,7 +639,7 @@ def format_markdown(design_system: dict) -> str:
 
 # ============ MAIN ENTRY POINT ============
 def generate_design_system(query: str, project_name: str = None, output_format: str = "markdown",
-                           variance: int = None, motion: int = None, density: int = None) -> dict:
+                           variance: int = None, density: int = None) -> dict:
     """
     Main entry point for design system generation. Writes nothing to disk.
 
@@ -705,7 +648,6 @@ def generate_design_system(query: str, project_name: str = None, output_format: 
         project_name: Optional project name for output header
         output_format: "markdown" (default) or "ascii" (box-drawing, for a terminal)
         variance: Optional 1-10 DESIGN_VARIANCE dial (1=centered/minimal, 10=bold/asymmetric)
-        motion: Optional 1-10 MOTION_INTENSITY dial, pulls a matching GSAP snippet from motion.csv
         density: Optional 1-10 VISUAL_DENSITY dial, overrides the spacing scale (1=spacious, 10=dense)
 
     Returns:
@@ -713,7 +655,7 @@ def generate_design_system(query: str, project_name: str = None, output_format: 
         "design_system" (raw dict, useful for --json callers)
     """
     generator = DesignSystemGenerator()
-    design_system = generator.generate(query, project_name, variance=variance, motion=motion, density=density)
+    design_system = generator.generate(query, project_name, variance=variance, density=density)
 
     text = format_ascii_box(design_system) if output_format == "ascii" else format_markdown(design_system)
 
