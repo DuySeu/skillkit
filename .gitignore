@@ -1,32 +1,7 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.eggs/
-build/
-dist/
-
-# Virtual environments
-.venv/
-venv/
-env/
-
-# Tooling / IDE
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-.idea/
-.vscode/
-# OS
-.DS_Store
-
-# Logs
-*.log
-
 sample/
 skills-lock.json
 
-# Machine-local symlinks into ~/.claude (folder kept by global/.gitkeep)
 global/*
-!global/.gitkeep
-.claude/skills/*
+test/*
+!.gitkeep
+.agents
