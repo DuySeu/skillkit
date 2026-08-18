@@ -6,7 +6,7 @@
 
 [] security-review skill: Review source code to identify specific security best-practice reviews and suggest improvements(Critical/Medium/Low) make sure the security of the app is in production-grade. Use when triggered the skill. Ref: `sample/engineering-code-reviewer.md`, `sample/security-best-practices`
 
-[] performance-optimization skill: Review source code to identify web performance, api performance,... to make sure the performance of the app is in production-grade. Review which function is hard/cannot scale, which function can scale and can serve how many request/user in once time. If user need their project can easily scale, suggest improvements for scalability. Use when triggered the skill. Ref: `sample/engineering-code-reviewer.md`
+[~] performance-optimization skill: Draft + evals in progress (`skills/performance-optimization/`). Review source for web/API/runtime perf + qualitative scale bands; report-only. Ref: `sample/engineering-code-reviewer.md`
 
 ## Project skills
 

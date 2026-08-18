@@ -7,15 +7,15 @@ description: "You MUST use this before any creative work - creating features, bu
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, write the design document — approaches, trade-offs, recommendation, design — and get user approval on the file.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have written a design document and the user has approved it. This applies to EVERY project regardless of perceived simplicity. An approved design is where this skill ends, not where implementation begins — wait for the user to ask.
 </HARD-GATE>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design doc can be short (a few sentences per section, and the approaches reduced to two for truly simple projects), but you MUST write it and get approval.
 
 ## Checklist
 
@@ -24,12 +24,9 @@ You MUST create a task for each of these items and complete them in order:
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-7. **Spec review loop** — dispatch spec-document-reviewer subagent with precisely crafted review context (never your session history); fix issues and re-dispatch until approved (max 5 iterations, then surface to human)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+4. **Write design doc** — save to `docs/YYYY-MM-DD-<topic>-design.md`. It carries the 2-3 approaches with their pros and cons, your recommendation, and the design itself
+5. **Spec review loop** — dispatch spec-document-reviewer subagent with precisely crafted review context (never your session history); fix issues and re-dispatch until approved (max 5 iterations, then surface to human)
+6. **User reviews written spec** — ask user to review the spec file; revise and re-review until they approve
 
 ## Process Flow
 
@@ -39,34 +36,27 @@ digraph brainstorming {
     "Visual questions ahead?" [shape=diamond];
     "Offer Visual Companion\n(own message, no other content)" [shape=box];
     "Ask clarifying questions" [shape=box];
-    "Propose 2-3 approaches" [shape=box];
-    "Present design sections" [shape=box];
-    "User approves design?" [shape=diamond];
-    "Write design doc" [shape=box];
+    "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" [shape=box];
     "Spec review loop" [shape=box];
     "Spec review passed?" [shape=diamond];
     "User reviews spec?" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
+    "Design approved — STOP" [shape=doublecircle];
 
     "Explore project context" -> "Visual questions ahead?";
     "Visual questions ahead?" -> "Offer Visual Companion\n(own message, no other content)" [label="yes"];
     "Visual questions ahead?" -> "Ask clarifying questions" [label="no"];
     "Offer Visual Companion\n(own message, no other content)" -> "Ask clarifying questions";
-    "Ask clarifying questions" -> "Propose 2-3 approaches";
-    "Propose 2-3 approaches" -> "Present design sections";
-    "Present design sections" -> "User approves design?";
-    "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write design doc" [label="yes"];
-    "Write design doc" -> "Spec review loop";
+    "Ask clarifying questions" -> "Write design doc\n(approaches + trade-offs\n+ recommendation + design)";
+    "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" -> "Spec review loop";
     "Spec review loop" -> "Spec review passed?";
     "Spec review passed?" -> "Spec review loop" [label="issues found,\nfix and re-dispatch"];
     "Spec review passed?" -> "User reviews spec?" [label="approved"];
-    "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "User reviews spec?" -> "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" [label="changes requested"];
+    "User reviews spec?" -> "Design approved — STOP" [label="approved"];
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The terminal state is an approved design document.** Once the user approves the spec, this skill is done — stop and report the path. Do NOT invoke frontend-design, mcp-builder, or any other implementation skill, and do NOT start implementing. If the user wants the design built, that is a new request from them.
 
 ## The Process
 
@@ -74,25 +64,26 @@ digraph brainstorming {
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
+- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
 
-**Exploring approaches:**
+**Writing the design doc:**
 
-- Propose 2-3 different approaches with trade-offs
-- Present options conversationally with your recommendation and reasoning
-- Lead with your recommended option and explain why
+Once the clarifying questions are answered, go **straight to the document**. Do not walk the user through approaches or design sections in chat first — the approaches, the trade-offs, the recommendation and the design all live in the file, and the file is what the user reviews.
 
-**Presenting the design:**
+The document must contain, in this order:
 
-- Once you believe you understand what you're building, present the design
-- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Ask after each section whether it looks right so far
-- Cover: architecture, components, data flow, error handling, testing
-- Be ready to go back and clarify if something doesn't make sense
+1. **Problem and context** — what is being built and why, in the user's own framing. The constraints and success criteria that came out of the clarifying questions go here, written down explicitly.
+2. **Approaches considered** — 2-3 genuinely different approaches, each with **Pros** and **Cons**. Different means different in kind, not the same approach with a setting changed: if two approaches fail the same way, cost the same and take the same effort, they are one approach with two names. Cons must be real — an approach with no downside means you stopped looking. Include the cost that shows up later, not just at setup.
+3. **Recommendation** — one approach, the reason it wins for *this* problem, and what fact would flip the decision to another approach.
+4. **The design** — of the recommended approach only. Cover architecture, components, data flow, error handling, testing. Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced.
+
+Comparing approaches on 3-4 axes that actually decide it here (effort, cost, how it fails, how hard it is to change later) is worth a small table. A generic feature grid is not.
+
+If something turns out to be unclear while writing, stop and ask rather than guessing in the document.
 
 **Design for isolation and clarity:**
 
@@ -111,7 +102,7 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the design (spec) to `docs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 
@@ -122,25 +113,20 @@ After writing the spec document:
 2. If Issues Found: fix, re-dispatch, repeat until Approved
 3. If loop exceeds 5 iterations, surface to human for guidance
 
-**User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+**User Review Gate — the last step:**
+After the spec review loop passes, ask the user to review the written spec:
 
-> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Spec written to `<path>`. Please review it and let me know if you want to make any changes."
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
-
-**Implementation:**
-
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+Wait for the user's response. If they request changes, make them and re-run the spec review loop. Once the user approves, **the skill is finished** — report the path and stop. Do not offer to implement it, and do not start.
 
 ## Key Principles
 
 - **One question at a time** - Don't overwhelm with multiple questions
 - **Multiple choice preferred** - Easier to answer than open-ended when possible
 - **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present design, get approval before moving on
+- **Explore alternatives** - Always write up 2-3 approaches with pros and cons, then recommend one. Never a single approach, never a menu with no recommendation
+- **The document is the deliverable** - approaches, trade-offs and design go in the file, not in chat. The user reviews the file
 - **Be flexible** - Go back and clarify when something doesn't make sense
 
 ## Visual Companion
