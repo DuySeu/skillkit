@@ -1,0 +1,44 @@
+{
+  "skill_name": "travel-planner",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "6 người bạn đi Tam Đảo thứ 7-CN tuần sau, budget 2 triệu/người, muốn villa có bể bơi gần Hà Nội. Lên kế hoạch và xuất file Excel.",
+      "expected_output": "Confirms inputs, compares ≥5 stays, waits for user pick (or documents pick in eval run), exports 4-sheet workbook via native runtime tool (Sheets or xlsx) with VND costs and Tam Đảo itinerary.",
+      "files": [],
+      "expectations": [
+        "Weather or season information is included for Tam Đảo",
+        "At least five accommodation options with price, rating, and booking link",
+        "Workbook exists with sheets named Tổng quan, Lịch trình, Dự toán chi phí, Checklist",
+        "Cost estimate includes transport and a contingency buffer",
+        "Export uses native platform spreadsheet tool, not a bundled Python script"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Mình và người yêu chưa biết đi đâu, 3 ngày 2 đêm, khoảng 5 triệu/người, thích onsen hoặc tắm khoáng. Gợi ý và lập kế hoạch chi tiết.",
+      "expected_output": "Suggests 3–5 destination fits, user narrows choice, compares stays, builds couple-focused itinerary and native-export workbook.",
+      "files": [],
+      "expectations": [
+        "Offers multiple destination ideas before locking one",
+        "Compares stays with pros/cons suited to couples",
+        "Itinerary is not over-packed for a 2-night trip",
+        "Budget per person is tracked against the 5M target",
+        "Workbook generated with all four required sheets via native export"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Gia đình 2 người lớn + 1 bé 4 tuổi đi Đà Lạt 2 đêm, 3.5 triệu/người, cần chỗ free cancellation. Plan trip giúp mình.",
+      "expected_output": "Family-aware lodging search, free-cancellation called out, gentle itinerary, workbook with checklist including child items.",
+      "files": [],
+      "expectations": [
+        "Lodging options mention cancellation policy or free cancellation",
+        "Itinerary accounts for a young child (pace, activities)",
+        "Checklist sheet includes family-relevant packing or prep items",
+        "Does not skip weather check for Đà Lạt dates",
+        "Does not create final workbook before a stay is selected"
+      ]
+    }
+  ]
+}

@@ -7,10 +7,10 @@ description: "You MUST use this before any creative work - creating features, bu
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, write the design document — approaches, trade-offs, recommendation, design — and get user approval on the file.
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, write the design document — approaches, trade-offs, recommendation, design — get the user to lock one approach, then write an implementation plan in chat.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have written a design document and the user has approved it. This applies to EVERY project regardless of perceived simplicity. An approved design is where this skill ends, not where implementation begins — wait for the user to ask.
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have written a design document, the user has locked one approach, and you have written the implementation plan in chat. This applies to EVERY project regardless of perceived simplicity. An implementation plan in chat is where this skill ends, not where implementation begins — wait for the user to ask.
 </HARD-GATE>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
@@ -25,8 +25,8 @@ You MUST create a task for each of these items and complete them in order:
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Write design doc** — save to `docs/YYYY-MM-DD-<topic>-design.md`. It carries the 2-3 approaches with their pros and cons, your recommendation, and the design itself
-5. **Spec review loop** — dispatch spec-document-reviewer subagent with precisely crafted review context (never your session history); fix issues and re-dispatch until approved (max 5 iterations, then surface to human)
-6. **User reviews written spec** — ask user to review the spec file; revise and re-review until they approve
+5. **User reviews written spec** — ask user to review the spec file; revise until they are ready to lock an approach. If they approve without naming an approach, ask one question: which approach to lock? Do not assume the recommendation.
+6. **Write implementation plan (in chat)** — once one approach is locked, write the implementation plan in chat (not a new file unless the user asks); then stop
 
 ## Process Flow
 
@@ -37,26 +37,28 @@ digraph brainstorming {
     "Offer Visual Companion\n(own message, no other content)" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" [shape=box];
-    "Spec review loop" [shape=box];
-    "Spec review passed?" [shape=diamond];
     "User reviews spec?" [shape=diamond];
-    "Design approved — STOP" [shape=doublecircle];
+    "Approach locked?" [shape=diamond];
+    "Ask which approach to lock\n(one question)" [shape=box];
+    "Write implementation plan\n(in chat)" [shape=box];
+    "Plan written — STOP" [shape=doublecircle];
 
     "Explore project context" -> "Visual questions ahead?";
     "Visual questions ahead?" -> "Offer Visual Companion\n(own message, no other content)" [label="yes"];
     "Visual questions ahead?" -> "Ask clarifying questions" [label="no"];
     "Offer Visual Companion\n(own message, no other content)" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Write design doc\n(approaches + trade-offs\n+ recommendation + design)";
-    "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" -> "Spec review loop";
-    "Spec review loop" -> "Spec review passed?";
-    "Spec review passed?" -> "Spec review loop" [label="issues found,\nfix and re-dispatch"];
-    "Spec review passed?" -> "User reviews spec?" [label="approved"];
+    "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc\n(approaches + trade-offs\n+ recommendation + design)" [label="changes requested"];
-    "User reviews spec?" -> "Design approved — STOP" [label="approved"];
+    "User reviews spec?" -> "Approach locked?" [label="ready / approved"];
+    "Approach locked?" -> "Write implementation plan\n(in chat)" [label="yes, named"];
+    "Approach locked?" -> "Ask which approach to lock\n(one question)" [label="no / only 'ok'"];
+    "Ask which approach to lock\n(one question)" -> "Write implementation plan\n(in chat)" [label="user locks one"];
+    "Write implementation plan\n(in chat)" -> "Plan written — STOP";
 }
 ```
 
-**The terminal state is an approved design document.** Once the user approves the spec, this skill is done — stop and report the path. Do NOT invoke frontend-design, mcp-builder, or any other implementation skill, and do NOT start implementing. If the user wants the design built, that is a new request from them.
+**The terminal state is an implementation plan written in chat**, after the user has locked one approach from the design doc. Report the design path, present the plan, and stop. Do NOT invoke frontend-design, mcp-builder, or any other implementation skill, and do NOT start implementing. If the user wants the plan built, that is a new request from them.
 
 ## The Process
 
@@ -106,19 +108,28 @@ If something turns out to be unclear while writing, stop and ask rather than gue
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 
-**Spec Review Loop:**
-After writing the spec document:
+**User Review Gate:**
+After writing the spec document, ask the user to review it:
 
-1. Dispatch spec-document-reviewer subagent (see spec-document-reviewer-prompt.md)
-2. If Issues Found: fix, re-dispatch, repeat until Approved
-3. If loop exceeds 5 iterations, surface to human for guidance
+> "Spec written to `<path>`. Please review it and let me know if you want to make any changes — or which approach you want to lock so I can write the implementation plan."
 
-**User Review Gate — the last step:**
-After the spec review loop passes, ask the user to review the written spec:
+Wait for the user's response:
 
-> "Spec written to `<path>`. Please review it and let me know if you want to make any changes."
+- **Changes requested** — update the design doc, then ask them to review again.
+- **Approach locked by name** (e.g. "go with Approach B", "lock the recommendation") — proceed to the implementation plan in chat.
+- **Approved without naming an approach** (e.g. only "ok", "lgtm", "approved") — do **not** assume the recommendation. Ask one multiple-choice question listing the approaches from the doc and which one to lock. Wait for that answer before writing the plan.
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Once the user approves, **the skill is finished** — report the path and stop. Do not offer to implement it, and do not start.
+**Implementation plan (in chat) — the last step:**
+Once one approach is locked, write the implementation plan **in chat** (not a new file unless the user asks). Cover:
+
+- Task order (sequenced, not a dump)
+- Main files / areas to touch
+- Dependencies between tasks
+- How to verify each chunk
+
+Scale to complexity: a short bullet list for simple work; more detail when the design warrants it. If the locked approach is not the recommended one, base the plan on that approach — and if the design section only covers the recommendation, call out what differs before planning.
+
+After the plan is in chat, **the skill is finished** — report the design path, leave the plan visible, and stop. Do not offer to implement it, and do not start.
 
 ## Key Principles
 
@@ -126,7 +137,8 @@ Wait for the user's response. If they request changes, make them and re-run the 
 - **Multiple choice preferred** - Easier to answer than open-ended when possible
 - **YAGNI ruthlessly** - Remove unnecessary features from all designs
 - **Explore alternatives** - Always write up 2-3 approaches with pros and cons, then recommend one. Never a single approach, never a menu with no recommendation
-- **The document is the deliverable** - approaches, trade-offs and design go in the file, not in chat. The user reviews the file
+- **Lock before planning** - Never treat a bare "ok" as locking the recommendation; ask which approach when unclear
+- **The document is the design deliverable** - approaches, trade-offs and design go in the file; the implementation plan goes in chat after lock
 - **Be flexible** - Go back and clarify when something doesn't make sense
 
 ## Visual Companion
