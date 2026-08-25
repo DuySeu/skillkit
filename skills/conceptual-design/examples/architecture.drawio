@@ -31,28 +31,25 @@
         <mxCell id="db" value="PostgreSQL&lt;br&gt;(shared)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
           <mxGeometry x="400" y="540" width="140" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="legend" value="Legend:  solid = request / response  ·  dashed = async / event" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
-          <mxGeometry x="60" y="666" width="500" height="24" as="geometry" />
-        </mxCell>
-        <mxCell id="e1" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="users" target="cdn">
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="users" target="cdn">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e2" value="dynamic (cache miss)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="cdn" target="gw">
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="cdn" target="gw">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e3" value="/orders" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="gw" target="svc_orders">
+        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="gw" target="svc_orders">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e4" value="/payments" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="gw" target="svc_pay">
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="gw" target="svc_pay">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e5" value="charge (event)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;strokeColor=#9673a6;fontSize=10;fontColor=#9673a6;" edge="1" parent="1" source="svc_orders" target="svc_pay">
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;strokeColor=#9673a6;fontSize=10;fontColor=#9673a6;" edge="1" parent="1" source="svc_orders" target="svc_pay">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e6" value="read / write" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="svc_orders" target="db">
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="svc_orders" target="db">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e7" value="read / write" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="svc_pay" target="db">
+        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#555555;fontSize=10;fontColor=#555555;" edge="1" parent="1" source="svc_pay" target="db">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
