@@ -1,6 +1,16 @@
 # Option authoring — templates & craft bar
 
-Read at Author checklist steps 3–5 (author options, contrast gate, fill preview). For the full token vocabulary and form rules, also open `shadcn-tokens.md`.
+Read at Author checklist steps 3-5 (author options, contrast gate, fill preview). For the full token vocabulary and form rules, load the token reference listed in SKILL.md Supporting Files.
+
+## Contents
+
+- Required token vocabulary (hex)
+- Craft bar
+- Option CSS shape
+- manifest.json shape
+- Contrast gate
+- Fill preview
+- Preview UX
 
 ## Required token vocabulary (hex)
 

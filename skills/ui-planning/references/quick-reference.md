@@ -2,6 +2,19 @@
 
 Load a **section** when writing or reviewing the guide (§5–8), not the whole file up front. Web-only: native iOS/Android affordances are omitted.
 
+## Contents
+
+- 1 Accessibility
+- 2 Touch and interaction
+- 3 Performance
+- 4 Style selection
+- 5 Layout and responsive
+- 6 Typography and colour
+- 7 Animation
+- 8 Forms and feedback
+- 9 Navigation patterns
+- 10 Charts and data
+
 ## 1. Accessibility (CRITICAL)
 
 - `color-contrast` - Normal text ≥4.5:1; large text ≥3:1

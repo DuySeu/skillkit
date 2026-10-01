@@ -2,6 +2,7 @@
 """Verify the bundled project-plan Word template exists under assets/."""
 
 import argparse
+import zipfile
 from pathlib import Path
 
 
@@ -22,6 +23,14 @@ def main() -> None:
     if not args.template.is_file():
         raise SystemExit(
             f"Bundled template missing: {args.template}. "
+            "Restore assets/project-plan-template.docx into the skill "
+            "(git checkout -- the file, or reinstall the skill)."
+        )
+    try:
+        zipfile.ZipFile(args.template).close()
+    except (zipfile.BadZipFile, OSError) as exc:
+        raise SystemExit(
+            f"Template is not a readable .docx: {args.template} ({exc}). "
             "Restore assets/project-plan-template.docx into the skill."
         )
     print(f"Template OK: {args.template}")

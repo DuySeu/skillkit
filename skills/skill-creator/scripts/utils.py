@@ -6,7 +6,15 @@ from pathlib import Path
 
 def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
     """Parse a SKILL.md file, returning (name, description, full_content)."""
-    content = (skill_path / "SKILL.md").read_text()
+    skill_md = skill_path / "SKILL.md"
+    try:
+        content = skill_md.read_text()
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"No SKILL.md at {skill_md}. Pass the skill directory (the folder that contains SKILL.md)."
+        ) from None
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ValueError(f"Cannot read {skill_md} as UTF-8 text: {exc}") from exc
     lines = content.split("\n")
 
     if lines[0].strip() != "---":

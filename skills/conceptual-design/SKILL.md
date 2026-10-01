@@ -11,17 +11,18 @@ Produce architecture / conceptual-design diagrams as `*.drawio` files — plain 
 
 ## Workflow
 
-1. **Design the diagram first, on paper (mentally).** Decide the layers/tiers, which components exist, and which arrows connect them. A good conceptual diagram has 5–15 nodes; if the user's system is bigger, group components into labeled containers. Model responsibilities as nodes and flows as edges — give it real structure (zones/trust boundaries, layers, a title), not a flat flowchart.
+1. **Design the diagram first.** Decide the zones, which components exist, and which arrows connect them. A good conceptual diagram has 5-15 nodes; if the user's system is bigger, group components into labeled zones. Model responsibilities as nodes and flows as edges - give it real structure (zones/trust boundaries, a title), not a flat flowchart.
 
-   **Conceptual designs are high-level — stay at the level of responsibilities/stages, never individual functions, classes, or implementation detail.** Unless the user explicitly asks for a detailed/component-level view, structure every conceptual design as three left→right zones, each a labeled dashed container:
+   **Conceptual designs are high-level - stay at the level of responsibilities/stages, never individual functions, classes, or implementation detail.** Unless the user explicitly asks for a detailed/component-level view, structure every conceptual design as three left→right zones, each a labeled dashed zone:
    - **1 · USER INPUT** — the things the user provides (arguments, files, requests, events).
    - **2 · PIPELINE / WORKFLOW** — 2–5 high-level stages describing *what happens* to the input (each a responsibility, e.g. "Analyze preview vs safezone", not `parse_verdict()`). Show key external resources (datastores, APIs, models) as supporting dependencies feeding the relevant stage with dashed edges below the pipeline.
    - **3 · OUTPUT** — what the workflow produces (result, response, side effects) plus the error/failure path if relevant.
 
-   Collapse implementation-level steps into stages: e.g. `fetch_image()` + `build_prompt()` + `invoke_model()` become one "Analyze …" stage. If you catch yourself naming functions or listing more than ~5 pipeline boxes, you are too low-level — zoom out.
+   Collapse implementation-level steps into stages: e.g. `fetch_image()` + `build_prompt()` + `invoke_model()` become one "Analyze ..." stage. If you catch yourself naming functions, you are too low-level - zoom out.
 2. **Plan the layout with real coordinates** (see Layout rules below) — this is the step that decides whether the result looks professional or like spaghetti.
-3. **Write the draw.io XML** to `<name>.drawio` (format below). Save next to the user's files unless they say otherwise. Sanity-check: every node has a label, ids are unique, no two rectangles in the same tier overlap.
-4. **Optional architecture write-up**: After delivering the `.drawio`, ask whether to write `docs/<name>.md` explaining the architecture. Only write it if the user agrees. Useful sections: overview, zones/components, main flows, and sync vs async notes when relevant.
+3. **Write the draw.io XML** to `<name>.drawio` (format below). Save next to the user's files unless they say otherwise. Sanity-check: every node has a label, ids are unique, no two rectangles in the same zone overlap.
+4. **Architecture write-up**: After delivering the `.drawio`, also write `docs/<name>.md` explaining the architecture. Do not ask first; skip it only if the user asks for the diagram alone. Useful sections: overview, zones/components, main flows, and sync vs async notes when relevant.
+5. **Optional editable SVG**: If the user wants an image that also reopens in draw.io, run `python3 scripts/render_drawio.py <name>.drawio` to write `<name>.drawio.svg` (a plain SVG carrying the mxfile XML in its `content` attribute; stdlib only, common shapes and edges), then run `python3 scripts/validate_drawio_svg.py <name>.drawio.svg` to check it (exit code 0 = valid). The `.drawio` stays the deliverable; skip this step unless asked.
 
 ## draw.io XML format
 
@@ -60,31 +61,31 @@ Common styles:
 | Decision | `rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;` |
 | Queue / topic | `rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;` |
 | Start/end, cloud service | `ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;` |
-| Group container / trust boundary | `rounded=1;fillColor=none;strokeColor=#999999;dashed=1;verticalAlign=top;fontStyle=1;` |
+| Zone (group box / trust boundary) | `rounded=1;fillColor=none;strokeColor=#999999;dashed=1;verticalAlign=top;fontStyle=1;` |
 | Title | `text;fillColor=none;strokeColor=none;fontSize=18;fontStyle=1;` |
 
 Edge options: `edgeStyle=orthogonalEdgeStyle` for right-angle routing, `dashed=1` for async/optional flows, `endArrow=none` for plain lines, `exitX/exitY/entryX/entryY` (0–1 fractions) to pin which side an arrow leaves/enters.
 
-Containers: children of a container cell use `parent="<container-id>"` and coordinates **relative to the container**.
+Zones: children of a zone cell use `parent="<zone-id>"` and coordinates **relative to the zone**.
 
 Prefer **plain-text labels** (use `&#10;` for line breaks): rich HTML labels are harder to keep consistent across editors.
 
 ## Layout rules (what makes it look good)
 
-- Flow in one direction: left→right (request flow) or top→bottom (layered architecture). Don't mix.
-- Standard node size 160×60; databases 120×80. Keep sizes consistent within a tier.
-- Gaps: ≥ 80px horizontally, ≥ 60px vertically between nodes. Containers get 30px inner padding + 30px top for the title.
-- Align nodes in the same tier on the same x (or y) coordinate — misalignment of a few px looks sloppy.
-- Avoid crossing edges: order nodes within a tier so arrows go to neighbors. Use `exitX/entryX` pins when two edges would overlap.
+- Flow in one direction: left→right (request flow) or top→bottom (stacked zones). Don't mix.
+- Standard node size 160×60; databases 120×80. Keep sizes consistent within a zone.
+- Gaps: ≥ 80px horizontally, ≥ 60px vertically between nodes. Zones get 30px inner padding + 30px top for the title.
+- Align nodes in the same zone on the same x (or y) coordinate - misalignment of a few px looks sloppy.
+- Avoid crossing edges: order nodes within a zone so arrows go to neighbors. Use `exitX/entryX` pins when two edges would overlap.
 - One color per role (use the palette above), not one color per node. A diagram with 8 colors reads worse than one with 3.
-- Set `fontColor=#000000` on every shape block (nodes) so labels stay black and legible in all viewers — draw.io otherwise applies a lighter default that is hard to read. Leave the title, subtitle, and container/zone headings at their default color.
+- Set `fontColor=#000000` on every shape block (nodes) so labels stay black and legible in all viewers - draw.io otherwise applies a lighter default that is hard to read. Leave the title, subtitle, and zone headings at their default color.
 - Add a bold title text node at the top.
-- Coordinates that overlap: before writing XML, list each node with its (x, y, w, h) and check no two rectangles in the same tier intersect.
+- Coordinates that overlap: before writing XML, list each node with its (x, y, w, h) and check no two rectangles in the same zone intersect.
 
 ## Common mistakes / red flags
 
 - Forgetting `parent="1"` on top-level cells or the `vertex="1"`/`edge="1"` flags — cells silently disappear.
 - Compressing or Base64-encoding the mxfile — keep plain uncompressed XML.
-- A single flow of boxes labeled "conceptual architecture" — add zones, layers, grouping.
-- **Too low-level for a conceptual design** — naming individual functions/classes, or more than ~5 pipeline boxes. Collapse into high-level stages and use the three zones (USER INPUT · PIPELINE/WORKFLOW · OUTPUT) unless the user explicitly asked for a detailed component view.
+- A single flow of boxes labeled "conceptual architecture" - add zones.
+- **Too low-level for a conceptual design** - see step 1: collapse functions/classes into high-level stages.
 - If asked to *edit* an existing `.drawio`: modify the mxfile XML in place (or rewrite the file), keeping cells `0`/`1` and unique ids.

@@ -15,19 +15,22 @@ defaults from `references/defaults-techx.md` unless the user overrides.
 <HARD-GATE>
 Do NOT export DOCX or call `fill-plan.py` until the user explicitly approves the
 Markdown. Do NOT invent AWS dollar amounts, customer contacts, or headcount —
-use `(pending)` or ask. Do NOT reuse names or facts from prior engagements.
+use `(pending)` or ask. Do NOT reuse names or facts from prior engagements. Do NOT
+hand the Markdown over for approval before the tone pass in
+`references/human-tone.md` is clean.
 </HARD-GATE>
 
 ## Checklist
 
 Complete in order:
 
-1. **Read references** — `references/section-guide.md`, `references/defaults-techx.md`
+1. **Read references** - `references/engagement-context.md` (why the document is shaped the way it is; never written into the deliverable), `references/section-guide.md`, `references/defaults-techx.md`, `references/human-tone.md`
 2. **Collect inputs (one batch)** — see Interview batch below
-3. **Draft full Markdown** — `docs/<slug>-project-plan.md` using the MD template
-4. **User approves MD** — revise until approved
-5. **Export DOCX** — run `fill-plan.py` (ensure template exists; see Setup)
-6. **Report paths** — both files and any `(pending)` items left for the user
+3. **Draft full Markdown** - `docs/<slug>-project-plan.md` using the Markdown template
+4. **Tone pass** - re-read against `references/human-tone.md`, run its grep, fix every hit
+5. **User approves Markdown** - revise until approved
+6. **Export DOCX** - run `fill-plan.py` (ensure template exists; see Export DOCX)
+7. **Report paths** - both files, any `(pending)` items left for the user, and any tone-grep hit kept on purpose
 
 ## Interview batch
 
@@ -62,7 +65,7 @@ language: en
 program: APN Partner Deal Acceleration Program
 cover_title: PROJECT PLAN
 engagement_title: POC – Example GenAI Engagement
-use_case_oneline: UC1 label | UC2 label | UC3 label
+use_case_oneline: Use case 1 label | Use case 2 label | Use case 3 label
 customer: Example Customer
 partner: TechX
 total_weeks: 8
@@ -96,7 +99,7 @@ Bullet list.
 
 ## 2 Scope of Work
 
-Intro paragraph (total weeks, UC count).
+Intro paragraph (total weeks, use-case count).
 
 ### 2.1 Use Case 1: Title - N Weeks
 
@@ -119,6 +122,8 @@ Prose architecture walkthrough.
 | ... | ... | ... | ... |
 
 ### 4.4 Expected AWS Cost Breakdown by Services
+
+The cost section is always keyed `4.4`, because `fill-plan.py` and the template reserve `4.1`-`4.3` for up to three use cases. With fewer use cases, skip the unused numbers.
 
 Subscription assumption table + service breakdown, or `(pending)` with note.
 
@@ -150,18 +155,18 @@ heading titles in `###` lines drive DOCX heading text on export.
 
 ## Export DOCX
 
-**Dependency:** `pip install python-docx`
+**Dependency:** `python-docx`, supplied per run by `uv run --with python-docx` in the commands below. `<skill-dir>` below means the folder containing this SKILL.md.
 
 **Template:** `assets/project-plan-template.docx` (bundled with the skill). Verify with:
 
 ```bash
-python3 skills/project-plan-generator/scripts/prepare-template.py
+uv run --with python-docx python3 <skill-dir>/scripts/prepare-template.py
 ```
 
-**After MD approval:**
+**After Markdown approval:**
 
 ```bash
-python3 skills/project-plan-generator/scripts/fill-plan.py docs/<slug>-project-plan.md
+uv run --with python-docx python3 <skill-dir>/scripts/fill-plan.py docs/<slug>-project-plan.md
 ```
 
 Output: `docs/<slug>-project-plan.docx` beside the Markdown file.
@@ -174,16 +179,23 @@ The script maps:
   hours, contribution split)
 
 Milestone tables in the bundled template support up to **three** use cases; for
-more UCs, keep extra milestone content in Markdown and note manual DOCX adjustment.
+more use cases, keep extra milestone content in Markdown and note manual DOCX adjustment.
 
 ## Writing quality
 
-Read `references/section-guide.md` for tone, length, and `(pending)` rules.
+Read `references/section-guide.md` for tone, length, and `(pending)` rules, and
+`references/engagement-context.md` for the altitude the document is written at and the
+truthfulness rules that outrank brevity.
 
 - Measurable success criteria with test-set sizes where possible
 - Explicit assumptions (data, region, subscription, SME access)
 - Human decision authority where legally/operationally required
 - No fabricated pricing — `(pending)` until user supplies numbers
+- **No AI-writing tells.** `references/human-tone.md` is a gate, not advice: banned
+  vocabulary (leverage, seamless, robust, pivotal, foster, showcase), trailing
+  "ensuring ..." clauses, "not only ... but also", rule-of-three padding, invented
+  sections, em dashes, curly quotes, filler assumptions, precision theatre. Run its
+  grep on the draft before step 5
 
 ## Common mistakes
 
@@ -194,6 +206,10 @@ Read `references/section-guide.md` for tone, length, and `(pending)` rules.
 | Skip section 1.5 or 6 | All six top-level sections required |
 | Invent AWS ARR | `(pending)` or user-supplied figures |
 | Wrong `###` keys for section 5 | Use `5.1` and `5.2` |
+| Puffery, trailing "ensuring ..." clauses, "not only ... but also" | Run the `human-tone.md` pass before approval |
+| Sections the template does not have ("Key Takeaways", "Future Outlook") | Keep sections 1-6 exactly |
+| Filler assumptions true of any project ("timelines may shift") | Assumptions this engagement actually depends on |
+| Invented precision (94.7%) to look measured | Round proposed threshold, labelled proposed, or `(pending)` |
 
 ## Related skills
 

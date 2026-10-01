@@ -153,25 +153,47 @@ def main():
 
     src = Path(args.option_css)
     if not src.exists():
-        print(f"error: {src} does not exist", file=sys.stderr)
+        print(f"error: {src} does not exist. Pass the winning option's CSS, e.g. "
+              f"docs/design/option-tokens/B-signal.css", file=sys.stderr)
+        return 1
+    if not src.is_file():
+        print(f"error: {src} is not a file. Pass a single option CSS file, not a directory.",
+              file=sys.stderr)
         return 1
 
-    css = src.read_text(encoding="utf-8")
+    try:
+        css = src.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        print(f"error: cannot read {src} as UTF-8 text ({exc}). Check the path and file permissions.",
+              file=sys.stderr)
+        return 1
+
     blocks = parse_blocks(css)
     if ":root" not in blocks:
-        print(f"error: {src} has no :root block -- is this an option token file?", file=sys.stderr)
+        print(f"error: {src} has no :root block -- is this an option token file? "
+              f"Pick a file from option-tokens/, not manifest.json or the preview HTML.", file=sys.stderr)
         return 1
     if ".dark" not in blocks:
         print(f"warning: {src} has no .dark block. A guide with one mode is a guide that "
               f"gets dark mode invented later.", file=sys.stderr)
 
     out_css = Path(args.css_out)
-    out_css.parent.mkdir(parents=True, exist_ok=True)
-    out_css.write_text(strip_comments(css), encoding="utf-8")
+    try:
+        out_css.parent.mkdir(parents=True, exist_ok=True)
+        out_css.write_text(strip_comments(css), encoding="utf-8")
+    except OSError as exc:
+        print(f"error: cannot write {out_css} ({exc}). Check that --css-out points inside a "
+              f"writable directory, e.g. <project>/docs/index.css.", file=sys.stderr)
+        return 1
 
     summary = fmt_summary(blocks, src.as_posix())
     if args.summary_out:
-        Path(args.summary_out).write_text(summary + "\n", encoding="utf-8")
+        try:
+            Path(args.summary_out).write_text(summary + "\n", encoding="utf-8")
+        except OSError as exc:
+            print(f"error: cannot write {args.summary_out} ({exc}). Check the --summary-out path.",
+                  file=sys.stderr)
+            return 1
     else:
         print(summary)
 

@@ -1,6 +1,14 @@
 # Plan data & spreadsheet output schema
 
-The agent assembles structured plan data, then exports via **native tools** in the current runtime (Gemini Spark → Google Sheets; Claude / Amazon Quick → `.xlsx`). See `export-by-runtime.md` for per-platform steps.
+## Contents
+
+- Sheets (fixed four tabs)
+- Sheet layouts: Tổng quan, Lịch trình, Dự toán chi phí, Checklist
+- plan.json top-level keys and field tables
+- Chat comparison table (Step 3)
+- Validation before export
+
+The agent assembles structured plan data, then exports via **native tools** in the current runtime (Gemini Spark → Google Sheets; Claude / Amazon Quick → `.xlsx`). Per-platform steps are in SKILL.md step 7.
 
 Do not invent alternate sheet names or column layouts.
 

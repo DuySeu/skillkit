@@ -15,7 +15,7 @@ Do NOT write any code, scaffold any project, or take any implementation action u
 
 ## Anti-Pattern: "This Demo Is Too Simple To Need A Design"
 
-Every demo goes through this process. A one-file script, a single API call, a UI mockup — all of them. "Simple" demos are where unexamined assumptions about inputs, outputs, and stack cause the most wasted work. The design can be short (a few sentences per section for truly simple demos), but you MUST present it and get approval.
+Every demo gets a design, even a one-file script. The design can be a few sentences per section, but you MUST present it and get approval.
 
 ## Checklist
 
@@ -27,7 +27,7 @@ You MUST create a task for each of these items and complete them in order:
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — using the Design Document Template below, one section at a time, get user approval after each section
 6. **Write design doc** — save to `docs/plans/YYYY-MM-DD-<topic>-design.md`
-7. **Spec review loop** — dispatch demo-design-reviewer subagent with precisely crafted review context (never your session history); fix issues and re-dispatch until approved (max 5 iterations, then surface to human)
+7. **Spec review loop** - dispatch demo-design-reviewer subagent (prompt: `<skill-dir>/demo-design-reviewer-prompt.md`, next to this file) with precisely crafted review context (never your session history); fix issues and re-dispatch until approved (max 5 iterations, then surface to human)
 8. **User reviews written design** — ask user to review the design file before proceeding
 9. **Transition to implementation** — proceed to build the demo only after approval
 
@@ -171,7 +171,7 @@ Do NOT add Testing or Error Handling sections — a demo design intentionally om
 **Design Review Loop:**
 After writing the design document:
 
-1. Dispatch demo-design-reviewer subagent (see demo-design-reviewer-prompt.md)
+1. Dispatch demo-design-reviewer subagent (see `<skill-dir>/demo-design-reviewer-prompt.md`, next to this file)
 2. If Issues Found: fix, re-dispatch, repeat until Approved
 3. If loop exceeds 5 iterations, surface to human for guidance
 
@@ -188,10 +188,4 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 ## Key Principles
 
-- **One question at a time** — Don't overwhelm with multiple questions
-- **Multiple choice preferred** — Easier to answer than open-ended when possible
-- **Always confirm stack + language** — Never assume; ask explicitly before designing
 - **YAGNI ruthlessly** — A demo shows one thing well; cut everything else
-- **Explore alternatives** — Always propose 2-3 approaches before settling
-- **Incremental validation** — Present design section by section, get approval before moving on
-- **Be flexible** — Go back and clarify when something doesn't make sense

@@ -2,9 +2,17 @@
 
 The shape of `docs/DESIGN.md`, the one artifact the authoring flow produces. Copy it, fill every placeholder from the option the user picked, delete rows that do not apply. An unfilled `<...>` reaching the user is a defect.
 
+## Contents
+
+- What this document is, and what that changes
+- What each section is for
+- What stays out
+- Keeping it true
+- The skeleton: header block and sections 1-9 (Direction, Tokens, Fonts, Surface kit, Layout and density, Motion, Component recipes, Do not, Verification)
+
 ## What this document is, and what that changes
 
-`UI-PLAN.md` in a build-it-now skill is a **work order**: read once, executed once, then stale. This file is a **standing contract**: read at the start of every UI task for the life of the project, by an assistant that was not in the conversation where the direction was chosen and cannot ask.
+`UI-PLAN.md` in a build-it-now skill is a **work order**: read once, executed once, then stale. This file is a **standing guide**: read at the start of every UI task for the life of the project, by an assistant that was not in the conversation where the option was chosen and cannot ask.
 
 Three consequences shape every section below:
 
@@ -18,14 +26,14 @@ Three consequences shape every section below:
 
 | Section | What it holds | Why it is there |
 |---|---|---|
-| **Header block** | What to do with this file, in four lines | The reader may have arrived here from a one-line pointer with no other context. Without this it reads as documentation to summarize rather than a contract to comply with |
+| **Header block** | What to do with this file, in four lines | The reader may have arrived here from a one-line pointer with no other context. Without this it reads as documentation to summarize rather than a guide to comply with |
 | **1 Direction** | The picked option's name, its thesis, what it commits to and what it gave up | Explains *why* the values below are what they are. A reader who knows the direction can extend it to a component nobody anticipated; one who only has hexes cannot |
 | **2 Tokens** | A summary table of the dozen roles a component reaches for, and a pointer to `docs/index.css` | The full token file is the source of truth. Inlining all 35 variables here creates a second copy, and the copy that is easier to edit is the one that drifts |
 | **3 Fonts** | Family per role, mapped to its token, plus the load method | The most common way a theme silently fails: the font loads and nothing changes, because no token was mapped to it |
 | **4 Surface kit** | Which of the six kits, and what a container is therefore made of | This is what makes the direction visible. Without it every component becomes a flat card in the right palette, which is not what was picked |
 | **5 Layout & density** | The app shell every screen sits inside, then the spacing scale, grid and what density means numerically | Two different failures. Density is the difference between a console and a brochure and is invisible in a palette, so it has to be numbers or it gets re-invented per screen. The shell is the one the reader hits first: a component built with the right tokens but the wrong skeleton - its own sidebar, its own max width, a second nav - still looks foreign next to what exists. The reader has to know what wraps their new screen before they can pick its padding |
 | **6 Motion** | Durations, easing, what does *not* animate | The rules are counter-intuitive enough (high-frequency actions get no animation) that an assistant will do the opposite by default |
-| **7 Component recipes** | For each recurring component: which token fills what, at which size, in which state - in tokens, never in a framework's class names | The bridge from token to code. Ten lines here save the same decision being re-made in every component, differently. Kept stack-neutral on purpose: framework syntax is the fastest-rotting thing that could go in a document meant to outlive the project's current styling engine, and `framework-recipes.md` does the translation at build time instead |
+| **7 Component recipes** | For each recurring component: which token fills what, at which size, in which state - in tokens, never in a framework's class names | The bridge from token to code. Ten lines here save the same decision being re-made in every component, differently. Kept stack-neutral on purpose: framework syntax is the fastest-rotting thing that could go in a document meant to outlive the project's current styling engine, and the build step (Comply, in SKILL.md) does the translation instead |
 | **8 Anti-patterns** | Blunt "do not" list, project-specific | The single highest-leverage section. A reader that skips everything else and reads this one still cannot ruin the direction |
 | **9 Verification** | The commands that decide whether a UI change is acceptable | Turns "looks right" into something checkable by whoever wrote the code |
 
@@ -37,7 +45,7 @@ Three consequences shape every section below:
 | Implementation steps | This file is read *during* implementation, by someone who already knows their task |
 | The full token dump | It is `docs/index.css`. Two copies means one wrong copy |
 | The rejected options | They stay in `docs/design/ui-options.html`. Naming them here invites relitigating a settled choice |
-| Framework tutorials, or recipes in a framework's syntax | The guide records the design, not the current build setup. `framework-recipes.md` translates at build time, when the stack is a fact rather than a guess |
+| Framework tutorials, or recipes in a framework's syntax | The guide records the design, not the current build setup. The build step (Comply, in SKILL.md) translates, when the stack is a fact rather than a guess |
 | Taste adjectives with no value attached | "Clean", "modern", "premium" - the reader cannot act on any of them |
 
 ## Keeping it true
@@ -49,7 +57,7 @@ The guide is only worth reading if it matches reality, so **it is edited in plac
 ````markdown
 # UI Design Guide - <Project Name>
 
-**This file is the design contract for this project. Read it fully before writing or changing any UI.**
+**This file is the design guide for this project. Read it fully before writing or changing any UI.**
 
 - Tokens live in `docs/index.css`. Copy that file into the app's stylesheet - never retype the values, never add a hex to a component. `<On a project that already has one, name the real path. On one that does not exist yet, say so: the app is a later task and whoever builds it decides where the stylesheet lives.>`
 - Everything below is decided. This document is not a starting point to improve on; the direction was chosen from five alternatives that are still on record in `docs/design/ui-options.html`.
@@ -150,7 +158,7 @@ Every screen sits inside this skeleton. A new screen extends it; it does not inv
 
 ## 7 Component recipes
 
-**Written in tokens and states, not in any framework's syntax.** Each row says which token fills what, at which size, in which state. Translating that into Tailwind classes, CSS Modules, styled-components or a theme object is the build step's job, and `framework-recipes.md` in this skill carries the per-stack form. A recipe written as `bg-primary rounded-lg` is a recipe that stops being true the day the project changes styling engine - and this file is meant to outlive that.
+**Written in tokens and states, not in any framework's syntax.** Each row says which token fills what, at which size, in which state. Translating that into Tailwind classes, CSS Modules, styled-components or a theme object is the build step's job, and the Comply step in SKILL.md carries the per-stack form. A recipe written as `bg-primary rounded-lg` is a recipe that stops being true the day the project changes styling engine - and this file is meant to outlive that.
 
 These are the recurring decisions; anything not here follows section 1.
 
@@ -166,7 +174,7 @@ These are the recurring decisions; anything not here follows section 1.
 
 - **Focus is visible on every interactive element** - 2px `--ring` at 2px offset. Removing an outline without replacing it is the most common accessibility regression in a themed app.
 - Icons from `<one library>` only, `<N>`px, `<N>`px stroke. Never emoji as an icon.
-- **Porting note for whoever wires this up:** `docs/index.css` is plain custom properties and drops into any stack unchanged, but several styling engines need the variables registered before utilities exist for them - Tailwind v4 needs an `@theme inline` block mapping every colour variable, Tailwind v3 needs `theme.extend`. Skipping that step is silent: no error, no styles. `framework-recipes.md` has the exact form per stack.
+- **Porting note for whoever wires this up:** `docs/index.css` is plain custom properties and drops into any stack unchanged, but several styling engines need the variables registered before utilities exist for them - Tailwind v4 needs an `@theme inline` block mapping every colour variable, Tailwind v3 needs `theme.extend`. Skipping that step is silent: no error, no styles. Comply step 2 in SKILL.md routes to the exact form per stack.
 
 ## 8 Do not
 

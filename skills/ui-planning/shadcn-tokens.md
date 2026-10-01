@@ -1,6 +1,17 @@
 # shadcn Token Reference
 
-The shadcn variable vocabulary is the lingua franca for this skill: design every option in these names, then map them onto whatever the target framework actually uses (see `framework-recipes.md`).
+The shadcn variable vocabulary is the lingua franca for this skill: design every option in these names, then map them onto whatever the target framework actually uses (SKILL.md Comply step 2).
+
+## Contents
+
+- The token set
+- Which colour form to write
+- Tailwind v4 form
+- Tailwind v3 form
+- Which version am I in
+- Reasoning in OKLCH, writing hex
+- The surface kit
+- Non-colour tokens worth defining
 
 > **The shipped token file carries no comments.** `index.css` (or `app.css` / `globals.css` / `styles.css`) is declarations only — no `/* … */`, no section banners, and not the `/* Option B - … */` header that option CSS may carry before `make-guide.py` strips it. Comments in the examples below annotate *this reference*; they do not travel into the project. Reasoning about values goes in the closing report in the chat, not into a file.
 

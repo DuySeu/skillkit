@@ -1,6 +1,14 @@
 # Framework Recipes
 
-Where the theme lives and what to write, per UI framework. Design the option in shadcn token vocabulary (`shadcn-tokens.md`), then map it here.
+Where the theme lives and what to write, per UI framework. The option was designed in shadcn token vocabulary; map it here.
+
+## Contents
+
+- Comply mode wires the theme; Author mode does not scaffold
+- Where the theme lives
+- Per framework: shadcn/ui, Ant Design, MUI, Mantine, Chakra UI v3, Vuetify, PrimeVue/PrimeNG, Naive UI, Element Plus, Angular Material, DaisyUI, Tailwind only / plain CSS / Astro
+- Porting the surface kit
+- Fonts
 
 > **Version gate.** Every API below changed across a recent major. Read the installed version from `package.json` and confirm the syntax against that version's docs before writing. If the installed major does not match what is documented here, trust `package.json` and the library's own docs — not this file, and not memory.
 >
@@ -37,7 +45,7 @@ If you are scaffolding an app in a separate session, do not use `--overwrite` on
 
 ## shadcn/ui, shadcn-vue, shadcn-svelte
 
-All three consume the identical variable names. Write the token file from `shadcn-tokens.md` (v4 or v3 form to match the installed Tailwind), then:
+All three consume the identical variable names. Use the token file `docs/index.css` as written (it already holds the variables in shadcn names; register them for the installed Tailwind, v4 or v3, as the guide's porting note says), then:
 
 - **Dark mode:** toggle the `dark` class on `<html>`. Persist the preference and honour `prefers-color-scheme` on first load.
 - **Components:** already generated into `src/components/ui/` (React/Svelte) or `src/components/ui/` (Vue). Restyle by editing the token file, not the components. Only edit a component when the design changes its *structure* (e.g. a button size scale).
@@ -357,7 +365,7 @@ Use the shadcn token file verbatim — it is just CSS custom properties. Without
 
 ## Porting the surface kit
 
-The colour tokens map onto whatever the framework uses; the seven `--surface-*` variables (`shadcn-tokens.md`) are **plain CSS custom properties in every one of these frameworks** and are ported verbatim into the token file. They are what makes the picked direction look like the option the user chose rather than like flat cards in the right colours.
+The colour tokens map onto whatever the framework uses; the seven `--surface-*` variables are **plain CSS custom properties in every one of these frameworks** and are ported verbatim into the token file. They are what makes the picked direction look like the option the user chose rather than like flat cards in the right colours.
 
 | Target | Where the kit goes | How components consume it |
 |---|---|---|

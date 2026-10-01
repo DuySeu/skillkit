@@ -308,15 +308,34 @@ def main():
     parser.add_argument("--skill-name", default="", help="Skill name to include in the report title")
     args = parser.parse_args()
 
-    if args.input == "-":
-        data = json.load(sys.stdin)
-    else:
-        data = json.loads(Path(args.input).read_text())
+    # Load run_loop output, failing with a fix-it message instead of a traceback
+    try:
+        if args.input == "-":
+            data = json.load(sys.stdin)
+        else:
+            data = json.loads(Path(args.input).read_text())
+    except FileNotFoundError:
+        print(f"Error: input file not found: {args.input}. Pass the JSON that run_loop.py printed, or - for stdin.", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as exc:
+        print(f"Error: {args.input} is not valid JSON ({exc}). Pass the unmodified output of run_loop.py.", file=sys.stderr)
+        sys.exit(1)
+    except OSError as exc:
+        print(f"Error: cannot read {args.input}: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if not isinstance(data, dict):
+        print("Error: expected a JSON object from run_loop.py with a 'history' key.", file=sys.stderr)
+        sys.exit(1)
 
     html_output = generate_html(data, skill_name=args.skill_name)
 
     if args.output:
-        Path(args.output).write_text(html_output)
+        try:
+            Path(args.output).write_text(html_output)
+        except OSError as exc:
+            print(f"Error: cannot write {args.output}: {exc}. Check the directory exists and is writable.", file=sys.stderr)
+            sys.exit(1)
         print(f"Report written to {args.output}", file=sys.stderr)
     else:
         print(html_output)

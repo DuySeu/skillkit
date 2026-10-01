@@ -1,3 +1,5 @@
+// Client-side helper for the brainstorming visual companion.
+// Loaded by scripts/server.js, which reads this file and injects it as an inline <script> into every served page (before </body>). It opens a WebSocket to the server, reloads the page on a 'reload' message, and sends browser events back.
 (function() {
   const WS_URL = 'ws://' + window.location.host;
   let ws = null;

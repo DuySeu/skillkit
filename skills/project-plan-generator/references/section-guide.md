@@ -3,6 +3,19 @@
 Per-section checklist for AWS Partner GenAI POC / SCA quick project plans. Match the
 six top-level sections of the bundled template; do not rename or skip them.
 
+## Contents
+
+- Cover block
+- 1 Project Overview
+- 2 Scope of Work
+- 3 Solution Architecture
+- 4 Milestones & Deliverables
+- 5 Resources & Cost Estimates
+- 6 Path to Production
+- `(pending)` vs ask
+- Tone
+- Success criteria examples
+
 ## Cover block (before section 1)
 
 | Field | Required | Notes |
@@ -10,7 +23,7 @@ six top-level sections of the bundled template; do not rename or skip them.
 | Program label | yes | e.g. APN Partner Deal Acceleration Program |
 | PROJECT PLAN | yes | Fixed title line |
 | Engagement title | yes | POC / pilot name with primary AWS product if relevant |
-| Use-case one-liner | yes | Pipe-separated short UC labels |
+| Use-case one-liner | yes | Pipe-separated short use-case labels |
 
 ## 1 — Project Overview
 
@@ -19,13 +32,13 @@ six top-level sections of the bundled template; do not rename or skip them.
 - 2–4 paragraphs: customer context, pain, partner + AWS solution, engagement shape
 - Close with numbered or bulleted use-case list: title, duration, one-line outcome
 - Tone: formal, third person, suitable for AWS Partner review
-- Length: ~250–450 words for a 3-UC POC
+- Length: ~250-450 words for a 3-use-case POC
 
 ### 1.2 Stakeholders / team
 
 - Table: Name | Title | Role | Email / Contact
 - Group rows: customer escalation (if known), customer stakeholders `(pending)` OK,
-  partner escalation + stakeholders + delivery team from `defaults-techx.md`
+  partner escalation + stakeholders + delivery team from the partner defaults (see SKILL.md, step 1)
 - Mark unknown customer contacts `(pending)` — do not invent names
 
 ### 1.3 Success criteria
@@ -46,33 +59,33 @@ six top-level sections of the bundled template; do not rename or skip them.
 
 ## 2 — Scope of Work
 
-- Opening paragraph: total weeks, UC count, high-level outcome
-- Per UC subsection `2.x`: title, duration in heading, 4–8 scope bullets
+- Opening paragraph: total weeks, use-case count, high-level outcome
+- Per use-case subsection `2.x`: title, duration in heading, 4-8 scope bullets
 - Bullets = deliverable activities, not architecture
 
 ## 3 — Solution Architecture
 
-- Per UC `3.x`: prose walkthrough (trigger → processing → output)
+- Per use-case `3.x`: prose walkthrough (trigger → processing → output)
 - Name AWS services and data flows; no code or class names
-- Optional sub-headings per agent or flow within a UC
+- Optional sub-headings per agent or flow within a use case
 - No draw.io required in v1
 
 ## 4 — Milestones & Deliverables
 
-- Per UC `4.x`: markdown table — Week | Milestone | Deliverables | Acceptance Criteria
-- Align weeks with UC calendar (cumulative across engagement or per-UC — state which)
+- Per use-case `4.x`: markdown table - Week | Milestone | Deliverables | Acceptance Criteria
+- Align weeks with use-case calendar (cumulative across engagement or per-UC - state which)
 - `4.n` AWS cost: subscription assumption table + service breakdown, or `(pending)`
 - Do not fabricate dollar amounts; use `(pending)` or user-supplied figures
 
 ## 5 — Resources & Cost Estimates
 
 - Partner team bullet list (from defaults unless overridden)
-- Phase hours table (roles × phases) — default from `defaults-techx.md` if not given
+- Phase hours table (roles × phases) - default from the partner defaults if not given
 - Contribution split table — `(pending)` for customer/AWS when unknown
 
 ## 6 — Path to Production
 
-- Per UC `6.x`: 4–6 bullets — UAT, security review, pilot/shadow mode, production
+- Per use-case `6.x`: 4-6 bullets - UAT, security review, pilot/shadow mode, production
   promotion, hypercare, ongoing updates
 - Include duration hints (e.g. 4-week pilot, 2-week hypercare)
 
@@ -84,6 +97,15 @@ six top-level sections of the bundled template; do not rename or skip them.
 | AWS cost not provided | `(pending)` tables + assumption note |
 | Success criteria vague from user | Propose measurable defaults; label as proposed |
 | Rates/team unchanged | Silent use of TechX defaults |
+
+## Tone
+
+- Formal, third person, suitable for AWS Partner review
+- Measurable criteria with test-set sizes; explicit customer actions
+- No fabricated pricing or headcount unless the user supplies numbers
+- Nothing that reads as machine output. The tone gate in SKILL.md (tell list and
+  pre-approval grep) applies to every section on this page, and it is checked
+  before the Markdown goes to the user, not after
 
 ## Success criteria examples
 

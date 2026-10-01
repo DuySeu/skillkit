@@ -10,7 +10,7 @@ Three parts, one per top-level directory:
 
 | Path | Purpose |
 | --- | --- |
-| `skills/` | Source of truth for the skills. This is where a new skill is written. Use the `writing-skills` skill to create or edit one. |
+| `skills/` | Source of truth for the skills. This is where a new skill is written. Use the `skill-creator` skill to create or edit one. |
 | `test/` | Scratch projects used to exercise a freshly written skill by actually invoking the AI on it (e.g. `test/ai-assistant-chat` came out of running `ui-planning` end to end). Not an automated test suite. |
 | `script/` + `project/` | Run from *another* repo: `script/project_setup.sh` scaffolds the folder structure and conventions there. It resolves its content one level up from `script/` — `../project` — so it must stay inside `script/` in this repo. Skills are no longer installed by a script here; consumers run `npx skills add https://github.com/DuySeu/skillkit`. |
 
@@ -22,7 +22,7 @@ Three parts, one per top-level directory:
 
 ## Adding or Editing a Skill
 
-1. Write `skills/<name>/SKILL.md` (plus any sibling reference files) using the `writing-skills` skill.
+1. Write `skills/<name>/SKILL.md` (plus any sibling reference files) using the `skill-creator` skill, and run its checklist in `skills/skill-creator/references/best-practices.md` before calling the skill done.
 2. For a *new* skill, create the dogfooding symlink so `.claude/skills/` picks it up — new skills are **not** discovered automatically:
    ```bash
    ln -sfn "../../skills/<name>" ".claude/skills/<name>"   # repeat with .kiro for Kiro CLI
@@ -30,7 +30,7 @@ Three parts, one per top-level directory:
    Editing an existing skill needs no install step: the symlinks make the change live immediately.
 3. `SKILL.md` frontmatter must carry `name` and `description`, and the `description` value must not contain a colon-plus-space unless it is quoted — the `skills` CLI parses it as YAML and silently **skips** any skill that fails. Verify with `npx skills add . -l` and confirm the found count matches the number of skill directories.
 
-**Do not add the new skill to this file.** CLAUDE.md describes the repo, not the skill catalogue. A skill is discovered and fired from its own `description` frontmatter, so every skill here except `writing-skills` is invoked proactively by the assistant; a list in CLAUDE.md would only rot. `writing-skills` is the one invoked explicitly, when working on skills themselves.
+**Do not add the new skill to this file.** CLAUDE.md describes the repo, not the skill catalogue. A skill is discovered and fired from its own `description` frontmatter, so every skill here is invoked from that text by the assistant; a list in CLAUDE.md would only rot. `skill-creator` is the one to reach for when working on skills themselves.
 
 The exception worth documenting here is a skill with executable parts or invariants spread across several files, where editing one file and not the others breaks it — as `ui-planning` does below.
 

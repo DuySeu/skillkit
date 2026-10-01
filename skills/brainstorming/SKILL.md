@@ -1,13 +1,13 @@
 ---
 name: brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+description: "Turns a rough idea into a reviewed design document and an implementation plan in chat, before any code is written. Use when starting creative or feature work: a new feature, component, or behavior change that has no agreed design yet."
 ---
 
 # Brainstorming Ideas Into Designs
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, write the design document — approaches, trade-offs, recommendation, design — get the user to lock one approach, then write an implementation plan in chat.
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, write the design document (see Writing the design doc), get the user to lock one approach, then write an implementation plan in chat.
 
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have written a design document, the user has locked one approach, and you have written the implementation plan in chat. This applies to EVERY project regardless of perceived simplicity. An implementation plan in chat is where this skill ends, not where implementation begins — wait for the user to ask.
@@ -106,7 +106,7 @@ If something turns out to be unclear while writing, stop and ask rather than gue
 
 - Write the design (spec) to `docs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
-- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Write plainly and concisely: short sentences, no filler
 
 **User Review Gate:**
 After writing the spec document, ask the user to review it:
@@ -138,7 +138,6 @@ After the plan is in chat, **the skill is finished** — report the design path,
 - **YAGNI ruthlessly** - Remove unnecessary features from all designs
 - **Explore alternatives** - Always write up 2-3 approaches with pros and cons, then recommend one. Never a single approach, never a menu with no recommendation
 - **Lock before planning** - Never treat a bare "ok" as locking the recommendation; ask which approach when unclear
-- **The document is the design deliverable** - approaches, trade-offs and design go in the file; the implementation plan goes in chat after lock
 - **Be flexible** - Go back and clarify when something doesn't make sense
 
 ## Visual Companion
@@ -146,7 +145,7 @@ After the plan is in chat, **the skill is finished** — report the design path,
 A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
 
 **Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), offer it once for consent:
-> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
+> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This can be token-intensive. Want to try it? (Requires opening a local URL)"
 
 **This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
 
@@ -158,4 +157,4 @@ A browser-based companion for showing mockups, diagrams, and visual options duri
 A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
 
 If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`
+`visual-companion.md`

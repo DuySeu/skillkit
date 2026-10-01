@@ -23,7 +23,7 @@ Full repo-relative paths. Label evidence:
 
 | Question | Mode | Deliver |
 |---|---|---|
-| "What is this repo?" / "where do I start?" | **Orientation** | Phase 1 → ask feature → Phase 2 |
+| "What is this repo?" / "where do I start?" | **Orientation** | Phase 1 → ask feature → Trace |
 | "How does login work?" | **Trace** | One path, every hop (skip Phase 1 ask) |
 | "Where is rate limiting?" | **Locate** | Owning file + evidence — not a full orientation |
 
@@ -57,10 +57,10 @@ digraph onboarding {
 
 ## Checklist
 
-1. **Inventory** — top-level + manifests (`package.json`, `pyproject.toml`, …), not README. Classify app/service/lib/CLI/monorepo. Skip `node_modules`/`dist`/generated. Unfamiliar stack → `references/entry-points.md`. ~10–25 files for Phase 1.
+1. **Inventory** - top-level + manifests (`package.json`, `pyproject.toml`, ...), not README. Classify app/service/lib/CLI/monorepo. Skip `node_modules`/`dist`/generated. Unfamiliar stack → `references/entry-points.md`. Budget ~10-25 files for Phase 1 (guideline, not a limit).
 2. **Entry points + features** — 1–5 starters (trigger / wires / hand-off). Feature list from routes, commands, exports, workers; group **per package** if multi-service. Run/use from real scripts only.
 3. **Orientation HARD-GATE** — deliver Phase 1, **stop**. No deep-dive same turn. Vague "ok" → re-ask list; do not pick for them. Skip gate on Trace/Locate.
-4. **Trace** — after pick (or Trace mode). Read `references/tracing.md` + `references/traps.md`. Path: `entry → dispatch → validation → orchestration → core → I/O → response`. Call site + definition each hop; open through layers. Runtime indirection → registration + candidates, no guess. ~15–40 files on that path.
+4. **Trace** - after pick (or Trace mode). Read `references/tracing.md` + `references/traps.md`. Path: `entry → dispatch → validation → orchestration → core → I/O → response`. Call site + definition each hop; open through layers. Runtime indirection → registration + candidates, no guess. Budget ~15-40 files on that path (guideline).
 5. **Boundaries (narrow)** — owning layer, related config/types/tests, cross-cutting on *this* path only.
 6. **Verify** — re-read anchors if few; if file write or >~5 citations: `python3 <skill-dir>/scripts/check_citations.py draft.md --root <repo>`. State Coverage gaps.
 
@@ -101,7 +101,7 @@ Which feature do you want to go deeper into?
 
 **End the turn.** Do not append a trace.
 
-### Orientation Phase 2 / Trace
+### Trace (Orientation deep-dive)
 
 After the user locks a feature (or Trace mode), use this template. Offer another feature from the Phase 1 list when done — one at a time.
 
@@ -154,5 +154,5 @@ After the user locks a feature (or Trace mode), use this template. Offer another
 |---|---|
 | `references/entry-points.md` | Unfamiliar stack / odd manifest |
 | `references/tracing.md` | Before Step 4 / any non-trivial deep-dive |
-| `references/traps.md` | Before Phase 2 / Trace (tricky Locate too) |
+| `references/traps.md` | Before Trace (tricky Locate too) |
 | `scripts/check_citations.py` | File-shaped output or many anchors — run, don't read |

@@ -356,17 +356,30 @@ def main():
     ap.add_argument("-o", "--output", help="output path (default: <input>.drawio.svg)")
     args = ap.parse_args()
 
-    with open(args.input, encoding="utf-8") as f:
-        text = f.read()
+    # Read the input, failing with a message that says what to fix
+    try:
+        with open(args.input, encoding="utf-8") as f:
+            text = f.read()
+    except FileNotFoundError:
+        sys.exit(f"error: input file not found: {args.input} - check the path, or write the .drawio file first")
+    except (OSError, UnicodeDecodeError) as exc:
+        sys.exit(f"error: cannot read {args.input} as UTF-8 text: {exc}")
 
     out_path = args.output
     if not out_path:
         base = re.sub(r"\.drawio$", "", args.input)
         out_path = base + ".drawio.svg"
 
-    svg = render(text)
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(svg)
+    # Render, then write the output
+    try:
+        svg = render(text)
+    except ET.ParseError as exc:
+        sys.exit(f"error: {args.input} is not well-formed XML ({exc}) - escape & as &amp; and < as &lt; in labels, and keep the mxfile uncompressed")
+    try:
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(svg)
+    except OSError as exc:
+        sys.exit(f"error: cannot write {out_path}: {exc} - check the folder exists and is writable")
     print(f"wrote {out_path}")
 
 

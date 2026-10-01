@@ -100,7 +100,13 @@ def check_text(text: str, root: Path) -> list[Citation]:
             elif line_part is None or target.is_dir():
                 status, detail = "ok", "exists"
             else:
-                total = len(target.read_text(errors="replace").splitlines())
+                try:
+                    total = len(target.read_text(errors="replace").splitlines())
+                except OSError as exc:
+                    results[candidate] = Citation(
+                        candidate, path_part, line_part, "unreadable", f"cannot read file ({exc}); check permissions"
+                    )
+                    continue
                 if line_part > total:
                     status, detail = "out-of-range", f"file has {total} lines"
                 else:
@@ -128,7 +134,11 @@ def main() -> int:
     # Gather citations across every input document
     citations: list[Citation] = []
     for name in args.files:
-        text = sys.stdin.read() if name == "-" else Path(name).read_text(errors="replace")
+        try:
+            text = sys.stdin.read() if name == "-" else Path(name).read_text(errors="replace")
+        except OSError as exc:
+            print(f"error: cannot read {name}: {exc}. Check the path or run from the draft's directory.", file=sys.stderr)
+            return 2
         citations.extend(check_text(text, root))
 
     problems = [c for c in citations if c.status != "ok"]

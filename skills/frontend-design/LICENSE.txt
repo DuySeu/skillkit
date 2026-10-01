@@ -1,0 +1,2 @@
+Source: https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design
+See the Claude Code repository LICENSE for full terms.

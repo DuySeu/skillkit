@@ -9,6 +9,7 @@ overfitting.
 import argparse
 import json
 import random
+import shutil
 import sys
 import tempfile
 import time
@@ -258,14 +259,41 @@ def main():
     parser.add_argument("--results-dir", default=None, help="Save all outputs (results.json, report.html, log.txt) to a timestamped subdirectory here")
     args = parser.parse_args()
 
-    eval_set = json.loads(Path(args.eval_set).read_text())
+    # Fail early if the claude CLI is missing (run_eval and improve_description call it)
+    if shutil.which("claude") is None:
+        print("Error: the `claude` CLI was not found on PATH. Install Claude Code and make sure `claude -p` works, then rerun. Description optimization does not work without it.", file=sys.stderr)
+        sys.exit(1)
+
+    # Load and validate the eval set
+    try:
+        eval_set = json.loads(Path(args.eval_set).read_text())
+    except FileNotFoundError:
+        print(f"Error: eval set not found: {args.eval_set}. Pass the path to your trigger eval JSON.", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as exc:
+        print(f"Error: {args.eval_set} is not valid JSON ({exc}). Fix the syntax or re-export it from the eval review page.", file=sys.stderr)
+        sys.exit(1)
+    except OSError as exc:
+        print(f"Error: cannot read {args.eval_set}: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if not isinstance(eval_set, list) or not eval_set or not all(
+        isinstance(e, dict) and "query" in e and "should_trigger" in e for e in eval_set
+    ):
+        print('Error: eval set must be a non-empty JSON list of objects like {"query": "...", "should_trigger": true}.', file=sys.stderr)
+        sys.exit(1)
+
     skill_path = Path(args.skill_path)
 
     if not (skill_path / "SKILL.md").exists():
         print(f"Error: No SKILL.md found at {skill_path}", file=sys.stderr)
         sys.exit(1)
 
-    name, _, _ = parse_skill_md(skill_path)
+    try:
+        name, _, _ = parse_skill_md(skill_path)
+    except (ValueError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     # Set up live report path
     if args.report != "none":

@@ -1,6 +1,6 @@
 ---
 name: travel-planner
-description: "Plan a complete trip end-to-end — clarify dates, budget, and group; check weather; compare 5+ stays across booking platforms; build an hour-by-hour itinerary; estimate costs; export a 4-sheet plan to Google Sheets (Gemini Spark) or Excel (Claude, Amazon Quick). Use whenever the user wants to plan a trip, weekend getaway, resort/homestay comparison, travel budget, or lịch trình du lịch — even if they only say đi đâu cuối tuần, tìm homestay, or plan trip. Do NOT use for visa/immigration only, flight-only booking, or a single restaurant recommendation."
+description: "Plan a complete trip end-to-end: confirm dates, budget, and group, check weather, compare stays, build an itinerary and cost estimate, and export a four-sheet workbook. Use whenever the user wants to plan a trip, weekend getaway, resort/homestay comparison, travel budget, or lịch trình du lịch, even if they only say đi đâu cuối tuần, tìm homestay, or plan trip. Do NOT use for visa/immigration only, flight-only booking, or a single restaurant recommendation."
 ---
 
 # Travel Planner
@@ -16,7 +16,7 @@ The problem this solves is half-plans — a list of hotels with no itinerary, or
 - One-off restaurant or café recommendation
 - User already booked everything and only wants packing tips (answer inline; no full workflow)
 
-For open-ended "where should I go?" research without dates or budget, prefer `researching`. Come back here once they have (or are ready to confirm) dates, headcount, and budget.
+For open-ended "where should I go?" research without dates or budget, prefer `research`. Come back here once they have (or are ready to confirm) dates, headcount, and budget.
 
 <HARD-GATE>
 Do NOT build the detailed itinerary, finalize the budget, or export the workbook until:
@@ -179,14 +179,16 @@ Build the `costs` array for the schema in `references/output-schema.md`.
 
 Never hand-type a loose markdown table as the final deliverable when native export is available.
 
+**Output language:** sheet names, column labels, and the chat summary labels are Vietnamese, exactly as written in `references/output-schema.md`; free-text content follows the language the user writes in. Do not translate or rename the four sheets.
+
 ---
 
 ## Step 8: Chat summary
 
 ```markdown
-## [Destination] — [dates]
+## [Destination] - [dates]
 
-**Chỗ nghỉ:** [name] — [link]
+**Chỗ nghỉ:** [name] - [link]
 **Chi phí dự kiến:** [X]/người (đã gồm buffer [%])
 **Thời tiết:** [one line]
 
@@ -197,7 +199,7 @@ Never hand-type a loose markdown table as the final deliverable when native expo
 ### Lưu ý
 - [booking deadline, cancellation, what to bring, price disclaimer]
 
-📎 [Google Sheets link] hoặc `travel-plan.xlsx`
+Tệp: [Google Sheets link] hoặc `travel-plan.xlsx`
 ```
 
 Ask if they want changes. Iterate from the step that needs updating.
@@ -222,25 +224,10 @@ Ask if they want changes. Iterate from the step that needs updating.
 
 ## Lessons learned
 
-### Do
-
-- Check weather before recommending outdoor-heavy plans
-- Compare cross-platform prices — same room can differ 20–30%
-- Include transport (tolls, fuel, grab) — often 10–20% of budget
-- Add 10–15% buffer; label prices as reference with date + link
-- Prefer free-cancellation stays when dates are uncertain
-- Ask dietary needs when suggesting restaurants
-- Use native export per runtime — same sheet names everywhere
-
-### Don't
-
-- Offer options >30% over budget without a clear warning
-- Trust a single review source
-- Pack the schedule — especially with kids or older travelers
-- Skip transport mode — it changes both cost and timeline
-- Run bundled Python scripts when the platform has spreadsheet tools
-
-### Common failures
+- Same room can differ 20-30% across platforms, so cross-check prices and never trust a single review source.
+- Transport (tolls, fuel, grab) is often 10-20% of budget.
+- Prefer free-cancellation stays when dates are uncertain.
+- Skip nothing on transport mode: it changes both cost and timeline.
 
 | Issue | Response |
 |-------|----------|
@@ -249,9 +236,4 @@ Ask if they want changes. Iterate from the step that needs updating.
 | Closed or renamed property | Check review dates; verify on Maps |
 | Export tool unavailable | Tell user which runtime is needed; offer markdown summary as interim |
 
-### When to ask
-
-- Budget too low for requirements — what to cut: lodging vs activities
-- Two options tied — present trade-offs, ask priority
-- Bad weather — change dates vs keep + indoor plan
-- Special group (infant, pet, accessibility) — gather constraints first
+Ask the user when: budget is too low for the requirements (what to cut), two options tie (which priority), weather is bad (change dates or keep with an indoor plan), or the group is special (infant, pet, accessibility).

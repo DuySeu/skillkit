@@ -2,6 +2,17 @@
 
 This document defines the JSON schemas used by skill-creator.
 
+## Contents
+
+- evals.json
+- history.json
+- grading.json
+- metrics.json
+- timing.json
+- benchmark.json
+- comparison.json
+- analysis.json
+
 ---
 
 ## evals.json

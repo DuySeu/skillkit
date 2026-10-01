@@ -11,7 +11,7 @@ At a high level, the process of creating a skill goes like this:
 
 - Decide what you want the skill to do and roughly how it should do it
 - Write a draft of the skill
-- Create a few test prompts and run claude-with-access-to-the-skill on them
+- Create a few test cases and run claude-with-access-to-the-skill on them
 - Help the user evaluate the results both qualitatively and quantitatively
   - While the runs happen in the background, draft some quantitative evals if there aren't any (if there are some, you can either use as is or modify if you feel something needs to change about them). Then explain them to the user (or if they already existed, explain the ones that already exist)
   - Use the `eval-viewer/generate_review.py` script to show the user the results for them to look at, and also let them look at the quantitative metrics
@@ -23,15 +23,17 @@ Your job when using this skill is to figure out where the user is in this proces
 
 On the other hand, maybe they already have a draft of the skill. In this case you can go straight to the eval/iterate part of the loop.
 
-Of course, you should always be flexible and if the user is like "I don't need to run a bunch of evaluations, just vibe with me", you can do that instead.
+Be flexible: if the user says "I don't need to run a bunch of evaluations, just vibe with me", do that instead.
 
 Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
 
-Cool? Cool.
+Throughout, follow Anthropic's authoring rules in `references/best-practices.md`: frontmatter limits, naming, description voice, conciseness, degrees of freedom, progressive disclosure, scripts, and the checklist to run before a skill is done.
+
+Run every `python -m scripts.<name>` command in this file from the skill-creator directory (the folder that holds this SKILL.md), not from the skill being built.
 
 ## Communicating with the user
 
-The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven't heard (and how could you, it's only very recently that it started), there's a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google "how to install npm". On the other hand, the bulk of users are probably fairly computer-literate.
+The skill creator is used by people across a wide range of familiarity with coding jargon, from people opening a terminal for the first time to experienced engineers. Most users are fairly computer-literate, but not all.
 
 So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
 
@@ -55,7 +57,7 @@ Start by understanding the user's intent. The current conversation might already
 
 ### Interview and Research
 
-Proactively ask questions about edge cases, input/output formats, example files, success criteria, and dependencies. Wait to write test prompts until you've got this part ironed out.
+Proactively ask questions about edge cases, input/output formats, example files, success criteria, and dependencies. Wait to write test cases until you've got this part ironed out.
 
 Check available MCPs - if useful for research (searching docs, finding similar skills, looking up best practices), research in parallel via subagents if available, otherwise inline. Come prepared with context to reduce burden on the user.
 
@@ -63,8 +65,8 @@ Check available MCPs - if useful for research (searching docs, finding similar s
 
 Based on the user interview, fill in these components:
 
-- **name**: Skill identifier
-- **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
+- **name**: Skill identifier. At most 64 characters, lowercase letters, digits and hyphens, never containing `anthropic` or `claude`. Prefer the gerund form (`processing-pdfs`) and match the naming pattern of the rest of the collection; avoid vague names like `helper` or `utils`.
+- **description**: What the skill does and when to trigger it, written in third person ("Processes Excel files...", never "I can..." or "You can..."). This is the primary triggering mechanism: all "when to use" info goes here, not in the body. At most 1024 characters, no `<` or `>`, and quote the value if it contains `: `. Claude tends to undertrigger skills, so name concrete trigger terms and the adjacent situations where the skill still applies. For instance, instead of "Builds dashboards for internal data.", write "Builds fast dashboards that display internal company data. Use when the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't ask for a 'dashboard'."
 - **compatibility**: Required tools, dependencies (optional, rarely needed)
 - **the rest of the skill :)**
 
@@ -90,12 +92,11 @@ Skills use a three-level loading system:
 2. **SKILL.md body** - In context whenever skill triggers (<500 lines ideal)
 3. **Bundled resources** - As needed (unlimited, scripts can execute without loading)
 
-These word counts are approximate and you can feel free to go longer if needed.
-
 **Key patterns:**
-- Keep SKILL.md under 500 lines; if you're approaching this limit, add an additional layer of hierarchy along with clear pointers about where the model using the skill should go next to follow up.
-- Reference files clearly from SKILL.md with guidance on when to read them
-- For large reference files (>300 lines), include a table of contents
+- Keep the SKILL.md body under 500 lines; if you're approaching this limit, move detail into reference files with clear pointers about where the model using the skill should go next.
+- Reference files clearly from SKILL.md with guidance on when to read them, and keep them one level deep: link every reference file directly from SKILL.md, because a file reached only through another reference file may get previewed rather than read in full
+- For reference files over 100 lines, include a table of contents at the top
+- Use forward slashes in every path and name files by their content
 
 **Domain organization**: When a skill supports multiple domains/frameworks, organize by variant:
 ```
@@ -138,9 +139,19 @@ Output: feat(auth): implement JWT-based authentication
 
 Try to explain to the model why things are important in lieu of heavy-handed musty MUSTs. Use theory of mind and try to make the skill general and not super-narrow to specific examples. Start by writing a draft and then look at it with fresh eyes and improve it.
 
+A few rules that keep a skill readable for the model (details and examples in `references/best-practices.md`):
+
+- Add only what Claude doesn't already know. Cut explanations of common concepts and libraries.
+- Match specificity to fragility: prose heuristics where many approaches work, an exact command where one wrong step breaks things.
+- Give a default instead of a menu of options, with an escape hatch for the exception.
+- Use one term per concept throughout.
+- Leave out time-sensitive statements ("currently", "as of 2025"); put deprecated approaches in a collapsed "Old patterns" section.
+- For long workflows, give a checklist the model copies and ticks off; for quality-critical output, add a validate-fix-repeat loop.
+- Scripts handle their own errors, justify every constant in a comment, list their dependencies, and say whether to run or read them. Refer to MCP tools as `ServerName:tool_name`.
+
 ### Test Cases
 
-After writing the skill draft, come up with 2-3 realistic test prompts — the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
+After writing the skill draft, run `python -m scripts.quick_validate <path-to-skill>` and fix anything it reports. Then come up with at least 3 realistic test cases (prompts) - the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
 
 Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts. You'll draft assertions in the next step while the runs are in progress.
 
@@ -162,7 +173,7 @@ See `references/schemas.md` for the full schema (including the `assertions` fiel
 
 ## Running and evaluating test cases
 
-This section is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.
+This section is one continuous sequence - don't stop partway through.
 
 Put results in `<skill-name>-workspace/` as a sibling to the skill directory. Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.) and within that, each test case gets a directory (`eval-0/`, `eval-1/`, etc.). Don't create all of this upfront — just create directories as you go.
 
@@ -303,7 +314,7 @@ This is the heart of the loop. You've run the test cases, the user has reviewed 
 
 4. **Look for repeated work across test cases.** Read the transcripts from the test runs and notice if the subagents all independently wrote similar helper scripts or took the same multi-step approach to something. If all 3 test cases resulted in the subagent writing a `create_docx.py` or a `build_chart.py`, that's a strong signal the skill should bundle that script. Write it once, put it in `scripts/`, and tell the skill to use it. This saves every future invocation from reinventing the wheel.
 
-This task is pretty important (we are trying to create billions a year in economic value here!) and your thinking time is not the blocker; take your time and really mull things over. I'd suggest writing a draft revision and then looking at it anew and making improvements. Really do your best to get into the head of the user and understand what they want and need.
+This task matters and your thinking time is not the blocker; take your time and really mull things over. I'd suggest writing a draft revision and then looking at it anew and making improvements. Really do your best to get into the head of the user and understand what they want and need.
 
 ### The iteration loop
 
@@ -314,6 +325,8 @@ After improving the skill:
 3. Launch the reviewer with `--previous-workspace` pointing at the previous iteration
 4. Wait for the user to review and tell you they're done
 5. Read the new feedback, improve again, repeat
+
+If the skill will run on more than one model, run the test cases on each before calling it done: Haiku may need more guidance than Opus, and Opus may find the same text over-explained.
 
 Keep going until:
 - The user says they're happy
@@ -419,40 +432,29 @@ After packaging, direct the user to the resulting `.skill` file path so they can
 
 ## Claude.ai-specific instructions
 
-In Claude.ai, the core workflow is the same (draft → test → review → improve → repeat), but because Claude.ai doesn't have subagents, some mechanics change. Here's what to adapt:
+The workflow is the same; only these mechanics differ, because Claude.ai has no subagents and often no display:
 
-**Running test cases**: No subagents means no parallel execution. For each test case, read the skill's SKILL.md, then follow its instructions to accomplish the test prompt yourself. Do them one at a time. This is less rigorous than independent subagents (you wrote the skill and you're also running it, so you have full context), but it's a useful sanity check — and the human review step compensates. Skip the baseline runs — just use the skill to complete the task as requested.
+- **Test cases**: run them yourself one at a time, following the skill's SKILL.md. Skip baseline runs.
+- **Review**: with no browser, show each prompt and output in the conversation, save any file output (.docx, .xlsx) and tell the user where it is, then ask for feedback inline.
+- **Skip**: quantitative benchmarking, blind comparison (needs subagents), and description optimization (needs `claude -p`, Claude Code only).
+- **Packaging**: `package_skill.py` works anywhere with Python and a filesystem.
 
-**Reviewing results**: If you can't open a browser (e.g., Claude.ai's VM has no display, or you're on a remote server), skip the browser reviewer entirely. Instead, present results directly in the conversation. For each test case, show the prompt and the output. If the output is a file the user needs to see (like a .docx or .xlsx), save it to the filesystem and tell them where it is so they can download and inspect it. Ask for feedback inline: "How does this look? Anything you'd change?"
-
-**Benchmarking**: Skip the quantitative benchmarking — it relies on baseline comparisons which aren't meaningful without subagents. Focus on qualitative feedback from the user.
-
-**The iteration loop**: Same as before — improve the skill, rerun the test cases, ask for feedback — just without the browser reviewer in the middle. You can still organize results into iteration directories on the filesystem if you have one.
-
-**Description optimization**: This section requires the `claude` CLI tool (specifically `claude -p`) which is only available in Claude Code. Skip it if you're on Claude.ai.
-
-**Blind comparison**: Requires subagents. Skip it.
-
-**Packaging**: The `package_skill.py` script works anywhere with Python and a filesystem. On Claude.ai, you can run it and the user can download the resulting `.skill` file.
-
-**Updating an existing skill**: The user might be asking you to update an existing skill, not create a new one. In this case:
-- **Preserve the original name.** Note the skill's directory name and `name` frontmatter field -- use them unchanged. E.g., if the installed skill is `research-helper`, output `research-helper.skill` (not `research-helper-v2`).
-- **Copy to a writeable location before editing.** The installed skill path may be read-only. Copy to `/tmp/skill-name/`, edit there, and package from the copy.
-- **If packaging manually, stage in `/tmp/` first**, then copy to the output directory -- direct writes may fail due to permissions.
+**Updating an existing skill**:
+- **Preserve the original name.** Use the directory name and `name` frontmatter unchanged. E.g., `research-helper` stays `research-helper.skill`, not `research-helper-v2`.
+- **Copy to a writeable location before editing.** The installed path may be read-only. Copy to `/tmp/skill-name/`, edit there, and package from the copy.
+- **If packaging manually, stage in `/tmp/` first**, then copy to the output directory.
 
 ---
 
 ## Cowork-Specific Instructions
 
-If you're in Cowork, the main things to know are:
+Cowork has subagents, so the main workflow works as written. Differences:
 
-- You have subagents, so the main workflow (spawn test cases in parallel, run baselines, grade, etc.) all works. (However, if you run into severe problems with timeouts, it's OK to run the test prompts in series rather than parallel.)
-- You don't have a browser or display, so when generating the eval viewer, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Then proffer a link that the user can click to open the HTML in their browser.
-- For whatever reason, the Cowork setup seems to disincline Claude from generating the eval viewer after running the tests, so just to reiterate: whether you're in Cowork or in Claude Code, after running tests, you should always generate the eval viewer for the human to look at examples before revising the skill yourself and trying to make corrections, using `generate_review.py` (not writing your own boutique html code). Sorry in advance but I'm gonna go all caps here: GENERATE THE EVAL VIEWER *BEFORE* evaluating inputs yourself. You want to get them in front of the human ASAP!
-- Feedback works differently: since there's no running server, the viewer's "Submit All Reviews" button will download `feedback.json` as a file. You can then read it from there (you may have to request access first).
-- Packaging works — `package_skill.py` just needs Python and a filesystem.
-- Description optimization (`run_loop.py` / `run_eval.py`) should work in Cowork just fine since it uses `claude -p` via subprocess, not a browser, but please save it until you've fully finished making the skill and the user agrees it's in good shape.
-- **Updating an existing skill**: The user might be asking you to update an existing skill, not create a new one. Follow the update guidance in the claude.ai section above.
+- With no browser, run `generate_review.py` with `--static <output_path>` and give the user a link to the HTML file. Always use it rather than your own HTML, and before you evaluate outputs yourself.
+- The "Submit All Reviews" button downloads `feedback.json` as a file; read it from there (you may need to request access).
+- If timeouts are severe, run test cases in series.
+- Run description optimization only after the skill is finished and the user agrees.
+- Updating an existing skill: follow the guidance in the Claude.ai section above.
 
 ---
 
@@ -465,21 +467,13 @@ The agents/ directory contains instructions for specialized subagents. Read them
 - `agents/analyzer.md` — How to analyze why one version beat another
 
 The references/ directory has additional documentation:
+- `references/best-practices.md` - Anthropic's authoring rules and the checklist to run before a skill is done
 - `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
+
+The scripts/ directory is run, not read:
+- `scripts/quick_validate.py` - checks frontmatter rules and the 500-line body limit
+- `scripts/aggregate_benchmark.py`, `scripts/run_loop.py`, `scripts/package_skill.py` - used in the steps above
 
 ---
 
-Repeating one more time the core loop here for emphasis:
-
-- Figure out what the skill is about
-- Draft or edit the skill
-- Run claude-with-access-to-the-skill on test prompts
-- With the user, evaluate the outputs:
-  - Create benchmark.json and run `eval-viewer/generate_review.py` to help the user review them
-  - Run quantitative evals
-- Repeat until you and the user are satisfied
-- Package the final skill and return it to the user.
-
 Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
-
-Good luck!

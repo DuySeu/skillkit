@@ -84,6 +84,12 @@ done
 
 Đổi `.claude` thành `.kiro` để làm tương tự cho Kiro CLI.
 
+Viết hoặc sửa skill thì dùng skill `skill-creator` (gõ `/skill-creator` trong Claude Code). Trước khi coi skill là xong, chạy validator rồi đối chiếu checklist trong `skills/skill-creator/references/best-practices.md`:
+
+```bash
+cd skills/skill-creator && python3 -m scripts.quick_validate ../<ten-skill>
+```
+
 ---
 
 ## `script/project_setup.sh` — scaffold project Python + convention
@@ -109,7 +115,7 @@ cd /duong/dan/project-cua-ban
 ### Cờ
 
 | Nhóm | Cờ | Mặc định | Ý nghĩa |
-|------|----|----------|---------|
+| ------ | ---- | ---------- | --------- |
 | Mode | `--demo` / `--production` | `--demo` | Chọn bộ convention (gọn cho demo, nghiêm ngặt hơn cho production) |
 | CLI đích | `--kiro` / `--claude` | `--kiro` | Nơi ghi convention để trợ lý tự nạp |
 | Ghi đè | `--force` | (tắt) | Ghi đè file đã tồn tại; nếu không, file đã có đúng path sẽ được bỏ qua |

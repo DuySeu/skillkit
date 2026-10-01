@@ -69,6 +69,10 @@ def validate_skill(skill_path):
         # Check name length (max 64 characters per spec)
         if len(name) > 64:
             return False, f"Name is too long ({len(name)} characters). Maximum is 64 characters."
+        # Check reserved words
+        for reserved in ('anthropic', 'claude'):
+            if reserved in name:
+                return False, f"Name '{name}' cannot contain the reserved word '{reserved}'"
 
     # Extract and validate description
     description = frontmatter.get('description', '')
@@ -82,6 +86,12 @@ def validate_skill(skill_path):
         # Check description length (max 1024 characters per spec)
         if len(description) > 1024:
             return False, f"Description is too long ({len(description)} characters). Maximum is 1024 characters."
+        # Check third-person voice
+        if re.match(r"^(i|you)\b", description, re.IGNORECASE):
+            return False, (
+                "Description must be written in third person "
+                "(e.g. 'Processes Excel files...', not 'I can...' or 'You can...')"
+            )
 
     # Validate compatibility field if present (optional)
     compatibility = frontmatter.get('compatibility', '')
@@ -90,6 +100,14 @@ def validate_skill(skill_path):
             return False, f"Compatibility must be a string, got {type(compatibility).__name__}"
         if len(compatibility) > 500:
             return False, f"Compatibility is too long ({len(compatibility)} characters). Maximum is 500 characters."
+
+    # Check body length (keep SKILL.md body under 500 lines)
+    body_lines = len(content[match.end():].strip('\n').splitlines())
+    if body_lines > 500:
+        return False, (
+            f"SKILL.md body is too long ({body_lines} lines). Keep it under 500 lines "
+            f"and move detail into reference files linked from SKILL.md."
+        )
 
     return True, "Skill is valid!"
 

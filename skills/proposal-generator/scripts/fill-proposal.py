@@ -7,9 +7,16 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from docx import Document
-from docx.oxml import OxmlElement
-from docx.text.paragraph import Paragraph
+try:
+    from docx import Document
+    from docx.oxml import OxmlElement
+    from docx.text.paragraph import Paragraph
+except ImportError:
+    raise SystemExit(
+        "python-docx is not installed. Run this script with: "
+        "uv run --with python-docx python3 <skill-dir>/scripts/%s"
+        % Path(__file__).name
+    )
 
 
 def parse_frontmatter(text: str) -> Tuple[Dict[str, str], str]:
@@ -364,8 +371,20 @@ def fill_document(
     titles: Dict[str, str],
 ) -> None:
     """Copy template and apply markdown content."""
-    shutil.copy2(template_path, output_path)
-    doc = Document(str(output_path))
+    try:
+        shutil.copy2(template_path, output_path)
+        doc = Document(str(output_path))
+    except OSError as exc:
+        raise SystemExit(
+            f"Cannot write {output_path}: {exc}. "
+            "Check the output folder exists and is writable."
+        )
+    except Exception as exc:
+        output_path.unlink(missing_ok=True)
+        raise SystemExit(
+            f"Cannot open template {template_path} as a .docx file: {exc}. "
+            "Run scripts/prepare-template.py, or restore assets/ from the skill."
+        )
 
     apply_cover(doc, frontmatter)
     apply_section_headings(doc, titles)
@@ -432,18 +451,28 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.markdown.is_file():
-        raise SystemExit(f"Markdown not found: {args.markdown}")
+        raise SystemExit(
+            f"Markdown not found: {args.markdown}. "
+            "Pass the path of the approved Markdown file, e.g. docs/<slug>-proposal.md."
+        )
     if not args.template.is_file():
         raise SystemExit(
             f"Template not found: {args.template}. "
-            "Run scripts/prepare-template.py first."
+            "Run scripts/prepare-template.py to verify the bundled template, "
+            "or pass --template with a valid .docx path."
         )
 
     output = args.output
     if output is None:
         output = args.markdown.with_suffix(".docx")
 
-    text = args.markdown.read_text(encoding="utf-8")
+    try:
+        text = args.markdown.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise SystemExit(
+            f"Cannot read {args.markdown} as UTF-8 text: {exc}. "
+            "Check file permissions and encoding."
+        )
     frontmatter, body = parse_frontmatter(text)
     sections, titles = parse_sections(body)
     fill_document(args.template, output, frontmatter, sections, titles)
