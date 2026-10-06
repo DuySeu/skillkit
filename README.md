@@ -4,7 +4,7 @@
 
 ## Cài nhanh (khuyên dùng)
 
-Không cần clone repo — dùng [`skills` CLI](https://github.com/vercel-labs/skills), hỗ trợ 75+ coding agent (Claude Code, Cursor, Codex, Copilot, Kiro CLI, Gemini CLI…):
+Dùng `skills` [CLI](https://github.com/vercel-labs/skills), hỗ trợ 75+ coding agent (Claude Code, Cursor, Codex, Copilot, Kiro CLI, Gemini CLI…):
 
 ```bash
 npx skills add https://github.com/DuySeu/skillkit                       # chọn skill + agent tương tác
@@ -21,9 +21,13 @@ Cập nhật về sau bằng `npx skills update`, gỡ bằng `npx skills remove
 
 Repo này gồm bộ **skills** (trong `skills/`) và một script tiện ích trong `script/`:
 
-| Script | Mục đích |
-|--------|----------|
-| [`script/project_setup.sh`](#scriptproject_setupsh--scaffold-project-python--convention) | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
+
+| Script                                                                                   | Mục đích                                                                                 |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `[script/project_setup.sh](#scriptproject_setupsh--scaffold-project-python--convention)` | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
+
+
+
 
 ## Yêu cầu
 
@@ -36,12 +40,14 @@ Cấp quyền thực thi lần đầu nếu cần:
 chmod +x script/project_setup.sh
 ```
 
+
+
 ## Chạy script từ mọi terminal (không cần gõ đường dẫn repo)
 
 Script tự tìm về repo dù được gọi từ đâu (kể cả qua symlink), nên chỉ cần
 đưa nó vào `PATH` một lần sau khi clone. Có 2 cách:
 
-**Cách 1 — symlink vào `~/.local/bin` (khuyên dùng):**
+**Cách 1 — symlink vào** `~/.local/bin` **(khuyên dùng):**
 
 ```bash
 mkdir -p ~/.local/bin
@@ -54,7 +60,7 @@ Nếu `~/.local/bin` chưa có trong `PATH`, thêm vào `~/.zshrc` (hoặc `~/.b
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-**Cách 2 — thêm thẳng thư mục repo vào `PATH`:**
+**Cách 2 — thêm thẳng thư mục repo vào** `PATH`**:**
 
 ```bash
 # trong ~/.zshrc / ~/.bashrc
@@ -69,6 +75,8 @@ project-setup --demo --claude     # (cách 2 thì gõ: project_setup.sh --demo -
 ```
 
 ---
+
+
 
 ## Dev skill trong repo này
 
@@ -92,6 +100,8 @@ cd skills/skill-creator && python3 -m scripts.quick_validate ../<ten-skill>
 
 ---
 
+
+
 ## `script/project_setup.sh` — scaffold project Python + convention
 
 Tạo khung một project Python theo convention dataflow (mỗi step một file trong `core/`,
@@ -99,6 +109,8 @@ helper trong `utils/`, logging tập trung), kèm file convention để trợ l�
 
 > Các file được tạo trong **thư mục hiện tại** — script không tạo folder bao ngoài.
 > Chạy `cd` vào thư mục project của bạn trước khi chạy.
+
+
 
 ### Cách chạy
 
@@ -112,13 +124,17 @@ cd /duong/dan/project-cua-ban
 /duong/dan/repo/script/project_setup.sh --help                   # xem hướng dẫn
 ```
 
+
+
 ### Cờ
 
-| Nhóm | Cờ | Mặc định | Ý nghĩa |
-| ------ | ---- | ---------- | --------- |
-| Mode | `--demo` / `--production` | `--demo` | Chọn bộ convention (gọn cho demo, nghiêm ngặt hơn cho production) |
-| CLI đích | `--kiro` / `--claude` | `--kiro` | Nơi ghi convention để trợ lý tự nạp |
-| Ghi đè | `--force` | (tắt) | Ghi đè file đã tồn tại; nếu không, file đã có đúng path sẽ được bỏ qua |
+
+| Nhóm     | Cờ                        | Mặc định | Ý nghĩa                                                                |
+| -------- | ------------------------- | -------- | ---------------------------------------------------------------------- |
+| Mode     | `--demo` / `--production` | `--demo` | Chọn bộ convention (gọn cho demo, nghiêm ngặt hơn cho production)      |
+| CLI đích | `--kiro` / `--claude`     | `--kiro` | Nơi ghi convention để trợ lý tự nạp                                    |
+| Ghi đè   | `--force`                 | (tắt)    | Ghi đè file đã tồn tại; nếu không, file đã có đúng path sẽ được bỏ qua |
+
 
 Mỗi nhóm chỉ chọn **một** cờ; truyền cả hai trong cùng nhóm sẽ báo lỗi.
 
@@ -137,9 +153,11 @@ README.md
 Cộng thêm phần convention tùy CLI đích:
 
 - `--kiro` → `.kiro/steering/coding-conventions.md` + `.kiro/steering/folder-structure.md`
-  (Kiro CLI tự nạp mọi file trong `.kiro/steering/`)
+(Kiro CLI tự nạp mọi file trong `.kiro/steering/`)
 - `--claude` → `CLAUDE.md` ở gốc project
-  (Claude Code tự nạp `CLAUDE.md` ở đầu mỗi session)
+(Claude Code tự nạp `CLAUDE.md` ở đầu mỗi session)
+
+
 
 ### Chạy thử project sinh ra
 
@@ -148,10 +166,13 @@ python3 main.py
 # LOG_LEVEL=DEBUG python3 main.py   # đổi mức log
 ```
 
+
+
 ### Tùy biến template
 
 - Nội dung convention "thật" nằm ở `project/demo/` và `project/production/`
-  (mỗi bộ có `coding-conventions.md`, `folder-structure.md`).
+(mỗi bộ có `coding-conventions.md`, `folder-structure.md`).
 - `project/log.py` là logging dùng chung cho mọi mode/CLI.
 - Các file phụ (`main.py`, `.gitignore`, `README.md`, `requirements.txt`, `__init__.py`)
-  được hardcode inline trong `script/project_setup.sh`.
+được hardcode inline trong `script/project_setup.sh`.
+

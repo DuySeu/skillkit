@@ -16,6 +16,8 @@ Three parts, one per top-level directory:
 
 `sample/` is git-ignored scratch space. `.claude/` and `.kiro/` at the root are this repo consuming its own output (see below).
 
+`global/{claude,cursor}/` are git-ignored symlinks into `~/.claude` and `~/.cursor`: editing there changes the real global config, shows no repo diff, and `rg`/`grep` skip them without `--follow`. `skills-lock.json` and `.agents/` are also git-ignored, written by `npx skills add`; don't hand-edit them.
+
 ## Ground Rule: Never Commit or Push
 
 **No automatic `git commit`, `git push`, branch, or PR — for any file in this repo.** Make the change, then stop and report what changed and where; the user reviews it and pushes to GitHub themselves. This applies to every path — `skills/`, the `.sh` scripts, `project/`, `test/`, this file — no matter how small or routine the edit looks. Don't offer to commit either; leave the work in the working tree. Only commit when the user asks for it in that message.
@@ -92,8 +94,8 @@ Generated file content comes from two places, which matters when changing what g
 
 `{{PROJECT_NAME}}` in any template is replaced with the target directory's basename. The `--kiro`/`--claude` flag decides where conventions land: `--kiro` copies the two convention files into `.kiro/steering/` (Kiro auto-loads that dir); `--claude` strips their YAML frontmatter and concatenates them into a single `CLAUDE.md` at the project root (see `write_claude_md`). Keep the demo and production convention pairs structurally parallel — both are consumed by the same code paths.
 
-### .claude/skills/ and .kiro/skills/ — generated, not hand-edited
-`skills/` is the only source of truth. Both of those directories are this repo dogfooding its own skills, and they contain nothing but relative symlinks — `.claude/skills/<name> -> ../../skills/<name>` — so editing a `SKILL.md` under `skills/` takes effect here immediately, with no copy step. Recreate them with `for d in skills/*/; do ln -sfn "../../$d" ".claude/skills/$(basename "$d")"; done`. Do **not** recreate them with `npx skills add` — that installer copies files rather than linking into the working tree, which breaks the dogfooding loop. Never hand-write a real file inside them, and never edit through a symlink path in a way that assumes it's a separate copy — it isn't.
+### .claude/skills/ and .kiro/skills/ - dogfooding, partly drifted
+`skills/` is the only source of truth. These two directories are this repo using its own skills. Entries pointing at `../../skills/<name>` are live: editing a `SKILL.md` takes effect here immediately. Today only some skills are linked, and a few (`brainstorming`, `codebase-onboarding`, `mcp-builder`, `skill-creator`) point at `../../.agents/skills/<name>`, a git-ignored installed copy that does **not** follow edits under `skills/`. `.claude/skills/claude-md-improver` is a real directory from an installer. To make everything live, recreate with `for d in skills/*/; do ln -sfn "../../$d" ".claude/skills/$(basename "$d")"; done`. Do **not** use `npx skills add` for this - it copies files and breaks the loop. Never hand-write a real file inside these directories.
 
 ### Repo-level conventions vs. templates
 `.kiro/steering/` at the repo root is Kiro steering for working on *this repo* (Vietnamese-language variants of the conventions). It is separate from `project/demo/` (English), which is what gets shipped into scaffolded projects — don't confuse or "sync" the two.
