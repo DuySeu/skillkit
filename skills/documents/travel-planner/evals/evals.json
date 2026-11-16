@@ -4,40 +4,66 @@
     {
       "id": 1,
       "prompt": "6 người bạn đi Tam Đảo thứ 7-CN tuần sau, budget 2 triệu/người, muốn villa có bể bơi gần Hà Nội. Lên kế hoạch và xuất file Excel.",
-      "expected_output": "Confirms inputs, compares ≥5 stays, waits for user pick (or documents pick in eval run), exports 4-sheet workbook via native runtime tool (Sheets or xlsx) with VND costs and Tam Đảo itinerary.",
+      "expected_output": "Confirms inputs, compares ≥5 stays, waits for user pick (or documents pick in eval run), writes docs/tam-dao-trip-planning.md and asks for review, and only after approval exports docs/tam-dao-trip.xlsx filled from assets/trip-template.xlsx with VND costs and the Tam Đảo itinerary.",
       "files": [],
       "expectations": [
         "Weather or season information is included for Tam Đảo",
+        "Draft docs/tam-dao-trip-planning.md exists with the sections Thông tin chung, Tiền tệ, Itinerary, Checklist and Summary, written before any workbook",
+        "No .xlsx or Google Sheet is created until the user approves the draft, and the .xlsx is saved under docs/, not in a temporary folder",
+        "Workbook values match the approved draft",
         "At least five accommodation options with price, rating, and booking link",
-        "Workbook exists with sheets named Tổng quan, Lịch trình, Dự toán chi phí, Checklist",
+        "Workbook is an .xlsx with exactly three sheets named Itinerary, Checklist and Summary",
+        "Formula cells (Itinerary F3, Checklist G3, L10 and L11) still hold formulas and Itinerary K8 holds the headcount 6",
+        "Thông tin chung on the Checklist sheet has Điểm đến Tam Đảo, the travel dates, Budget/người as the number 2000000 and the selected villa with its booking link",
+        "Every Checklist line has a tick box value (☐ or ☑) in column A",
         "Cost estimate includes transport and a contingency buffer",
-        "Export uses native platform spreadsheet tool, not a bundled Python script"
+        "Workbook is a filled copy of the bundled template, not a workbook rebuilt from scratch"
       ]
     },
     {
       "id": 2,
       "prompt": "Mình và người yêu chưa biết đi đâu, 3 ngày 2 đêm, khoảng 5 triệu/người, thích onsen hoặc tắm khoáng. Gợi ý và lập kế hoạch chi tiết.",
-      "expected_output": "Suggests 3–5 destination fits, user narrows choice, compares stays, builds couple-focused itinerary and native-export workbook.",
+      "expected_output": "Suggests 3–5 destination fits, user narrows choice, compares stays, builds couple-focused itinerary and a workbook filled from the template (.xlsx, or Google Sheets when a Sheets tool is connected).",
       "files": [],
       "expectations": [
         "Offers multiple destination ideas before locking one",
         "Compares stays with pros/cons suited to couples",
         "Itinerary is not over-packed for a 2-night trip",
         "Budget per person is tracked against the 5M target",
-        "Workbook generated with all four required sheets via native export"
+        "Workbook generated from the template with its three sheets: Itinerary, Checklist and Summary",
+        "Thông tin chung holds the destination the user settled on, Số đêm 2 and Budget/người 5000000 as numbers, and leaves unknown rows empty",
+        "Writes the docs/*-trip-planning.md draft and waits for approval before creating any workbook"
       ]
     },
     {
       "id": 3,
       "prompt": "Gia đình 2 người lớn + 1 bé 4 tuổi đi Đà Lạt 2 đêm, 3.5 triệu/người, cần chỗ free cancellation. Plan trip giúp mình.",
-      "expected_output": "Family-aware lodging search, free-cancellation called out, gentle itinerary, workbook with checklist including child items.",
+      "expected_output": "Family-aware lodging search, free-cancellation called out, gentle itinerary, workbook from the template, chat summary whose preparation list includes child items.",
       "files": [],
       "expectations": [
         "Lodging options mention cancellation policy or free cancellation",
         "Itinerary accounts for a young child (pace, activities)",
-        "Checklist sheet includes family-relevant packing or prep items",
+        "Chat summary preparation list (Chuẩn bị) includes family-relevant packing or prep items",
         "Does not skip weather check for Đà Lạt dates",
-        "Does not create final workbook before a stay is selected"
+        "Does not create final workbook before a stay is selected",
+        "Stops after writing the draft and asks the user to review it; a requested change is made in the same docs/*-trip-planning.md file, not a new copy"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Nhóm 4 người đi Hong Kong 4 ngày 3 đêm giữa tháng 12, bay từ Hà Nội, budget 15 triệu/người. Lên plan chi tiết rồi xuất ra ggsheet giúp mình nhé.",
+      "expected_output": "Plans the trip, then delivers Google Sheets because the user named it: a filled copy of the template uploaded with conversion or built natively, or, with no Sheets or Drive tool connected, the .xlsx plus how to open it in Google Sheets.",
+      "files": [],
+      "expectations": [
+        "Writes docs/hong-kong-trip-planning.md and gets approval before creating the Google Sheet",
+        "Chooses Google Sheets as the format because the user asked for ggsheet",
+        "With no Sheets or Drive tool available, delivers the .xlsx filled from the template and says how to open it in Google Sheets",
+        "Workbook has exactly three sheets named Itinerary, Checklist and Summary",
+        "Itinerary J4 is HKD with an exchange rate in K4, and the rate's date is stated",
+        "Checklist includes a Dự phòng line, and flights appear as a Checklist line, not as a per-leg fare in Itinerary column E",
+        "Checklist column A holds ☐ or ☑ on every line; real check boxes are set up, or the user is told how, when the deliverable is Google Sheets",
+        "Thông tin chung has Điểm đến Hong Kong, Số đêm 3 and Budget/người 15000000 as numbers, Chỗ nghỉ with the nightly price and its currency, and Lưu ý with the exchange rate and its date",
+        "Cost per person in the chat summary equals the per-person total the workbook computes"
       ]
     }
   ]

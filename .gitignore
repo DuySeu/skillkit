@@ -1,5 +1,7 @@
 sample/
+docs/
 skills-lock.json
+.DS_Store
 
 global/*
 test/*
