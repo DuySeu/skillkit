@@ -7,9 +7,13 @@
 # history, or caches. An entry is linked only if it exists in the home dir.
 # global/ contents are gitignored (absolute, machine-specific paths).
 #
-# Usage: script/global_link.sh        (safe to re-run)
+# Usage: bash script/global_link.sh   (safe to re-run; macOS, Linux, Windows Git Bash)
 
 set -euo pipefail
+
+# Windows Git Bash: by default `ln -s` silently COPIES instead of linking.
+# Force real symlinks so a missing permission fails loudly. No-op on macOS/Linux.
+export MSYS=winsymlinks:nativestrict
 
 GLOBAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/global"
 
@@ -36,7 +40,12 @@ for row in "${MAP[@]}"; do
       echo "keep  $agent/$entry (real file exists, not a symlink)"
       continue
     fi
-    ln -sfn "$src" "$dst"
+    if ! ln -sfn "$src" "$dst"; then
+      echo "error: cannot create symlink $dst" >&2
+      echo "       On Windows, turn on Developer Mode (Settings > System > For developers)" >&2
+      echo "       or run Git Bash as Administrator, then re-run." >&2
+      exit 1
+    fi
     echo "link  $agent/$entry -> $src"
   done
 done

@@ -19,62 +19,28 @@ Cập nhật về sau bằng `npx skills update`, gỡ bằng `npx skills remove
 
 ---
 
-Repo này gồm bộ **skills** (trong `skills/`) và một script tiện ích trong `script/`:
+Repo này gồm bộ **skills** (trong `skills/`) và các script tiện ích trong `script/`:
 
 
-| Script                                                                                   | Mục đích                                                                                 |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `[script/project_setup.sh](#scriptproject_setupsh--scaffold-project-python--convention)` | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
+| Script | Mục đích |
+| ------ | -------- |
+| [`script/project_setup.sh`](#scriptproject_setupsh--scaffold-project-python--convention) | Tạo khung project Python (core/utils/logging) kèm coding convention vào thư mục hiện tại |
+| [`script/global_link.sh`](#scriptglobal_linksh--sửa-config-toàn-cục-của-agent-ngay-trong-repo) | Symlink config toàn cục của agent (`~/.claude`, `~/.cursor`, …) vào `global/` để sửa ngay trong repo |
 
 
 
 
 ## Yêu cầu
 
-- `bash`
+- `bash`: có sẵn trên macOS/Linux; trên Windows dùng **Git Bash** (đi kèm [Git for Windows](https://git-scm.com/download/win))
 - `python3` (để chạy project sinh ra bởi `project_setup.sh`)
+- `Node.js` **≥ 22.20** (để chạy `npx skills add`; Node cũ hơn sẽ lỗi `does not provide an export named 'glob'`). Kiểm tra bằng `node -v`, nâng cấp qua [nvm](https://github.com/nvm-sh/nvm) (macOS/Linux) hoặc [nvm-windows](https://github.com/nvm-windows/nvm): `nvm install 22 && nvm use 22`
 
-Cấp quyền thực thi lần đầu nếu cần:
-
-```bash
-chmod +x script/project_setup.sh
-```
-
-
-
-## Chạy script từ mọi terminal (không cần gõ đường dẫn repo)
-
-Script tự tìm về repo dù được gọi từ đâu (kể cả qua symlink), nên chỉ cần
-đưa nó vào `PATH` một lần sau khi clone. Có 2 cách:
-
-**Cách 1 — symlink vào** `~/.local/bin` **(khuyên dùng):**
+Cấp quyền thực thi lần đầu nếu cần (macOS/Linux):
 
 ```bash
-mkdir -p ~/.local/bin
-ln -sf "$(pwd)/script/project_setup.sh" ~/.local/bin/project-setup
+chmod +x script/*.sh
 ```
-
-Nếu `~/.local/bin` chưa có trong `PATH`, thêm vào `~/.zshrc` (hoặc `~/.bashrc`):
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-**Cách 2 — thêm thẳng thư mục repo vào** `PATH`**:**
-
-```bash
-# trong ~/.zshrc / ~/.bashrc
-export PATH="/duong/dan/toi/repo/script:$PATH"
-```
-
-Mở terminal mới (hoặc `source ~/.zshrc`) rồi dùng ở bất kỳ đâu:
-
-```bash
-cd /duong/dan/project-cua-ban
-project-setup --demo --claude     # (cách 2 thì gõ: project_setup.sh --demo --claude)
-```
-
----
 
 
 
@@ -97,6 +63,68 @@ Viết hoặc sửa skill thì dùng skill `skill-creator` (gõ `/skill-creator`
 ```bash
 cd skills/skill-creator && python3 -m scripts.quick_validate ../<ten-skill>
 ```
+
+---
+
+
+
+## `script/global_link.sh` — sửa config toàn cục của agent ngay trong repo
+
+Tạo symlink từ `global/<agent>/` tới config cấp user của từng agent, để mở và sửa
+chúng ngay trong workspace này:
+
+| Agent  | Nguồn       | Entry được link                                                  |
+| ------ | ----------- | ---------------------------------------------------------------- |
+| claude | `~/.claude` | `CLAUDE.md` `settings.json` `skills` `agents` `commands` `rules` |
+| cursor | `~/.cursor` | `skills` `rules` `agents` `mcp.json`                             |
+| kiro   | `~/.kiro`   | `skills` `steering` `agents` `settings` `powers`                 |
+| codex  | `~/.codex`  | `AGENTS.md` `config.toml` `skills`                               |
+| gemini | `~/.gemini` | `GEMINI.md` `settings.json`                                      |
+
+Script chỉ link entry **đã tồn tại** trong home, không đụng tới file auth, history hay cache.
+Nội dung `global/` bị gitignore vì chứa đường dẫn tuyệt đối riêng của từng máy. Chạy lại
+bao nhiêu lần cũng được.
+
+> Sửa file trong `global/` là sửa **config thật** trong home: không hiện diff trong repo,
+> và `rg`/`grep` bỏ qua thư mục này nếu không có `--follow`.
+
+### Cách chạy
+
+Đứng ở gốc repo, cả 3 hệ điều hành dùng chung một lệnh:
+
+```bash
+bash script/global_link.sh
+```
+
+- **macOS / Linux:** chạy trong Terminal.
+- **Windows:** chạy trong **Git Bash**. Trước lần chạy đầu tiên, bật **Developer Mode**
+  (Settings → System → For developers): Windows chỉ cho tạo symlink khi bật chế độ này
+  hoặc khi chạy Git Bash bằng quyền Administrator. Nếu chưa bật, script dừng và báo lỗi
+  chứ không lặng lẽ copy file.
+- **Windows, từ PowerShell:** gọi đúng bash của Git. Lệnh `bash` không kèm đường dẫn có thể
+  trỏ sang WSL, khi đó `$HOME` là home của Linux chứ không phải `C:\Users\<you>`:
+
+  ```powershell
+  & "C:\Program Files\Git\bin\bash.exe" script/global_link.sh
+  ```
+
+Mỗi dòng kết quả là một trong ba loại: `link` (đã tạo symlink), `keep` (đã có file hoặc thư mục
+thật trùng tên nên bỏ qua), `skip` (máy không cài agent đó).
+
+### Lưu ý
+
+- **Entry chưa có thì không được link.** Ví dụ muốn link `~/.claude/CLAUDE.md` và `~/.claude/skills`
+  khi chúng chưa tồn tại, hãy tạo trước rồi chạy lại:
+
+  ```bash
+  mkdir -p ~/.claude/skills && touch ~/.claude/CLAUDE.md
+  bash script/global_link.sh
+  ```
+
+- **Gặp dòng `keep`** sau khi từng chạy `ln -s` trên Windows lúc chưa bật Developer Mode: đó là
+  bản **copy**, không phải link. Xóa nó trong `global/<agent>/` rồi chạy lại script.
+- **Repo nằm trong OneDrive, Dropbox hoặc iCloud:** dịch vụ sync có thể đi theo symlink và đẩy
+  cả config trong home lên cloud. Nên đặt repo ngoài thư mục sync.
 
 ---
 
